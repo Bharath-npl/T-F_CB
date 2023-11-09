@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import os
@@ -17,7 +18,7 @@ warnings.filterwarnings('ignore')
 
 st.set_page_config(page_title="BIPM Time Analyser", page_icon=":chart_with_upwards_trend:", layout="wide")
 
-st.title(":chart_with_upwards_trend: CGGTTS data analyser")
+st.title(":chart_with_upwards_trend: CGGTTS data analyser v1.0")
 
 st.markdown('<style>div.block-container{padding-top:1rem;}</style>', unsafe_allow_html=True)
 
@@ -173,17 +174,17 @@ def Selected_MJD_data1(files_01, data_set):
             st.warning("No data available for the selected MJD range.")
 
         # Compute average refsys values grouped by MJD_time
-        Avg_refsys_df = selected_df_01.groupby("MJD")["REFSYS"].mean().reset_index()
-        Avg_refsys_df["REFSYS"] = Avg_refsys_df["REFSYS"].round(2)
+        Avg_refsys_CV = selected_df_01.groupby("MJD")["REFSYS"].mean().reset_index()
+        Avg_refsys_CV["REFSYS"] = Avg_refsys_CV["REFSYS"].round(2)
 
         # Calculate the overall average for df1 and df2
-        avg_value_refsys = Avg_refsys_df["REFSYS"].mean()
+        avg_value_refsys = Avg_refsys_CV["REFSYS"].mean()
 
         # If plot button is pressed, show the graph
         if plot_option1:
             # Add a new column for the average value
-            Avg_refsys_df["Avg_refsys"] = avg_value_refsys
-            st.line_chart(Avg_refsys_df.set_index("MJD")[["REFSYS", "Avg_refsys"]])
+            Avg_refsys_CV["Avg_refsys"] = avg_value_refsys
+            st.line_chart(Avg_refsys_CV.set_index("MJD")[["REFSYS", "Avg_refsys"]])
 
         return selected_df_01
 
@@ -324,17 +325,17 @@ def Selected_MJD_data2(files_02, data_set):
             st.warning("No data available for the selected MJD range.")
 
         # Compute average refsys values grouped by MJD_time
-        Avg_refsys_df = Selected_df_02.groupby("MJD")["REFSYS"].mean().reset_index()
-        Avg_refsys_df["REFSYS"] = Avg_refsys_df["REFSYS"].round(2)
+        Avg_refsys_AV = Selected_df_02.groupby("MJD")["REFSYS"].mean().reset_index()
+        Avg_refsys_AV["REFSYS"] = Avg_refsys_AV["REFSYS"].round(2)
 
         # Calculate the overall average for df1 and df2
-        avg_value_refsys = Avg_refsys_df["REFSYS"].mean()
+        avg_value_refsys = Avg_refsys_AV["REFSYS"].mean()
 
         # If plot button is pressed, show the graph
         if plot_option2:
             # Add a new column for the average value
-            Avg_refsys_df["Avg_refsys"] = avg_value_refsys
-            st.line_chart(Avg_refsys_df.set_index("MJD")[["REFSYS", "Avg_refsys"]])
+            Avg_refsys_AV["Avg_refsys"] = avg_value_refsys
+            st.line_chart(Avg_refsys_AV.set_index("MJD")[["REFSYS", "Avg_refsys"]])
 
         return Selected_df_02
 
@@ -601,12 +602,12 @@ if 'df1_data' in st.session_state and 'df2_data' in st.session_state:
 
 
                             condition1 = df1_filtered["SAT"].isin(st.session_state.selected_svids) # Boolean list when the condition is satisfied 
-                            #st.write(f"Satellite: {np.sum(condition1)}")
+                            # st.write(f"Satellite: {np.sum(condition1)}")
                             condition2 = df2_filtered["SAT"].isin(st.session_state.selected_svids) # 
                             
                             if condition1.any():
                                 weighted_mean_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).mean()
-                                #st.write(f"Weights: {weighted_mean_df1}")
+                                # st.write(f"Weights: {weighted_mean_df1}")
                                 # weighted_means_df1.append(weighted_mean_df1)
                             
                             if condition2.any():
