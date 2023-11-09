@@ -548,7 +548,9 @@ if 'df1_data' in st.session_state and 'df2_data' in st.session_state:
                 
                 # Display the plot
                 st.pyplot(fig)
-
+                
+            if 'selected_svids' not in st.session_state:
+                st.session_state.selected_svids = ['ALL']
             if plot_AV:
 
                 if 'ALL' in selected_svids or len(selected_svids) == len(unique_SVIDs):
