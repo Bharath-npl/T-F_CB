@@ -443,8 +443,8 @@ if 'df1_data' in st.session_state and 'df2_data' in st.session_state:
             selected_svids = st.sidebar.multiselect(
                 "Select SV_ids:",
                 options=['ALL'] + list(unique_SVIDs),
-                default=st.session_state.selected_svids,
-                # default =['ALL'],
+                # default=st.session_state.selected_svids,
+                default =['ALL'],
                 key= 12)  # Use the unique key here
             # Update the session state
             # Handle ALL option
