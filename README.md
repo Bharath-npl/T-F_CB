@@ -5,3 +5,5 @@ CGGTTS_Analyser is a tool to analyse the CGGTTS data. Developed by Time and Freq
 Then the user can have the following options: 
 A. Plot and see the raw data of Ref sys in the files uploaded
 B. Perform the Common View and All in View time transfer between the two set of data files
+
+Currently in version V1.0 there is no option for selecting the frequency of the CGGTTS 
