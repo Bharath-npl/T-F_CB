@@ -1,12 +1,13 @@
-import streamlit as st
-import pandas as pd
-import os
-import csv
-import warnings
-import tempfile
-import io 
-import math
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import numpy as np
+streamlit == 1.27.*
+pandas
+os
+csv
+warnings
+tempfile
+io 
+math
+matplotlib.pyplot
+matplotlib.ticker
+numpy 
+
 
