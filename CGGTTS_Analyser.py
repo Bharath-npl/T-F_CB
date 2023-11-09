@@ -601,12 +601,12 @@ if 'df1_data' in st.session_state and 'df2_data' in st.session_state:
 
 
                             condition1 = df1_filtered["SAT"].isin(st.session_state.selected_svids) # Boolean list when the condition is satisfied 
-                            st.write(f"Satellite: {np.sum(condition1)}")
+                            #st.write(f"Satellite: {np.sum(condition1)}")
                             condition2 = df2_filtered["SAT"].isin(st.session_state.selected_svids) # 
                             
                             if condition1.any():
                                 weighted_mean_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).mean()
-                                st.write(f"Weights: {weighted_mean_df1}")
+                                #st.write(f"Weights: {weighted_mean_df1}")
                                 # weighted_means_df1.append(weighted_mean_df1)
                             
                             if condition2.any():
