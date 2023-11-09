@@ -6,6 +6,7 @@ warnings
 tempfile
 io 
 math
+matplotlib
 matplotlib.pyplot
 matplotlib.ticker
 numpy 
