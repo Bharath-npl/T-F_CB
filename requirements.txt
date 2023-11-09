@@ -1,13 +1,4 @@
-streamlit == 1.27.*
-matplotlib
-pandas
-os
-csv
-warnings
-tempfile
-io 
-math
 numpy
-
-
-
+pandas
+matplotlib
+streamlit
