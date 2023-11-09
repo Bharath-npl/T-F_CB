@@ -1,5 +1,5 @@
 streamlit == 1.27.*
-python 
+matplotlib
 pandas
 os
 csv
@@ -7,9 +7,9 @@ warnings
 tempfile
 io 
 math
-matplotlib
 matplotlib.pyplot
 matplotlib.ticker
-numpy 
+numpy
+Pillow
 
 
