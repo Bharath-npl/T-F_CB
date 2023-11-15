@@ -575,7 +575,7 @@ data2_avail =0
 # st.sidebar.header("Lab 2 Data")
 # plot_option2 = st.sidebar.button("Plot Avg RefSys",key=10)
 st.sidebar.header("Pricipals of CV & AV time transfer")
-plot_CV = st.sidebar.button("Introduction", key= 'Common_view')
+plot_CV = st.sidebar.button("PDF material", key= 'Material')
 
 st.sidebar.header("Common View Performance")
 plot_CV = st.sidebar.button("Plot CV", key= 'Common_view')
