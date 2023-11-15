@@ -585,26 +585,6 @@ st.sidebar.header("All in View Performance")
 plot_AV = st.sidebar.button("Plot AV", key= 'All_in_view')
 # plot_button = st.sidebar.button("CV Performance", key=5)
 
-# Add a spacer to push the contact info to the bottom
-st.sidebar.write("")  # This line adds some space
-st.sidebar.write("")  # Add as many as needed to push the content down
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")  
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")   
-st.sidebar.write("")  
-st.sidebar.write("")  
-# contact information at the bottom of the sidebar
-st.sidebar.markdown('---')  # Add a horizontal line for separation
-st.sidebar.markdown('**Contact Information**')
-st.sidebar.text('Mr/Ms XYZ')
-st.sidebar.text('Email: XYZ@bipm.org')
 
 
 df3 = pd.DataFrame(columns=['MJD_time', 'CV_avg_diff'])
@@ -1010,4 +990,14 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
     else:
         st.write("No selected data to work up on")
 
+# Add a spacer to push the contact info to the bottom
+st.sidebar.write("")  # This line adds some space
+st.sidebar.write("")  # Add as many as needed to push the content down
+st.sidebar.write("")   
+
+# contact information at the bottom of the sidebar
+st.sidebar.markdown('---')  # Add a horizontal line for separation
+st.sidebar.markdown('**Contact Information**')
+st.sidebar.text('Mr/Ms XYZ')
+st.sidebar.text('Email: XYZ@bipm.org')
    
