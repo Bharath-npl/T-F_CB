@@ -6,6 +6,7 @@ import csv
 import warnings
 import tempfile
 import io 
+from io import StringIO
 import math
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -46,7 +47,7 @@ combined_Colm_data_01 = pd.DataFrame()
 
 # File uploader and data processing
 with st.form("my-form1", clear_on_submit=True):
-    files_01 = st.file_uploader(":file_folder: Upload the CGGTTS files of Lab 1", accept_multiple_files=True)
+    files_01 = st.file_uploader(":file_folder: Upload the CGGTTS files of receiver 1", accept_multiple_files=True)
     submitted1 = st.form_submit_button("Submit1")
 
 
@@ -274,6 +275,7 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
         if filtered_unique_frequencies:
             # Re-select the frequency after MJD filtering
             selected_frequency1 = st.radio("Select Frequency", filtered_unique_frequencies, index=0, key='Frequency1', horizontal=True)
+            st.session_state.selected_frequency1= selected_frequency1
             plot_data1(selected_frequency1)
         else:
             st.write("No valid frequencies available for selection.")
@@ -292,7 +294,7 @@ if 'show_plot2' not in st.session_state:
 
 # File uploader and data processing
 with st.form("my-form2", clear_on_submit=True):
-    files_02 = st.file_uploader(":file_folder: Upload the CGGTTS files of Lab 2", accept_multiple_files=True)
+    files_02 = st.file_uploader(":file_folder: Upload the CGGTTS files of receiver 2", accept_multiple_files=True)
     submitted1 = st.form_submit_button("Submit2")
 
 Required_Colm_data_02 = []
@@ -476,7 +478,6 @@ def plot_data(frequency2):
             yaxis_title="REFSYS",
             yaxis=dict(tickmode='auto', nticks =10)
         )
-
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
 
@@ -510,17 +511,71 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
         if filtered_unique_frequencies:
             # Re-select the frequency after MJD filtering
             selected_frequency2 = st.radio("Select Frequency", filtered_unique_frequencies, index=0, key='Frequency2', horizontal=True)
+            st.session_state.selected_frequency2= selected_frequency2
             plot_data(selected_frequency2)
         else:
             st.write("No valid frequencies available for selection.")
     
 
+# Function to create the DataFrame for CSV
+def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, selected_data):
+    # Creating DataFrame for data section
+    # x=df3_filtered["MJD_time"], 
+    #                 y=df3_filtered["CV_avg_diff"]
+    data_df = pd.DataFrame({
+        'MJD': selected_data["MJD_time"],
+        'CV_difference (ns)': selected_data['CV_avg_diff']
+    })
+
+    # Creating header information
+    header_CV_info = (
+        f"Common View Time Transfer Link Performance \n"
+        f"Start MJD: {starting_mjd}\n"
+        f"End MJD: {ending_mjd}\n"
+        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"Selected satellites for time transfer: {', '.join(SVids)}\n"
+    )
+
+    return header_CV_info, data_df
+
+# Function to convert header and DataFrame to CSV for download
+def convert_to_csv(header, df):
+    output = StringIO()
+    output.write(header)
+    df.to_csv(output, index=False, header=True)
+    return output.getvalue()
+
+
+# Function to create the DataFrame for CSV
+def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, selected_data):
+    # Creating DataFrame for data section
+
+    data_AV_df = pd.DataFrame({
+        'MJD': selected_data["MJD_time"],
+        'AV_difference (ns)': selected_data['AV_diff']
+    })
+
+    # Creating header information
+    header_AV_info = (
+        f"ALL in View Time Transfer Link Performance \n"
+        f"Start MJD: {starting_mjd}\n"
+        f"End MJD: {ending_mjd}\n"
+        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"Selected Satellites for time transfer: {', '.join(SVids)}\n"
+    )
+
+    return header_AV_info, data_AV_df
+    
 
 data1_avail =0
 data2_avail =0
 
 # st.sidebar.header("Lab 2 Data")
 # plot_option2 = st.sidebar.button("Plot Avg RefSys",key=10)
+st.sidebar.header("Pricipals of CV & AV time transfer")
+plot_CV = st.sidebar.button("Introduction", key= 'Common_view')
 
 st.sidebar.header("Common View Performance")
 plot_CV = st.sidebar.button("Plot CV", key= 'Common_view')
@@ -529,6 +584,35 @@ plot_CV = st.sidebar.button("Plot CV", key= 'Common_view')
 st.sidebar.header("All in View Performance")
 plot_AV = st.sidebar.button("Plot AV", key= 'All_in_view')
 # plot_button = st.sidebar.button("CV Performance", key=5)
+
+# Add a spacer to push the contact info to the bottom
+st.sidebar.write("")  # This line adds some space
+st.sidebar.write("")  # Add as many as needed to push the content down
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")  
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")  
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+st.sidebar.write("")   
+
+# contact information at the bottom of the sidebar
+st.sidebar.markdown('---')  # Add a horizontal line for separation
+st.sidebar.markdown('**Contact Information**')
+st.sidebar.text('Mr/Ms XYZ')
+st.sidebar.text('Email: XYZ@bipm.org')
 
 
 df3 = pd.DataFrame(columns=['MJD_time', 'CV_avg_diff'])
@@ -665,7 +749,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                             missing_session.append(unique_time)
                             # st.write("")
                 else: 
-                    st.write(f"Files doesn't belong to same time period ")
+                    st.write("Files doesn't belong to same time period ")
 
                 st.session_state.plot_CV_data = pd.DataFrame(CV_data, columns=['MJD_time', 'CV_avg_diff'])
                 
@@ -738,7 +822,27 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Display the plot
                 st.plotly_chart(fig, use_container_width=True)
+                
+                # Data file processing 
+                                
+                if st.sidebar.button('Get CV file of this data'): 
+                    # Create the CSV data
+                    # Create the CSV header and data
+                    header, data_df = create_csv_data_CV(min_x, max_x-1, 
+                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                    st.session_state.selected_frequency2, df3_filtered)
 
+                    # Convert to CSV
+                    csv = convert_to_csv(header, data_df)
+
+                    # Create download button
+                    st.sidebar.download_button(
+                        label="Download CV data",
+                        data=csv,
+                        file_name="common_view_performance.csv",
+                        mime="text/csv",
+                    )
+                        
 
             if 'selected_svids' not in st.session_state:
                 st.session_state.selected_svids = ['ALL']
@@ -828,7 +932,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # Assuming st.session_state is a Streamlit state object
                     st.session_state.plot_AV_data = pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
                 else: 
-                    st.write(f"Files doesn't belong to same time period ")
+                    st.write("Files doesn't belong to same time period ")
 
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
                 df4 = st.session_state.plot_AV_data
@@ -891,6 +995,25 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Display the plot
                 st.plotly_chart(fig, use_container_width=True)
+
+                               
+                if st.sidebar.button('Get AV file of this data'): 
+                    # Create the CSV data
+                    # Create the CSV header and data
+                    header, data_df = create_csv_data_AV(min_x, max_x-1, 
+                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                    st.session_state.selected_frequency2, df4_filtered)
+
+                    # Convert to CSV
+                    csv_AV = convert_to_csv(header, data_df)
+
+                    # Create download button
+                    st.sidebar.download_button(
+                        label="Download AV data",
+                        data=csv_AV,
+                        file_name="All_in_view_performance.csv",
+                        mime="text/csv",
+                    )
 
     else:
         st.write("No selected data to work up on")
