@@ -119,7 +119,7 @@ def process_data1(files_01):
             # print(f"File read is :\n {df_split}")
             # print(f"Sv ids in the Data: \n {df_split['SAT']}")
             # Convert to appropriate datatypes
-            df_01['SAT'] = df_split['SAT'].astype(int)
+            df_01['SAT'] = df_split['SAT']
             # df_01['MJD'] = df_split['MJD'].astype(float)
             # unique_mjd_values = set(df_split['MJD'])  # Unique MJD values in the list 
             df_split['STTIME'] = df_split['STTIME']  # Keep as string for hhmmss processing
@@ -358,7 +358,7 @@ def process_data2(files_02):
             # print(f"File read is :\n {df_split}")
             # print(f"Sv ids in the Data: \n {df_split['SAT']}")
             # Convert to appropriate datatypes
-            df_02['SAT'] = df_split['SAT'].astype(int)
+            df_02['SAT'] = df_split['SAT']
             # df_01['MJD'] = df_split['MJD'].astype(float)
             # unique_mjd_values = set(df_split['MJD'])  # Unique MJD values in the list 
             df_split['STTIME'] = df_split['STTIME']  # Keep as string for hhmmss processing
