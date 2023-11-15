@@ -598,7 +598,8 @@ st.sidebar.write("")
 st.sidebar.write("")   
 st.sidebar.write("")   
 st.sidebar.write("")   
-
+st.sidebar.write("")  
+st.sidebar.write("")  
 # contact information at the bottom of the sidebar
 st.sidebar.markdown('---')  # Add a horizontal line for separation
 st.sidebar.markdown('**Contact Information**')
