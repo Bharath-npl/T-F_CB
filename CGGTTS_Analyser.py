@@ -119,6 +119,7 @@ def process_data1(files_01):
             # print(f"File read is :\n {df_split}")
             # print(f"Sv ids in the Data: \n {df_split['SAT']}")
             # Convert to appropriate datatypes
+            # df_01['SAT'] = df_split['SAT'].astype(int)
             df_01['SAT'] = df_split['SAT']
             # df_01['MJD'] = df_split['MJD'].astype(float)
             # unique_mjd_values = set(df_split['MJD'])  # Unique MJD values in the list 
@@ -358,6 +359,7 @@ def process_data2(files_02):
             # print(f"File read is :\n {df_split}")
             # print(f"Sv ids in the Data: \n {df_split['SAT']}")
             # Convert to appropriate datatypes
+            # df_02['SAT'] = df_split['SAT'].astype(int)
             df_02['SAT'] = df_split['SAT']
             # df_01['MJD'] = df_split['MJD'].astype(float)
             # unique_mjd_values = set(df_split['MJD'])  # Unique MJD values in the list 
@@ -661,8 +663,9 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                         else:
                             missing_session.append(unique_time)
-                
-                # st.write(f"Data Missing for the sessions: {missing_session}")
+                            # st.write("")
+                else: 
+                    st.write(f"Files doesn't belong to same time period ")
 
                 st.session_state.plot_CV_data = pd.DataFrame(CV_data, columns=['MJD_time', 'CV_avg_diff'])
                 
@@ -824,6 +827,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                    
                     # Assuming st.session_state is a Streamlit state object
                     st.session_state.plot_AV_data = pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
+                else: 
+                    st.write(f"Files doesn't belong to same time period ")
 
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
                 df4 = st.session_state.plot_AV_data
