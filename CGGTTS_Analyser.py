@@ -213,7 +213,7 @@ def plot_data1(frequency1):
     
 
     if not df1_data_filtered.empty:
-        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())*0.1
         Avg_refsys_CV["REFSYS"] = Avg_refsys_CV["REFSYS"].round(2)
         mean_value = (Avg_refsys_CV["REFSYS"].mean())
 
