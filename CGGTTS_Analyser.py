@@ -111,7 +111,7 @@ def process_data1(files_01):
             # column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "FRC"]
             if len(df_split.columns) < len(column_names):
                 st.error(f"Error in file {filename}: The number of columns in the data does not match the expected count.")
-                continue  # Skip further processing for this file
+                break  # Skip further processing for this file
             # Trim the DataFrame to only the required columns
             df_split = df_split.iloc[:, :len(column_names)]
 
@@ -353,7 +353,9 @@ def process_data2(files_02):
             column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", "MSIO", "SMSI", "ISG", "FR", "HC", "FRC"]
             # df_split.columns = column_names
             # column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "FRC"]
-            
+            if len(df_split.columns) < len(column_names):
+                st.error(f"Error in file {filename}: The number of columns in the data does not match the expected count.")
+                break  # Skip further processing for this file
             # Trim the DataFrame to only the required columns
             df_split = df_split.iloc[:, :len(column_names)]
 
