@@ -281,7 +281,7 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
             st.session_state.selected_frequency1= selected_frequency1
             plot_data1(selected_frequency1)
         else:
-            st.write("No valid frequencies available for selection.")
+            st.error("No valid frequencies available to process the data")
 
 
 # Initialize the variable outside of the conditional blocks
@@ -488,7 +488,7 @@ def plot_data(frequency2):
         st.plotly_chart(fig, use_container_width=True)
 
     else:
-        st.write("df2 data filtered is Empty ")
+        st.error("No valid frequencies available to process the data")
 
 
 # MJD Selection
