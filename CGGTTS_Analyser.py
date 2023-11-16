@@ -233,7 +233,8 @@ def plot_data1(frequency1):
         # Add a dashed mean line
         fig.add_hline(y=mean_value, line_dash="dash", line_color="red",
                     annotation_text=f"Mean: {mean_value:.2f}", 
-                    annotation_position="bottom right")
+                    annotation_position="bottom right",
+                     annotation_font=dict(size=18, color="black"))
 
         # Update layout for better presentation
         fig.update_layout(
@@ -469,7 +470,8 @@ def plot_data(frequency2):
         # Add a dashed mean line
         fig.add_hline(y=mean_value, line_dash="dash", line_color="red",
                     annotation_text=f"Mean: {mean_value:.2f}", 
-                    annotation_position="bottom right")
+                    annotation_position="bottom right",
+                     annotation_font=dict(size=18, color="black"))
 
         # Update layout for better presentation
         fig.update_layout(
