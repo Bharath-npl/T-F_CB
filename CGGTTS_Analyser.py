@@ -213,7 +213,7 @@ def plot_data1(frequency1):
     
 
     if not df1_data_filtered.empty:
-        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())*0.1
+        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
         Avg_refsys_CV["REFSYS"] = Avg_refsys_CV["REFSYS"].round(2)
         mean_value = (Avg_refsys_CV["REFSYS"].mean())
 
@@ -779,7 +779,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     xaxis=dict(
                         tickmode='array',
                         tickvals=[i for i in range(int(min_x), int(max_x) + 1)],
-                        tickformat=".4f",
+                        tickformat="d",
                         tickfont=dict(size=14, color="black")
                     ),
                     yaxis=dict(
@@ -953,7 +953,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     xaxis=dict(
                         tickmode='array',
                         tickvals=[i for i in range(int(min_x), int(max_x) + 1)],
-                        tickformat=".4f",
+                        tickformat="d",
                         tickfont=dict(size=14, color="black")
                     ),
                     yaxis=dict(
