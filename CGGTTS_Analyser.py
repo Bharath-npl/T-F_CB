@@ -520,7 +520,7 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
             st.session_state.selected_frequency2= selected_frequency2
             plot_data(selected_frequency2)
         else:
-            st.write("No valid frequencies available for selection.")
+            st.error("No valid frequencies available for selection.")
     
 
 # Function to create the DataFrame for CSV
@@ -727,7 +727,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                             missing_session.append(unique_time)
                             # st.write("")
                 else: 
-                    st.write("Files doesn't belong to same time period ")
+                    st.error("Files doesn't belong to same time period ")
 
                 st.session_state.plot_CV_data = pd.DataFrame(CV_data, columns=['MJD_time', 'CV_avg_diff'])
                 
@@ -911,7 +911,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # Assuming st.session_state is a Streamlit state object
                     st.session_state.plot_AV_data = pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
                 else: 
-                    st.write("Files doesn't belong to same time period ")
+                    st.error("Files doesn't belong to the same time period ")
 
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
                 df4 = st.session_state.plot_AV_data
@@ -996,7 +996,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     )
 
     else:
-        st.write("No selected data to work up on")
+        st.error("No overlap of selected data to work up on")
 
 # Add a spacer to push the contact info to the bottom
 st.sidebar.write("")  # This line adds some space
