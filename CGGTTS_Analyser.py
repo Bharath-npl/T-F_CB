@@ -778,8 +778,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     yaxis_title_font=dict(size=16, color="black"),
                     xaxis=dict(
                         tickmode='array',
-                        tickvals=[i for i in range(int(min_x), int(max_x) + 1)],
-                        tickformat="d",
+                        tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
+                        tickformat="05d",
                         tickfont=dict(size=14, color="black")
                     ),
                     yaxis=dict(
@@ -952,8 +952,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     yaxis_title_font=dict(size=16, color="black"),
                     xaxis=dict(
                         tickmode='array',
-                        tickvals=[i for i in range(int(min_x), int(max_x) + 1)],
-                        tickformat="d",
+                        tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
+                        tickformat="05d",
                         tickfont=dict(size=14, color="black")
                     ),
                     yaxis=dict(
