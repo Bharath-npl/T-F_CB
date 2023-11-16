@@ -250,7 +250,7 @@ def plot_data1(frequency1):
         st.plotly_chart(fig, use_container_width=True)
 
     else:
-        st.write("df1 data filtered is Empty ")
+        st.error("Selected frequency data is not available in the selected MJD range ")
 
 
 # MJD Selection
