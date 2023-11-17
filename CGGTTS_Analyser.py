@@ -137,10 +137,10 @@ def process_data1(files_01):
             def convert_sttime_to_seconds(sttime_str):
                 # Extract hours, minutes, seconds and convert to total seconds
                 hours, minutes, seconds = map(int, [sttime_str[:2], sttime_str[2:4], sttime_str[4:6]])
-                return hours * 3600 + minutes * 60 + seconds
+                return (hours * 3600 + minutes * 60 + seconds)/86400
 
             # Apply the conversion to STTIME and add it to MJD
-            df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x) * 0.00001)
+            df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x))
             df_01['MJD'] = df_split['MJD']
             # Convert other relevant columns to desired datatypes
             df_01['ELV'] = df_split['ELV'].astype(float)
@@ -381,10 +381,10 @@ def process_data2(files_02):
             def convert_sttime_to_seconds(sttime_str):
                 # Extract hours, minutes, seconds and convert to total seconds
                 hours, minutes, seconds = map(int, [sttime_str[:2], sttime_str[2:4], sttime_str[4:6]])
-                return hours * 3600 + minutes * 60 + seconds
+                return (hours * 3600 + minutes * 60 + seconds)/86400
 
             # Apply the conversion to STTIME and add it to MJD
-            df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x) * 0.00001)
+            df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x) )
             df_02['MJD'] = df_split['MJD']
             # Convert other relevant columns to desired datatypes
             df_02['ELV'] = df_split['ELV'].astype(float)
