@@ -99,24 +99,41 @@ def process_data1(files_01):
                     inside_header = False
 
             # Create DataFrame from the data list
-            df = pd.DataFrame(data_after_head, columns=['data'])
-            
-            # Split the 'data' column based on spaces
-            df_split = df['data'].str.split(expand=True)
-            
-            # Rename columns for better understanding
-            # column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", "MSIO", "SMSI", "ISG", "FR", "HC", "FRC", "CK", "REFUTC", "DUTC"]
-            column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", "MSIO", "SMSI", "ISG", "FR", "HC", "FRC"]
-            # df_split.columns = column_names
-            # column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "FRC"]
-            if len(df_split.columns) < len(column_names):
-                st.error(f"Error in file {filename}: The number of columns in the data does not match the expected count.")
-                break  # Skip further processing for this file
-            # Trim the DataFrame to only the required columns
-            df_split = df_split.iloc[:, :len(column_names)]
+            data_rows = []
 
-            # Set the column names
-            df_split.columns = column_names
+            for line in data_after_head:
+                if line.strip():  # Skip empty lines
+                    # Extract the columns based on their fixed positions
+                    data_row = {
+                        'SAT': line[0:3].strip(),
+                        'CL': line[4:6].strip(),
+                        'MJD': line[7:12].strip(),
+                        'STTIME': line[13:19].strip(),
+                        'TRKL': line[20:24].strip(),
+                        'ELV': line[25:28].strip(),
+                        'AZTH': line[29:33].strip(),
+                        'REFSV': line[34:45].strip(),
+                        'SRSV': line[46:52].strip(),
+                        'REFSYS': line[53:64].strip(),
+                        'REFSYS': line[53:64].strip(),
+                        # Check if FRC column exists and is in the expected position
+                        
+                    }
+
+                    # 1. FRC Exists in Correct Position
+                    if len(line) > 110 and line[107:110].strip():
+                        data_row['FRC'] = line[107:110].strip()
+                    # 2. FRC Exists in a Different Position (example: using alternate position 80:83)
+                    elif len(line) > 83 and line[80:83].strip():
+                        data_row['FRC'] = line[80:83].strip()
+                    # 3. FRC Does Not Exist
+                    else:
+                        data_row['FRC'] = "No_FRC"
+
+                    data_rows.append(data_row)
+
+            # Create DataFrame from the data list
+            df_split = pd.DataFrame(data_rows)
 
             df_split = df_split[df_split['SAT'].notna()] # Skip the lines where SAT column is missing 
             # print(f"File read is :\n {df_split}")
@@ -344,24 +361,41 @@ def process_data2(files_02):
                     inside_header = False
 
             # Create DataFrame from the data list
-            df = pd.DataFrame(data_after_head, columns=['data'])
-            
-            # Split the 'data' column based on spaces
-            df_split = df['data'].str.split(expand=True)
-            
-            # Rename columns for better understanding
-            # column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", "MSIO", "SMSI", "ISG", "FR", "HC", "FRC", "CK", "REFUTC", "DUTC"]
-            column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", "MSIO", "SMSI", "ISG", "FR", "HC", "FRC"]
-            # df_split.columns = column_names
-            # column_names = ["SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", "REFSYS", "FRC"]
-            if len(df_split.columns) < len(column_names):
-                st.error(f"Error in file {filename}: The number of columns in the data does not match the expected count.")
-                break  # Skip further processing for this file
-            # Trim the DataFrame to only the required columns
-            df_split = df_split.iloc[:, :len(column_names)]
+            data_rows = []
 
-            # Set the column names
-            df_split.columns = column_names
+            for line in data_after_head:
+                if line.strip():  # Skip empty lines
+                    # Extract the columns based on their fixed positions
+                    data_row = {
+                        'SAT': line[0:3].strip(),
+                        'CL': line[4:6].strip(),
+                        'MJD': line[7:12].strip(),
+                        'STTIME': line[13:19].strip(),
+                        'TRKL': line[20:24].strip(),
+                        'ELV': line[25:28].strip(),
+                        'AZTH': line[29:33].strip(),
+                        'REFSV': line[34:45].strip(),
+                        'SRSV': line[46:52].strip(),
+                        'REFSYS': line[53:64].strip(),
+                        'REFSYS': line[53:64].strip(),
+                        # Check if FRC column exists and is in the expected position
+                        # 'FRC': line[107:110].strip() if len(line) > 107 else "No_FRC",
+                    }
+
+                    # 1. FRC Exists in Correct Position
+                    if len(line) > 110 and line[107:110].strip():
+                        data_row['FRC'] = line[107:110].strip()
+                    # 2. FRC Exists in a Different Position (example: using alternate position 80:83)
+                    elif len(line) > 83 and line[80:83].strip():
+                        data_row['FRC'] = line[80:83].strip()
+                    # 3. FRC Does Not Exist
+                    else:
+                        data_row['FRC'] = "No_FRC"
+
+                    data_rows.append(data_row)
+
+            # Create DataFrame from the data list
+            df_split = pd.DataFrame(data_rows)
 
             df_split = df_split[df_split['SAT'].notna()] # Skip the lines where SAT column is missing 
             # print(f"File read is :\n {df_split}")
