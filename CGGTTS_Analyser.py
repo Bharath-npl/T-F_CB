@@ -530,6 +530,7 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
     # Creating DataFrame for data section
     # x=df3_filtered["MJD_time"], 
     #                 y=df3_filtered["CV_avg_diff"]
+    selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
     data_df = pd.DataFrame({
         'MJD': selected_data["MJD_time"],
         'CV_difference (ns)': selected_data['CV_avg_diff']
@@ -551,14 +552,16 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 def convert_to_csv(header, df):
     output = StringIO()
     output.write(header)
-    df.to_csv(output, index=False, header=True)
+    df.to_csv(output,sep='\t', index=False, header=True)
     return output.getvalue()
 
 
 # Function to create the DataFrame for CSV
 def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, selected_data):
     # Creating DataFrame for data section
-
+    # Format the 'MJD' column to have only 5 digits after the decimal
+    selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
+    
     data_AV_df = pd.DataFrame({
         'MJD': selected_data["MJD_time"],
         'AV_difference (ns)': selected_data['AV_diff']
@@ -991,9 +994,9 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                     # Create download button
                     st.sidebar.download_button(
-                        label="Download AV data",
+                        label="Download AV result",
                         data=csv_AV,
-                        file_name="All_in_view_performance.csv",
+                        file_name="All_in_view_result.csv",
                         mime="text/csv",
                     )
 
