@@ -883,12 +883,12 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                             condition2 = df2_filtered["SAT"].isin(st.session_state.selected_svids) # 
                             
                             if condition1.any():
-                                weighted_mean_df1 = ((df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).mean())*0.1
+                                weighted_mean_df1 = ((df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).sum())*0.1
                                 # st.write(f"Weights: {weighted_mean_df1}")
                                 # weighted_means_df1.append(weighted_mean_df1)
                             
                             if condition2.any():
-                                weighted_mean_df2 = ((df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).mean())*0.1
+                                weighted_mean_df2 = ((df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).sum())*0.1
                                 
                             
                             # Only compute AV_diff_refsys if both conditions are met
