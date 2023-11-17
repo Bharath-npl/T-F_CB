@@ -215,8 +215,8 @@ def plot_data1(frequency1):
     
 
     if not df1_data_filtered.empty:
-        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())*0.1
-        Avg_refsys_CV["REFSYS"] = Avg_refsys_CV["REFSYS"].round(2)
+        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_CV["REFSYS"] = (Avg_refsys_CV["REFSYS"]*0.1).round(2)
         mean_value = (Avg_refsys_CV["REFSYS"].mean())
 
         # st.markdown(f"## Receiver 1 Average REFSYS: {frequency1}")
@@ -243,7 +243,8 @@ def plot_data1(frequency1):
             title=f"Receiver 1 Average REFSYS: {frequency1}",
             xaxis_title="MJD",
             yaxis_title="REFSYS",
-            yaxis=dict(tickmode='auto', nticks =10)
+            yaxis=dict(tickmode='auto', nticks =10),
+            xaxis =dict(tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
 
         # Display the plot
@@ -454,8 +455,8 @@ def plot_data(frequency2):
 
     #     st.line_chart(Avg_refsys_CV.set_index("MJD")[["REFSYS", "Avg"]])
     if not df2_data_filtered.empty:
-        Avg_refsys_CV = (df2_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())*0.1
-        Avg_refsys_CV["REFSYS"] = Avg_refsys_CV["REFSYS"].round(2)
+        Avg_refsys_CV = (df2_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_CV["REFSYS"] = (Avg_refsys_CV["REFSYS"]*0.1).round(2)
         mean_value = Avg_refsys_CV["REFSYS"].mean()
 
         # st.markdown(f"## Receiver 2 Average REFSYS: {frequency2}")
@@ -482,7 +483,8 @@ def plot_data(frequency2):
             title=f"Receiver 2 Average REFSYS: {frequency2}",
             xaxis_title="MJD",
             yaxis_title="REFSYS",
-            yaxis=dict(tickmode='auto', nticks =10)
+            yaxis=dict(tickmode='auto', nticks =10),
+            xaxis =dict(tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
