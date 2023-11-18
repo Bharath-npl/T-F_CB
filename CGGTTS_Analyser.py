@@ -376,15 +376,15 @@ def process_data2(files_02):
                         'AZTH': line[29:33].strip(),
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
-                        'REFSYS': line[53:64].strip(),
-                        'REFSYS': line[53:64].strip(),
+                        'REFSYS': line[53:64].strip()
+                        # 'REFSYS': line[53:64].strip(),
                         # Check if FRC column exists and is in the expected position
                         # 'FRC': line[107:110].strip() if len(line) > 107 else "No_FRC",
                     }
 
                     # 1. FRC Exists in Correct Position
-                    if len(line) > 110 and line[107:110].strip():
-                        data_row['FRC'] = line[107:110].strip()
+                    if len(line) > 110 and line[121:124].strip():
+                        data_row['FRC'] = line[121:124].strip()
                     # 2. FRC Exists in a Different Position (example: using alternate position 80:83)
                     elif len(line) > 83 and line[80:83].strip():
                         data_row['FRC'] = line[80:83].strip()
