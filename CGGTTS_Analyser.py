@@ -84,19 +84,29 @@ def process_data1(files_01):
             data_after_head = []
             # Flag to indicate if we are currently inside a header block
             inside_header = False
-
+            frc_is_at = None
+            prev_line = None  # Variable to keep track of the previous line
+            
             for line in lines:
+                # find the position of the FRC in the line 
+                if "hhmmss  s  .1dg .1dg    .1ns" in line and prev_line:
+                    frc_position = prev_line.find('FRC')
+                    if frc_position != -1:
+                        frc_is_at = frc_position
+                
                 # Start of the header
                 if line.startswith("CGGTTS")or line.startswith("GGTTS"):
                     inside_header = True
 
                 # If we're not inside a header, process the line as data
-                if not inside_header:
+                elif not inside_header:
                     data_after_head.append(line)
 
                 # End of the header
                 if "hhmmss  s  .1dg .1dg    .1ns" in line:
                     inside_header = False
+                    
+                prev_line = line  # Update the prev_line with the current line
 
             # Create DataFrame from the data list
             data_rows = []
@@ -115,20 +125,15 @@ def process_data1(files_01):
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
                         'REFSYS': line[53:64].strip()
-                        # 'REFSYS': line[53:64].strip(),
-                        # Check if FRC column exists and is in the expected position
-                        
+                                                
                     }
 
-                    # 1. FRC Exists in Correct Position
-                    if len(line) > 110 and line[121:124].strip():
-                        data_row['FRC'] = line[121:124].strip()
-                    # 2. FRC Exists in a Different Position (example: using alternate position 80:83)
-                    elif len(line) > 83 and line[80:83].strip():
-                        data_row['FRC'] = line[80:83].strip()
-                    # 3. FRC Does Not Exist
+                    # Use the 'FRC' position if found
+                    if frc_is_at is not None and len(line) > frc_is_at + 2:
+                        data_row['FRC'] = line[frc_is_at:frc_is_at + 3].strip()
                     else:
-                        data_row['FRC'] = "No_FRC"
+                        # if it is CGGTTS version 1.0 there is no FRC column in the data format but the data is of L1C
+                        data_row['FRC'] = "L1C"
 
                     data_rows.append(data_row)
 
@@ -346,19 +351,28 @@ def process_data2(files_02):
             data_after_head = []
             # Flag to indicate if we are currently inside a header block
             inside_header = False
+            prev_line = None
+            frc_is_at =None
 
             for line in lines:
+                # Find the position of the FRC in the line 
+                if "hhmmss  s  .1dg .1dg    .1ns" in line and prev_line:
+                    frc_position = prev_line.find('FRC')
+                    if frc_position != -1:
+                        frc_is_at = frc_position
+                
                 # Start of the header
                 if line.startswith("CGGTTS")or line.startswith("GGTTS"):
                     inside_header = True
 
                 # If we're not inside a header, process the line as data
-                if not inside_header:
+                elif not inside_header:
                     data_after_head.append(line)
 
                 # End of the header
                 if "hhmmss  s  .1dg .1dg    .1ns" in line:
                     inside_header = False
+                prev_line = line  # Update the prev_line with the current line
 
             # Create DataFrame from the data list
             data_rows = []
@@ -376,19 +390,11 @@ def process_data2(files_02):
                         'AZTH': line[29:33].strip(),
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
-                        'REFSYS': line[53:64].strip()
-                        # 'REFSYS': line[53:64].strip(),
-                        # Check if FRC column exists and is in the expected position
-                        # 'FRC': line[107:110].strip() if len(line) > 107 else "No_FRC",
-                    }
-
-                    # 1. FRC Exists in Correct Position
-                    if len(line) > 110 and line[121:124].strip():
-                        data_row['FRC'] = line[121:124].strip()
-                    # 2. FRC Exists in a Different Position (example: using alternate position 80:83)
-                    elif len(line) > 83 and line[80:83].strip():
-                        data_row['FRC'] = line[80:83].strip()
-                    # 3. FRC Does Not Exist
+                        'REFSYS': line[53:64].strip()}
+                    
+                    # Use the 'FRC' position if found
+                    if frc_is_at is not None and len(line) > frc_is_at + 2:
+                        data_row['FRC'] = line[frc_is_at:frc_is_at + 3].strip()
                     else:
                         data_row['FRC'] = "No_FRC"
 
