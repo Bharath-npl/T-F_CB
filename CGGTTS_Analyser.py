@@ -677,7 +677,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             df1_mjd_01 = st.session_state.df1_mjd[st.session_state.df1_mjd["MJD"] == mjd_time]
             df2_mjd_02 = st.session_state.df2_mjd[st.session_state.df2_mjd["MJD"] == mjd_time]
             
-            common_svids = set(df1_mjd_01["SAT"]) & set(df2_mjd_02["SAT"])            
+            # common_svids = set(df1_mjd_01["SAT"]) & set(df2_mjd_02["SAT"]) 
+            common_svids = set(df1_mjd_01["SAT"]).union(set(df2_mjd_02["SAT"]))
 
             # Add to the all_common_svids set
             all_common_svids.update(common_svids)
