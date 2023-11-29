@@ -709,7 +709,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 st.session_state.selected_svids = ['ALL']
 
             selected_svids = st.sidebar.multiselect(
-                "Select SV_ids:",
+                "Choose Satellites (PRN's)",
                 options=['ALL'] + list(unique_SVIDs),
                 # default=st.session_state.selected_svids,
                 default =['ALL'],
