@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import csv
 import warnings
-import tempfile
+import cv2
 import io 
 from io import StringIO
 import math
@@ -623,9 +623,24 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 data1_avail =0
 data2_avail =0
 
-st.sidebar.header("BIPM Time Department")
-st.sidebar.write("")   
-st.sidebar.write("")
+filename = "Logo_BIPM.png"
+img = cv2.imread(filename, 1)
+image01 = np.array([img])
+
+original_title = '<p style="font-family:Courier; color:Blue; font-size: 20px;"></p>'
+st.markdown(original_title, unsafe_allow_html=True)
+st.sidebar.image(image01, channels="BGR")
+
+filename = "Logo_IEEE_UFFC.JPG"
+img = cv2.imread(filename, 1)
+image02 = np.array([img])
+
+original_title = '<p style="font-family:Courier; color:Blue; font-size: 20px;"></p>'
+st.markdown(original_title, unsafe_allow_html=True)
+st.sidebar.image(image02, channels="BGR")
+
+
+st.sidebar.header("Time & Frequency Capacity Building")
 
 st.sidebar.header("Pricipals of CV & AV time transfer")
 plot_CV = st.sidebar.button("PDF material", key= 'Material')
