@@ -623,8 +623,10 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 data1_avail =0
 data2_avail =0
 
-# st.sidebar.header("Lab 2 Data")
-# plot_option2 = st.sidebar.button("Plot Avg RefSys",key=10)
+st.sidebar.header("BIPM Time Department")
+st.sidebar.write("")   
+st.sidebar.write("")
+
 st.sidebar.header("Pricipals of CV & AV time transfer")
 plot_CV = st.sidebar.button("PDF material", key= 'Material')
 
