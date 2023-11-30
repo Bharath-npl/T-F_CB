@@ -660,6 +660,31 @@ if 'selected_svids' not in st.session_state:
 
 unique_SVIDs = []
 
+def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs):
+    # Ensure 'ALL' in selected_svids is handled correctly
+    if 'ALL' in selected_svids:
+        selected_svids = unique_SVIDs
+
+    # Filter the DataFrames based on MJD times and selected satellites
+    df1_filtered = df1[df1["MJD"].isin(unique_MJD_times) & df1["SAT"].isin(selected_svids)]
+    df2_filtered = df2[df2["MJD"].isin(unique_MJD_times) & df2["SAT"].isin(selected_svids)]
+
+    # Merge the filtered DataFrames
+    merged_df = pd.merge(df1_filtered, df2_filtered, on=['SAT', 'MJD'], suffixes=('_df1', '_df2'))
+
+    # Compute differences
+    merged_df['CV_diff'] = (merged_df['REFSYS_df1'] - merged_df['REFSYS_df2']) * 0.1
+
+    # Group by 'MJD' and calculate average CV_diff
+    result = merged_df.groupby('MJD').agg({'CV_diff': ['mean', 'count']})
+    result.columns = ['CV_avg_diff', 'count']
+    result.reset_index(inplace=True)
+
+    # Handle missing MJD times
+    missing_session = list(set(unique_MJD_times) - set(result['MJD']))
+
+    return result, missing_session
+
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
     
@@ -733,55 +758,17 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             # plot_button = st.sidebar.button("Plot CV")
 
             if plot_CV:
+                # Replace the following with your actual DataFrame and variable names
+                df1_CV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
+                df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
+                selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
-                if 'ALL' in st.session_state.selected_svids:
-                    st.session_state.selected_svids = list(unique_SVIDs)
+                result_df, missing_sessions = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs)
 
-                # print(f"Selected SV IDs are: {st.session_state.selected_svids}")
-                unique_MJD_times = sorted(set(st.session_state.df1_mjd["MJD"]).intersection(set(st.session_state.df2_mjd["MJD"])))
-                # unique_MJD_times = sorted(set(df1_mjd_01["MJD"]).union(set(df2_mjd_02["MJD"])))
-                # print ("Unique MJD values:",unique_MJD_times)
-                if unique_MJD_times: # If there are common MJD exists between the files 
-                    for unique_time in unique_MJD_times: # For each unique MJD time in the selected timing range 
-                        refsys_value_df1 = []
-                        refsys_value_df2 = []
-                        avg_CV_diff = 0
-                        if unique_time in st.session_state.df1_mjd["MJD"].values and unique_time in st.session_state.df2_mjd["MJD"].values:
-                            for svid in st.session_state.selected_svids:
-                                
-                                condition1 = (st.session_state.df1_mjd["SAT"] == svid) & (st.session_state.df1_mjd["MJD"] == unique_time)
-                                
-                                if condition1.any():
-                                    refsys_value_df1.extend(st.session_state.df1_mjd[condition1]["REFSYS"].tolist())
-                                    # refsys_value_df1 = df1_mjd[df1_mjd["sv_id"] == svid]["refsys"].tolist()
-                                    
-                                condition2 = (st.session_state.df2_mjd["SAT"] == svid) & (st.session_state.df2_mjd["MJD"] == unique_time)
-                                
-                                if condition2.any():
-                                    refsys_value_df2.extend(st.session_state.df2_mjd[condition2]["REFSYS"].tolist())
-                                
-                            # Calculate all the CV_diff values for the given svid and mjd_time
-                            CV_diffs = [val1 - val2 for val1, val2 in zip(refsys_value_df1, refsys_value_df2)]
-
-                            if CV_diffs:  # CV_difference can be zero also 
-                                avg_CV_diff = (sum(CV_diffs) *0.1)/ len(CV_diffs) # 0.1 ns is the unit of REFSYS in CGGTTS data format 
-                                new_row = {'MJD_time': unique_time, 'CV_avg_diff': round(avg_CV_diff,2)}
-                            else:
-                                # Handle the case where there are no valid diffs (e.g., one or both lists are empty)
-                                avg_CV_diff = None  # Use None to represent missing data rather than zero
-                                new_row = {'MJD_time': unique_time, 'CV_avg_diff': avg_CV_diff}
-
-                            # else:
-                            #     print (f"CV difference is zero at session: {unique_time}")
-                            CV_data.append(new_row)
-
-                        else:
-                            missing_session.append(unique_time)
-                            # st.write("")
-                else: 
-                    st.error("Files doesn't belong to same time period ")
-
-                st.session_state.plot_CV_data = pd.DataFrame(CV_data, columns=['MJD_time', 'CV_avg_diff'])
+                if not result_df.empty:
+                    st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
+                else:
+                    st.write("No data available for plotting.")               
                 
             # if  not st.session_state.plot_data.empty:
             # Plotting 
@@ -804,55 +791,63 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 # st.write(f"Mean value of data with in selected limit ({user_start_y} - {user_end_y}): {user_mean_val:.2f} ns")
               
                 # Set x-axis range and filter rows of the dataframe
-                min_x = math.floor(min(df3["MJD_time"]))
-                max_x = math.ceil(max(df3["MJD_time"]))
-                              
+                min_mjd_time = df3["MJD"].dropna().min()
+                max_mjd_time = df3["MJD"].dropna().max()
 
+                # Now apply math.floor() and math.ceil()
+                min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
+                max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
+
+                # Add a check if min_x and max_x are None
+                if min_x is None or max_x is None:
+                    print("Error: MJD_time column contains only NaN values")
+                    # Handle the error appropriately
+                else:
                 # Create scatter plot
-                fig = go.Figure()
-
-                # Add scatter plot of data points
-                fig.add_trace(go.Scatter(
-                    x=df3_filtered["MJD_time"], 
-                    y=df3_filtered["CV_avg_diff"], 
-                    mode='markers',
-                    name='CV_avg_diff',
-                    marker=dict(size=10)  # Increase marker size
-                ))
-
-                # Add a thicker horizontal line for the mean
-                fig.add_hline(y=user_mean_val, line_dash="dash", line_color="red", line_width=3,
-                            annotation_text=f"Mean: {user_mean_val:.2f} ns", 
-                            annotation_position="top right",
-                            annotation_font=dict(size=18, color="black"))
-
-                # Set plot titles and labels with increased font size and black color
-                fig.update_layout(
-                    title=f"CV performance (MJD: {min_x} - {max_x-1})",
-                    title_font=dict(size=20, color="black"),
-                    xaxis_title="MJD time",
-                    xaxis_title_font=dict(size=16, color="black"),
-                    yaxis_title="Time difference (ns)",
-                    yaxis_title_font=dict(size=16, color="black"),
-                    xaxis=dict(
-                        tickmode='array',
-                        # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
-                        # tickformat="05d",
-                        tickfont=dict(size=14, color="black"),
-                        exponentformat='none' 
-                    ),
-                    yaxis=dict(
-                        tickmode='auto', nticks =10,
-                        tickfont=dict(size=14, color="black")
-                    ),
-                    # yaxis=dict(tickmode='auto', nticks =10)
-                    autosize=False,
-                    width=800,
-                    height=600
-                )
-
-                # Display the plot
-                st.plotly_chart(fig, use_container_width=True)
+                    fig = go.Figure()
+                              
+                    # Add scatter plot of data points
+                    fig.add_trace(go.Scatter(
+                        x=df3_filtered["MJD_time"], 
+                        y=df3_filtered["CV_avg_diff"], 
+                        mode='markers',
+                        name='CV_avg_diff',
+                        marker=dict(size=10)  # Increase marker size
+                    ))
+    
+                    # Add a thicker horizontal line for the mean
+                    fig.add_hline(y=user_mean_val, line_dash="dash", line_color="red", line_width=3,
+                                annotation_text=f"Mean: {user_mean_val:.2f} ns", 
+                                annotation_position="top right",
+                                annotation_font=dict(size=18, color="black"))
+    
+                    # Set plot titles and labels with increased font size and black color
+                    fig.update_layout(
+                        title=f"CV performance (MJD: {min_x} - {max_x-1})",
+                        title_font=dict(size=20, color="black"),
+                        xaxis_title="MJD time",
+                        xaxis_title_font=dict(size=16, color="black"),
+                        yaxis_title="Time difference (ns)",
+                        yaxis_title_font=dict(size=16, color="black"),
+                        xaxis=dict(
+                            tickmode='array',
+                            # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
+                            # tickformat="05d",
+                            tickfont=dict(size=14, color="black"),
+                            exponentformat='none' 
+                        ),
+                        yaxis=dict(
+                            tickmode='auto', nticks =10,
+                            tickfont=dict(size=14, color="black")
+                        ),
+                        # yaxis=dict(tickmode='auto', nticks =10)
+                        autosize=False,
+                        width=800,
+                        height=600
+                    )
+    
+                    # Display the plot
+                    st.plotly_chart(fig, use_container_width=True)
                 
                 # Data file processing 
                                 
