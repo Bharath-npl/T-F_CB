@@ -570,20 +570,20 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
     # Creating DataFrame for data section
     # x=df3_filtered["MJD_time"], 
     #                 y=df3_filtered["CV_avg_diff"]
-    selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
+    selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
     data_df = pd.DataFrame({
-        'MJD': selected_data["MJD_time"],
+        'MJD': selected_data["MJD"],
         'CV_difference (ns)': selected_data['CV_avg_diff']
     })
 
     # Creating header information
     header_CV_info = (
-        f"Common View Time Transfer Link Performance \n"
-        f"Start MJD: {starting_mjd}\n"
-        f"End MJD: {ending_mjd}\n"
-        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
-        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
-        f"Selected satellites for time transfer: {', '.join(SVids)}\n"
+        f"#Common View Time Transfer Link Performance \n"
+        f"#Start MJD: {starting_mjd}\n"
+        f"#End MJD: {ending_mjd}\n"
+        f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"#Selected satellites for time transfer: {', '.join(SVids)}\n"
     )
 
     return header_CV_info, data_df
@@ -609,12 +609,12 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 
     # Creating header information
     header_AV_info = (
-        f"ALL in View Time Transfer Link Performance \n"
-        f"Start MJD: {starting_mjd}\n"
-        f"End MJD: {ending_mjd}\n"
-        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
-        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
-        f"Selected Satellites for time transfer: {', '.join(SVids)}\n"
+        f"#ALL in View Time Transfer Link Performance \n"
+        f"#Start MJD: {starting_mjd}\n"
+        f"#End MJD: {ending_mjd}\n"
+        f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"#Selected Satellites for time transfer: {', '.join(SVids)}\n"
     )
 
     return header_AV_info, data_AV_df
@@ -674,17 +674,25 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs):
 
     # Compute differences
     merged_df['CV_diff'] = (merged_df['REFSYS_df1'] - merged_df['REFSYS_df2']) * 0.1
-
+    
     # Group by 'MJD' and calculate average CV_diff
-    result = merged_df.groupby('MJD').agg({'CV_diff': ['mean', 'count']})
-    result.columns = ['CV_avg_diff', 'count']
+    result = merged_df.groupby('MJD').agg({'CV_diff': 'mean'}).rename(columns={'CV_diff': 'CV_avg_diff'})
+    result['CV_avg_diff'] = result['CV_avg_diff'].round(2)
+    # result.drop(columns='CV_diff', inplace=True)
+    # result.columns = ['CV_avg_diff', 'count']
     result.reset_index(inplace=True)
 
+    # Count the number of entries per MJD
+    count = merged_df.groupby('MJD').size().reset_index(name='count')
+
+    # Merge the result with the count
+    result = pd.merge(result, count, on='MJD')
+
     # Handle missing MJD times
+
     missing_session = list(set(unique_MJD_times) - set(result['MJD']))
 
     return result, missing_session
-
 
 
 
@@ -736,8 +744,6 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times):
     else:
         st.error("Files don't belong to the same time period")
         return pd.DataFrame()
-
-
 
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
