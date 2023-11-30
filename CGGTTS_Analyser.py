@@ -701,25 +701,34 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
         
         unique_SVIDs = []
         unique_MJD_times = sorted(set(st.session_state.df1_mjd["MJD"]).union(set(st.session_state.df2_mjd["MJD"])))
-        # st.write(f"MJD selected Data 01: \n {st.session_state.df1_mjd}")
-        # st.write(f"MJD selected Data 02: \n {st.session_state.df2_mjd}")
-
+        
         all_common_svids = set()
         df1_mjd_01 =[]
         df2_mjd_02 =[]
         missing_session =[]
+        filtered_data01 = pd.DataFrame()
+        filtered_data02 = pd.DataFrame()
 
         for mjd_time in unique_MJD_times:
             # Filter dataframes for the current mjd_time
             df1_mjd_01 = st.session_state.df1_mjd[st.session_state.df1_mjd["MJD"] == mjd_time]
             df2_mjd_02 = st.session_state.df2_mjd[st.session_state.df2_mjd["MJD"] == mjd_time]
             
+                # Accumulate the filtered data
+            filtered_data01 = pd.concat([filtered_data01, df1_mjd_01])
+            filtered_data02 = pd.concat([filtered_data02, df2_mjd_02])
             # common_svids = set(df1_mjd_01["SAT"]) & set(df2_mjd_02["SAT"]) 
-            common_svids = set(df1_mjd_01["SAT"]).union(set(df2_mjd_02["SAT"]))
 
-            # Add to the all_common_svids set
-            all_common_svids.update(common_svids)
+            all_svids = set(df1_mjd_01["SAT"]).union( set(df2_mjd_02["SAT"]))
+
+           
+            all_common_svids.update(all_svids)
+
+
             
+         # Store the accumulated data in the session state
+        st.session_state.df1_mjd_01 = filtered_data01
+        st.session_state.df2_mjd_02 = filtered_data02
 
         # Convert set to list
         unique_SVIDs = list(all_common_svids)
@@ -808,7 +817,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                               
                     # Add scatter plot of data points
                     fig.add_trace(go.Scatter(
-                        x=df3_filtered["MJD_time"], 
+                        x=df3_filtered["MJD"], 
                         y=df3_filtered["CV_avg_diff"], 
                         mode='markers',
                         name='CV_avg_diff',
