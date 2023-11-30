@@ -622,23 +622,12 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 
 data1_avail =0
 data2_avail =0
-
-# filename = "Logo_BIPM.png"
-# img = cv2.imread(filename, 1)
-# image01 = np.array([img])
-
-# original_title = '<p style="font-family:Courier; color:Blue; font-size: 20px;"></p>'
-# st.markdown(original_title, unsafe_allow_html=True)
-# st.sidebar.image(image01, channels="BGR")
-
-# filename = "Logo_IEEE_UFFC.JPG"
-# img = cv2.imread(filename, 1)
-# image02 = np.array([img])
-
-# original_title = '<p style="font-family:Courier; color:Blue; font-size: 20px;"></p>'
-# st.markdown(original_title, unsafe_allow_html=True)
-# st.sidebar.image(image02, channels="BGR")
-
+# BIPM Logo
+st.sidebar.image("https://www.bipm.org/documents/20126/27072194/Logo+BIPM+blue.png/797bb4e6-8cfb-5d78-b480-e460ad5eeec2?t=1583920059345", width=200)
+#One line of gap 
+st.sidebar.write("")
+#IEEE UFFSC logo
+st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200)
 
 st.sidebar.header("Time & Frequency Capacity Building")
 
