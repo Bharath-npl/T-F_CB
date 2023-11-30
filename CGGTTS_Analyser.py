@@ -686,6 +686,60 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs):
     return result, missing_session
 
 
+
+
+def calculate_k(group):
+    sum_inv_cos2 = group['inv_cos2'].sum()
+    return 1 / sum_inv_cos2 if sum_inv_cos2 != 0 else float('inf')
+
+
+
+def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times):
+    # Handling 'ALL' selection
+    svids_to_use = unique_SVIDs if 'ALL' in selected_svids or len(selected_svids) == len(unique_SVIDs) else selected_svids
+
+    # Remove 'ALL' if individual SV_ids are selected
+    if len(selected_svids) < len(unique_SVIDs) + 1:
+        svids_to_use = [svid for svid in selected_svids if svid != 'ALL']
+
+    # Calculate inverse cosine squared values
+    df1['inv_cos2'] = 1 / np.cos(np.radians(df1['ELV'] * 0.1))**2
+    df2['inv_cos2'] = 1 / np.cos(np.radians(df2['ELV'] * 0.1))**2
+
+    if unique_MJD_times:
+        AV_data = []
+        for unique_time in unique_MJD_times:
+            df1_filtered = df1[df1["MJD"] == unique_time]
+            df2_filtered = df2[df2["MJD"] == unique_time]
+
+            if not df1_filtered.empty and not df2_filtered.empty:
+                # Calculate k values
+                k1_value = df1_filtered.groupby('MJD').apply(calculate_k).iloc[0]
+                k2_value = df2_filtered.groupby('MJD').apply(calculate_k).iloc[0]
+
+                # Filter data based on selected satellites
+                condition1 = df1_filtered["SAT"].isin(svids_to_use)
+                condition2 = df2_filtered["SAT"].isin(svids_to_use)
+
+                if condition1.any() and condition2.any():
+                    weighted_mean_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).sum() * 0.1
+                    weighted_mean_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).sum() * 0.1
+
+                    AV_diff_refsys = weighted_mean_df1 - weighted_mean_df2
+                    new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys, 2) if AV_diff_refsys else None}
+                    AV_data.append(new_row)
+            else:
+                # Handle the case when one of the filtered DataFrames is empty
+                AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
+
+        return pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
+    else:
+        st.error("Files don't belong to the same time period")
+        return pd.DataFrame()
+
+
+
+
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
     
     st.session_state.df1_mjd = st.session_state.sel_MJD_FRC_01
@@ -796,9 +850,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 df3_filtered = df3[(df3["CV_avg_diff"] >= user_start_y) & (df3["CV_avg_diff"] <= user_end_y)]
                 user_mean_val = df3_filtered["CV_avg_diff"].mean()
 
-                # Display the user selected mean
-                # st.write(f"Mean value of data with in selected limit ({user_start_y} - {user_end_y}): {user_mean_val:.2f} ns")
-              
+                              
                 # Set x-axis range and filter rows of the dataframe
                 min_mjd_time = df3["MJD"].dropna().min()
                 max_mjd_time = df3["MJD"].dropna().max()
@@ -884,91 +936,11 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
             if plot_AV:
 
-                if 'ALL' in st.session_state.selected_svids or len(st.session_state.selected_svids) == len(unique_SVIDs):
-                    svids_to_use = unique_SVIDs
-                else:
-                    svids_to_use = st.session_state.selected_svids
-                # If individual SV_ids are selected/deselected, remove ALL
-                if len(st.session_state.selected_svids) < len(unique_SVIDs) + 1:
-                    st.session_state.selected_svids = [svid for svid in st.session_state.selected_svids if svid != 'ALL']
-
-                st.session_state.selected_svids = svids_to_use
-
-                if 'ALL' in st.session_state.selected_svids:
-                    st.session_state.selected_svids = list(unique_SVIDs)        
-
-                # This is just an example and may not reflect your actual formula
-                st.session_state.df1_mjd['inv_cos2'] = 1 / pow(np.cos(np.radians(st.session_state.df1_mjd['ELV']*0.1)),2)
-                st.session_state.df2_mjd['inv_cos2'] = 1 / pow(np.cos(np.radians(st.session_state.df2_mjd['ELV']*0.1)),2)
-        
-
-                # Define a function to calculate k weight based on the inverse of the square of the cosine of the elevation angle
-                def calculate_k(group):
-                    sum_inv_cos2 = group['inv_cos2'].sum()
-                    k = 1 / sum_inv_cos2 if sum_inv_cos2 != 0 else float('inf')  # Use infinity to represent undefined k
-                    return k
-
-                # print(f"Selected SV IDs are: {st.session_state.selected_svids}")
-                unique_MJD_times = sorted(set(st.session_state.df1_mjd["MJD"]).union(set(st.session_state.df2_mjd["MJD"])))
-                # print ("Unique MJD values:",unique_MJD_times)
-                if unique_MJD_times: # If there are common MJD exists between the files 
-                    AV_data = []
-                    for unique_time in unique_MJD_times: # For each unique MJD time in the selected timing range 
-                        refsys_value_df1 = []
-                        refsys_value_df2 = []
-                        Elv_value_df1 = []
-                        Elv_value_df2 = []
-                        weighted_means_df1 = []
-                        weighted_means_df2 = []
-                        avg_CV_diff = 0
-                        # Initialize a dictionary to store the Avg_AV_refsys for each unique MJD
-                        avg_AV_refsys_dict = {}
-
-                        if unique_time in st.session_state.df1_mjd["MJD"].values and unique_time in st.session_state.df2_mjd["MJD"].values:
-                            # THE LOGIC CHANGES FROM HERE FOR AV
-                            df1_filtered = st.session_state.df1_mjd[st.session_state.df1_mjd["MJD"] == unique_time]
-                            df2_filtered = st.session_state.df2_mjd[st.session_state.df2_mjd["MJD"] == unique_time]
-                            
-                            # Calculate k values outside the satellite loop since it's constant for each MJD
-                            k1_value = df1_filtered.groupby('MJD').apply(calculate_k).iloc[0]
-                            k2_value = df2_filtered.groupby('MJD').apply(calculate_k).iloc[0]
-
-
-                            condition1 = df1_filtered["SAT"].isin(st.session_state.selected_svids) # Boolean list when the condition is satisfied 
-                            # st.write(f"Satellite: {np.sum(condition1)}")
-                            condition2 = df2_filtered["SAT"].isin(st.session_state.selected_svids) # 
-                            
-                            if condition1.any():
-                                weighted_mean_df1 = ((df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).sum())*0.1
-                                # st.write(f"Weights: {weighted_mean_df1}")
-                                # weighted_means_df1.append(weighted_mean_df1)
-                            
-                            if condition2.any():
-                                weighted_mean_df2 = ((df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).sum())*0.1
-                                
-                            
-                            # Only compute AV_diff_refsys if both conditions are met
-                            if condition1.any() and condition2.any():
-                                AV_diff_refsys = weighted_mean_df1 - weighted_mean_df2
-
-                                if AV_diff_refsys:  # AV_difference can be zero also 
-                                     
-                                    new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys,2)}
-                                else:
-                                    # Handle the case where there are no valid diffs (e.g., one or both lists are empty)
-                                    AV_diff_refsys = None  # Use None to represent missing data rather than zero
-                                    new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys,2)}
-                                
-                                AV_data.append(new_row)
-
-                        else:
-                            missing_session.append(unique_time)
-                   
-                    # Assuming st.session_state is a Streamlit state object
-                    st.session_state.plot_AV_data = pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
-                else: 
-                    st.error("Files doesn't belong to the same time period ")
-
+                df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
+                df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
+                st.session_state.plot_AV_data = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times)
+                
+                
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
                 df4 = st.session_state.plot_AV_data
 
