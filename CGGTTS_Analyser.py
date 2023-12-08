@@ -17,6 +17,7 @@ import math
 
 warnings.filterwarnings('ignore')
 
+
 # streamlit run .\CV_difference_V1.py --server.port 8888
 
 st.set_page_config(page_title="BIPM Time Analyser", page_icon=":chart_with_upwards_trend:", layout="wide")
@@ -67,8 +68,7 @@ def process_data1(files_01):
         df_01 =pd.DataFrame()
         combined_Colm_data_01 = pd.DataFrame()
         # A list to store cleaned data across multiple files
-        
-        
+               
          
         for each_file in files_01:
             all_dataframes = []
@@ -570,20 +570,20 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
     # Creating DataFrame for data section
     # x=df3_filtered["MJD_time"], 
     #                 y=df3_filtered["CV_avg_diff"]
-    selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
+    selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
     data_df = pd.DataFrame({
-        'MJD': selected_data["MJD"],
+        'MJD': selected_data["MJD_time"],
         'CV_difference (ns)': selected_data['CV_avg_diff']
     })
 
     # Creating header information
     header_CV_info = (
-        f"#Common View Time Transfer Link Performance \n"
-        f"#Start MJD: {starting_mjd}\n"
-        f"#End MJD: {ending_mjd}\n"
-        f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
-        f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
-        f"#Selected satellites for time transfer: {', '.join(SVids)}\n"
+        f"Common View Time Transfer Link Performance \n"
+        f"Start MJD: {starting_mjd}\n"
+        f"End MJD: {ending_mjd}\n"
+        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"Selected satellites for time transfer: {', '.join(SVids)}\n"
     )
 
     return header_CV_info, data_df
@@ -609,12 +609,12 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 
     # Creating header information
     header_AV_info = (
-        f"#ALL in View Time Transfer Link Performance \n"
-        f"#Start MJD: {starting_mjd}\n"
-        f"#End MJD: {ending_mjd}\n"
-        f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
-        f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
-        f"#Selected Satellites for time transfer: {', '.join(SVids)}\n"
+        f"ALL in View Time Transfer Link Performance \n"
+        f"Start MJD: {starting_mjd}\n"
+        f"End MJD: {ending_mjd}\n"
+        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"Selected Satellites for time transfer: {', '.join(SVids)}\n"
     )
 
     return header_AV_info, data_AV_df
@@ -674,25 +674,17 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs):
 
     # Compute differences
     merged_df['CV_diff'] = (merged_df['REFSYS_df1'] - merged_df['REFSYS_df2']) * 0.1
-    
+
     # Group by 'MJD' and calculate average CV_diff
-    result = merged_df.groupby('MJD').agg({'CV_diff': 'mean'}).rename(columns={'CV_diff': 'CV_avg_diff'})
-    result['CV_avg_diff'] = result['CV_avg_diff'].round(2)
-    # result.drop(columns='CV_diff', inplace=True)
-    # result.columns = ['CV_avg_diff', 'count']
+    result = merged_df.groupby('MJD').agg({'CV_diff': ['mean', 'count']})
+    result.columns = ['CV_avg_diff', 'count']
     result.reset_index(inplace=True)
 
-    # Count the number of entries per MJD
-    count = merged_df.groupby('MJD').size().reset_index(name='count')
-
-    # Merge the result with the count
-    result = pd.merge(result, count, on='MJD')
-
     # Handle missing MJD times
-
     missing_session = list(set(unique_MJD_times) - set(result['MJD']))
 
     return result, missing_session
+
 
 
 
@@ -702,7 +694,12 @@ def calculate_k(group):
 
 
 
-def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times):
+def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, Elv_Mask):
+    global print_once
+     # Filter based on ELV values
+    df1 = df1[df1['ELV'] >= Elv_Mask*10]
+    df2 = df2[df2['ELV'] >= Elv_Mask*10]
+    
     # Handling 'ALL' selection
     svids_to_use = unique_SVIDs if 'ALL' in selected_svids or len(selected_svids) == len(unique_SVIDs) else selected_svids
 
@@ -720,6 +717,16 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times):
             df1_filtered = df1[df1["MJD"] == unique_time]
             df2_filtered = df2[df2["MJD"] == unique_time]
 
+            # Apply outlier filter for REFSYS values
+            mean_df1 = df1_filtered['REFSYS'].mean()
+            std_df1 = df1_filtered['REFSYS'].std()
+            mean_df2 = df2_filtered['REFSYS'].mean()
+            std_df2 = df2_filtered['REFSYS'].std()
+
+            df1_filtered = df1_filtered[np.abs(df1_filtered['REFSYS'] - mean_df1) <= 1.5 * std_df1]
+            df2_filtered = df2_filtered[np.abs(df2_filtered['REFSYS'] - mean_df2) <= 1.5 * std_df2]
+
+
             if not df1_filtered.empty and not df2_filtered.empty:
                 # Calculate k values
                 k1_value = df1_filtered.groupby('MJD').apply(calculate_k).iloc[0]
@@ -730,15 +737,42 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times):
                 condition2 = df2_filtered["SAT"].isin(svids_to_use)
 
                 if condition1.any() and condition2.any():
-                    weighted_mean_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).sum() * 0.1
-                    weighted_mean_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).sum() * 0.1
+                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).sum() * 0.1
+                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).sum() * 0.1
 
-                    AV_diff_refsys = weighted_mean_df1 - weighted_mean_df2
+                    AV_diff_refsys = weighted_sum_df1 - weighted_sum_df2
                     new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys, 2) if AV_diff_refsys else None}
                     AV_data.append(new_row)
             else:
                 # Handle the case when one of the filtered DataFrames is empty
                 AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
+
+             # Assuming unique_time, k1_value are single values and the others are series or similar
+            filtered_data = df1_filtered[condition1]
+            if print_once ==1:
+                data = {
+                    'SAT': filtered_data['SAT'] ,
+                    'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
+                    'Refsys': df1_filtered.loc[condition1, 'REFSYS'],
+                    'Elv': df1_filtered.loc[condition1, 'ELV'],
+                    'Sigma': std_df1,
+                    'K Value': [k1_value] * len(df1_filtered.loc[condition1]),
+                    'Inverse_cos_sqr': df1_filtered.loc[condition1, 'inv_cos2'],
+                    'product of all': df1_filtered.loc[condition1, 'REFSYS']*k1_value*df1_filtered.loc[condition1, 'inv_cos2']*0.1
+                }
+                # Create a DataFrame
+                df_to_display = pd.DataFrame(data)
+                # Display the DataFrame as a table in Streamlit
+                st.table(df_to_display)
+                K_nd_Inverse_cos_sum = df_to_display['product of all'].sum()
+                
+                st.write(f"Sum of the weighted refsys 01: {K_nd_Inverse_cos_sum}")
+                st.write(f"Weighted Sum data 01: {weighted_sum_df1}")
+                st.write(f"Weighted Sum data 02: {weighted_sum_df2}")
+                st.write(f"AV difference : {weighted_sum_df1 - weighted_sum_df2}")
+                print_once = 2
+                # st.write(f"sum of the weights: {K_nd_Inverse_cos.sum()}")
+
 
         return pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
     else:
@@ -814,13 +848,26 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 # default=st.session_state.selected_svids,
                 default =['ALL'],
                 key= 12)  # Use the unique key here
-            # Update the session state
-            # Handle ALL option
+
                # Update the session state
             if 'ALL' in selected_svids or len(selected_svids) == len(unique_SVIDs):
                 svids_to_use = unique_SVIDs
             else:
                 svids_to_use = selected_svids
+            
+            # Initialize selected_svids in session_state if not present
+            if 'elevation_mask' not in st.session_state:
+                st.session_state.elevation_mask = 15.0
+
+            # Elevation mask input
+            elevation_mask = st.sidebar.number_input('Elevation Mask (0 to 90 degrees)',
+                                                    min_value=0.0, 
+                                                    max_value=90.0, 
+                                                    value=15.0,  # default value
+                                                    step=0.5)  # step size for increment/decrement
+
+            # Update session state for elevation mask
+            st.session_state.elevation_mask = elevation_mask
 
             # Update session state for selected svids
             st.session_state.selected_svids = svids_to_use
@@ -944,7 +991,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                 df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
-                st.session_state.plot_AV_data = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times)
+                print_once = 1
+                st.session_state.plot_AV_data = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times,st.session_state.elevation_mask )
                 
                 
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
