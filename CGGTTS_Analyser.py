@@ -687,10 +687,9 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs):
 
 
 
-
-def calculate_k(group):
-    sum_inv_cos2 = group['inv_cos2'].sum()
-    return 1 / sum_inv_cos2 if sum_inv_cos2 != 0 else float('inf')
+# def calculate_k(group):
+#     sum_inv_cos2 = group['sin2'].sum()
+#     return 1 / sum_inv_cos2 if sum_inv_cos2 != 0 else float('inf')
 
 
 
@@ -708,8 +707,8 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
         svids_to_use = [svid for svid in selected_svids if svid != 'ALL']
 
     # Calculate inverse cosine squared values
-    df1['inv_cos2'] = 1 / np.cos(np.radians(df1['ELV'] * 0.1))**2
-    df2['inv_cos2'] = 1 / np.cos(np.radians(df2['ELV'] * 0.1))**2
+    df1['sin2'] =  np.sin(np.radians(df1['ELV'] * 0.1))**2
+    df2['sin2'] =  np.sin(np.radians(df2['ELV'] * 0.1))**2
 
     if unique_MJD_times:
         AV_data = []
@@ -728,17 +727,36 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
 
 
             if not df1_filtered.empty and not df2_filtered.empty:
-                # Calculate k values
-                k1_value = df1_filtered.groupby('MJD').apply(calculate_k).iloc[0]
-                k2_value = df2_filtered.groupby('MJD').apply(calculate_k).iloc[0]
 
                 # Filter data based on selected satellites
                 condition1 = df1_filtered["SAT"].isin(svids_to_use)
                 condition2 = df2_filtered["SAT"].isin(svids_to_use)
 
+                # Calculate k values
+                k1_value = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
+                k2_value = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
+
+
                 if condition1.any() and condition2.any():
-                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'inv_cos2']).sum() * 0.1
-                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'inv_cos2']).sum() * 0.1
+                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'sin2']).sum() * 0.1
+                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'sin2']).sum() * 0.1
+
+
+                    res1 = df1_filtered['REFSYS'] - weighted_sum_df1
+                    std_df1 = np.sqrt(np.sum(res1**2)/len(res1))
+                    res2 = df2_filtered['REFSYS'] - weighted_sum_df2
+                    std_df2 = np.sqrt(np.sum(res2**2)/len(res2))
+
+
+
+                    df1_filtered = df1_filtered[np.abs(res1) <= 1.5 * std_df1]
+                    df2_filtered = df2_filtered[np.abs(res2) <= 1.5 * std_df2]
+
+                    k1_value = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
+                    k2_value = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
+
+                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'sin2']).sum() * 0.1
+                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'sin2']).sum() * 0.1
 
                     AV_diff_refsys = weighted_sum_df1 - weighted_sum_df2
                     new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys, 2) if AV_diff_refsys else None}
@@ -753,23 +771,23 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                 data = {
                     'SAT': df1_filtered['SAT'] ,
                     'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
-                    'Refsys': df1_filtered.loc[condition1, 'REFSYS'],
-                    'Elv': df1_filtered.loc[condition1, 'ELV'],
-                    'Sigma': std_df1,
-                    'K Value': [k1_value] * len(df1_filtered.loc[condition1]),
-                    'Inverse_cos_sqr': df1_filtered.loc[condition1, 'inv_cos2'],
-                    'product of all': df1_filtered.loc[condition1, 'REFSYS']*k1_value*df1_filtered.loc[condition1, 'inv_cos2']*0.1
+                    'Refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*0.1,
+                    'Elv': df1_filtered.loc[condition1, 'ELV']/10,
+                    'Std Dev': std_df1,
+                    'sine square': df1_filtered.loc[condition1, 'sin2'],
+                    'Weight': [k1_value] * df1_filtered.loc[condition1, 'sin2'],
+                    'Weighted refsys': df1_filtered.loc[condition1, 'REFSYS']*k1_value*df1_filtered.loc[condition1, 'sin2']*0.1
                 }
                 # Create a DataFrame
                 df_to_display = pd.DataFrame(data)
                 # Display the DataFrame as a table in Streamlit
                 st.table(df_to_display)
-                K_nd_Inverse_cos_sum = df_to_display['product of all'].sum()
+                K_nd_sine_sqr = df_to_display['Refsys*weight'].sum()
                 
-                st.write(f"Sum of the weighted refsys 01: {K_nd_Inverse_cos_sum}")
-                st.write(f"Weighted Sum data 01: {weighted_sum_df1}")
-                st.write(f"Weighted Sum data 02: {weighted_sum_df2}")
-                st.write(f"AV difference : {weighted_sum_df1 - weighted_sum_df2}")
+                st.write(f"Sum of the weights after normalisation at the above (1st) epoch: {round(sum([k1_value] * df1_filtered.loc[condition1, 'sin2']),2)}")
+                st.write(f"Sum of the weighted refsys of 1st data set at the above (1st) epoch: {round(weighted_sum_df1,2)}")
+                st.write(f"sum of the weighted refsys of 2nd data set at the above (1st) epoch: {round(weighted_sum_df2,2)}")
+                st.write(f"AV difference at the above (1st) epoch: {round(weighted_sum_df1 - weighted_sum_df2,2)}")
                 print_once = 2
                 # st.write(f"sum of the weights: {K_nd_Inverse_cos.sum()}")
 
@@ -779,6 +797,9 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
         st.error("Files don't belong to the same time period")
         return pd.DataFrame()
 
+
+df1_mjd = pd.DataFrame() 
+df2_mjd = pd.DataFrame()
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
     
