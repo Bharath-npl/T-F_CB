@@ -748,10 +748,10 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                 AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
 
              # Assuming unique_time, k1_value are single values and the others are series or similar
-            filtered_data = df1_filtered[condition1]
+            # filtered_data = df1_filtered[condition1]
             if print_once ==1:
                 data = {
-                    'SAT': filtered_data['SAT'] ,
+                    'SAT': df1_filtered['SAT'] ,
                     'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
                     'Refsys': df1_filtered.loc[condition1, 'REFSYS'],
                     'Elv': df1_filtered.loc[condition1, 'ELV'],
