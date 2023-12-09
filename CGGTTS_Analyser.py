@@ -660,7 +660,12 @@ if 'selected_svids' not in st.session_state:
 
 unique_SVIDs = []
 
-def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs):
+def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs,Elv_Mask):
+    
+      # Filter based on ELV values
+    df1 = df1[df1['ELV'] >= Elv_Mask*10]
+    df2 = df2[df2['ELV'] >= Elv_Mask*10]
+    
     # Ensure 'ALL' in selected_svids is handled correctly
     if 'ALL' in selected_svids:
         selected_svids = unique_SVIDs
@@ -705,7 +710,7 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
     # Remove 'ALL' if individual SV_ids are selected
     if len(selected_svids) < len(unique_SVIDs) + 1:
         svids_to_use = [svid for svid in selected_svids if svid != 'ALL']
-
+    
     # Calculate inverse cosine squared values
     df1['sin2'] =  np.sin(np.radians(df1['ELV'] * 0.1))**2
     df2['sin2'] =  np.sin(np.radians(df2['ELV'] * 0.1))**2
@@ -725,21 +730,21 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
             df1_filtered = df1_filtered[np.abs(df1_filtered['REFSYS'] - mean_df1) <= 1.5 * std_df1]
             df2_filtered = df2_filtered[np.abs(df2_filtered['REFSYS'] - mean_df2) <= 1.5 * std_df2]
 
-
             if not df1_filtered.empty and not df2_filtered.empty:
-
+                
                 # Filter data based on selected satellites
                 condition1 = df1_filtered["SAT"].isin(svids_to_use)
                 condition2 = df2_filtered["SAT"].isin(svids_to_use)
 
-                # Calculate k values
-                k1_value = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
-                k2_value = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
+                # Normalisation of weights values
+                Norm_weigth1 = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
+                Norm_weight2 = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
 
 
                 if condition1.any() and condition2.any():
-                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'sin2']).sum() * 0.1
-                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'sin2']).sum() * 0.1
+                    
+                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * Norm_weigth1 * df1_filtered.loc[condition1, 'sin2']).sum() * 0.1
+                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * Norm_weight2 * df2_filtered.loc[condition2, 'sin2']).sum() * 0.1
 
 
                     res1 = df1_filtered['REFSYS'] - weighted_sum_df1
@@ -748,15 +753,14 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                     std_df2 = np.sqrt(np.sum(res2**2)/len(res2))
 
 
-
                     df1_filtered = df1_filtered[np.abs(res1) <= 1.5 * std_df1]
                     df2_filtered = df2_filtered[np.abs(res2) <= 1.5 * std_df2]
 
-                    k1_value = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
-                    k2_value = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
+                    Norm_weigth1 = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
+                    Norm_weight2 = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
 
-                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * k1_value * df1_filtered.loc[condition1, 'sin2']).sum() * 0.1
-                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * k2_value * df2_filtered.loc[condition2, 'sin2']).sum() * 0.1
+                    weighted_sum_df1 = (df1_filtered.loc[condition1, 'REFSYS'] * Norm_weigth1 * df1_filtered.loc[condition1, 'sin2']).sum() * 0.1
+                    weighted_sum_df2 = (df2_filtered.loc[condition2, 'REFSYS'] * Norm_weight2 * df2_filtered.loc[condition2, 'sin2']).sum() * 0.1
 
                     AV_diff_refsys = weighted_sum_df1 - weighted_sum_df2
                     new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys, 2) if AV_diff_refsys else None}
@@ -769,25 +773,27 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
             # filtered_data = df1_filtered[condition1]
             if print_once ==1:
                 data = {
-                    'SAT': df1_filtered['SAT'] ,
+                    'SAT': df1_filtered.loc[condition1, 'SAT'],
                     'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
                     'Refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*0.1,
                     'Elv': df1_filtered.loc[condition1, 'ELV']/10,
-                    'Std Dev': std_df1,
-                    'sine square': df1_filtered.loc[condition1, 'sin2'],
-                    'Weight': [k1_value] * df1_filtered.loc[condition1, 'sin2'],
-                    'Weighted refsys': df1_filtered.loc[condition1, 'REFSYS']*k1_value*df1_filtered.loc[condition1, 'sin2']*0.1
+                    'Residual':  np.abs(df1_filtered.loc[condition1, 'REFSYS'] - mean_df1),  
+                    # 'sine square': df1_filtered.loc[condition1, 'sin2'],
+                    'Weight': [Norm_weigth1] * df1_filtered.loc[condition1, 'sin2'],
+                    'Weighted refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*Norm_weigth1*df1_filtered.loc[condition1, 'sin2']*0.1
                 }
                 # Create a DataFrame
+                # st.write(f"Length of the column : {condition1}")
                 df_to_display = pd.DataFrame(data)
-                # Display the DataFrame as a table in Streamlit
-                st.table(df_to_display)
-                K_nd_sine_sqr = df_to_display['Refsys*weight'].sum()
                 
-                st.write(f"Sum of the weights after normalisation at the above (1st) epoch: {round(sum([k1_value] * df1_filtered.loc[condition1, 'sin2']),2)}")
-                st.write(f"Sum of the weighted refsys of 1st data set at the above (1st) epoch: {round(weighted_sum_df1,2)}")
-                st.write(f"sum of the weighted refsys of 2nd data set at the above (1st) epoch: {round(weighted_sum_df2,2)}")
-                st.write(f"AV difference at the above (1st) epoch: {round(weighted_sum_df1 - weighted_sum_df2,2)}")
+                # Display the DataFrame as a table in Streamlit
+                st.write("Overview of All_in_View at FIRST epoch of 1st receiver")
+                st.table(df_to_display)
+                # Print the required caluclated infromatio in the screen                
+                # st.write(f"Sum of the weights after normalisation at the above (1st) epoch: {round(sum([Norm_weigth1] * df1_filtered.loc[condition1, 'sin2']),2)}")
+                # st.write(f"Sum of the weighted refsys of 1st data set at the above (1st) epoch: {round(weighted_sum_df1,2)}")
+                # st.write(f"sum of the weighted refsys of 2nd data set at the above (1st) epoch: {round(weighted_sum_df2,2)}")
+                # st.write(f"AV difference at the above (1st) epoch: {round(weighted_sum_df1 - weighted_sum_df2,2)}")
                 print_once = 2
                 # st.write(f"sum of the weights: {K_nd_Inverse_cos.sum()}")
 
@@ -876,7 +882,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             else:
                 svids_to_use = selected_svids
             
-            # Initialize selected_svids in session_state if not present
+            # Set the default elevation mask in session_state 
             if 'elevation_mask' not in st.session_state:
                 st.session_state.elevation_mask = 15.0
 
@@ -900,7 +906,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
                 selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
-                result_df, missing_sessions = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs)
+                result_df, missing_sessions = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
 
                 if not result_df.empty:
                     st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
@@ -1103,8 +1109,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
 # Add a spacer to push the contact info to the bottom
 st.sidebar.write("")  # This line adds some space
-st.sidebar.write("")  # Add as many as needed to push the content down
-st.sidebar.write("")   
+# st.sidebar.write("")  # Add as many as needed to push the content down
+# st.sidebar.write("")   
 
 # contact information at the bottom of the sidebar
 st.sidebar.markdown('---')  # Add a horizontal line for separation
