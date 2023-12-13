@@ -771,20 +771,20 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
 
              # Assuming unique_time, k1_value are single values and the others are series or similar
             # filtered_data = df1_filtered[condition1]
-            if print_once ==1:
-                data = {
-                    'SAT': df1_filtered.loc[condition1, 'SAT'],
-                    'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
-                    'Refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*0.1,
-                    'Elv': df1_filtered.loc[condition1, 'ELV']/10,
-                    'Residual':  np.abs(df1_filtered.loc[condition1, 'REFSYS'] - mean_df1),  
-                    # 'sine square': df1_filtered.loc[condition1, 'sin2'],
-                    'Weight': [Norm_weigth1] * df1_filtered.loc[condition1, 'sin2'],
-                    'Weighted refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*Norm_weigth1*df1_filtered.loc[condition1, 'sin2']*0.1
-                }
-                # Create a DataFrame
-                # st.write(f"Length of the column : {condition1}")
-                df_to_display = pd.DataFrame(data)
+            # if print_once ==1:
+            #     data = {
+            #         'SAT': df1_filtered.loc[condition1, 'SAT'],
+            #         'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
+            #         'Refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*0.1,
+            #         'Elv': df1_filtered.loc[condition1, 'ELV']/10,
+            #         'Residual':  np.abs(df1_filtered.loc[condition1, 'REFSYS'] - mean_df1),  
+            #         # 'sine square': df1_filtered.loc[condition1, 'sin2'],
+            #         'Weight': [Norm_weigth1] * df1_filtered.loc[condition1, 'sin2'],
+            #         'Weighted refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*Norm_weigth1*df1_filtered.loc[condition1, 'sin2']*0.1
+            #     }
+            #     # Create a DataFrame
+            #     # st.write(f"Length of the column : {condition1}")
+            #     df_to_display = pd.DataFrame(data)
                 
                 # Display the DataFrame as a table in Streamlit
                 st.write("Overview of All_in_View at FIRST epoch of 1st receiver")
