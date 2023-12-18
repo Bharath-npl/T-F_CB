@@ -43,6 +43,9 @@ def find_header_end(lines):
 
 df1_mjd=pd.DataFrame()
 Avg_refsys_CV = pd.DataFrame()
+Avg_refsys_Rx1 = pd.DataFrame()
+Avg_refsys_Rx2 = pd.DataFrame()
+
 
 combined_Colm_data_01 = pd.DataFrame()
 
@@ -73,13 +76,18 @@ def process_data1(files_01):
         for each_file in files_01:
             all_dataframes = []
             filename = each_file.name
-            st.write(f"File: {filename}")
-
             # Read uploaded file contents directly into memory
             file_content = each_file.read().decode()
 
             # Split the file into lines
             lines = file_content.split('\n')
+
+            # Check if the first line starts with CGGTTS or GGTTS
+            if not (lines[0].startswith("CGGTTS") or lines[0].startswith("GGTTS")):
+                st.error(f"File format not supported for file: {filename}")
+                continue  # Skip to the next file
+            
+            st.write(f"File: {filename}")
 
             data_after_head = []
             # Flag to indicate if we are currently inside a header block
@@ -97,6 +105,9 @@ def process_data1(files_01):
                 # Start of the header
                 if line.startswith("CGGTTS")or line.startswith("GGTTS"):
                     inside_header = True
+                
+                if line.startswith("REF=") or line.startswith("REF ="):
+                    Receiever1 = line.split('=')[1].strip()
 
                 # If we're not inside a header, process the line as data
                 elif not inside_header:
@@ -124,7 +135,8 @@ def process_data1(files_01):
                         'AZTH': line[29:33].strip(),
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
-                        'REFSYS': line[53:64].strip()
+                        'REFSYS': line[53:64].strip(),
+                        'REF': Receiever1
                                                 
                     }
 
@@ -170,6 +182,7 @@ def process_data1(files_01):
             df_01['SRSV'] = df_split['SRSV'].astype(float)
             df_01['REFSYS'] = df_split['REFSYS'].astype(float)
             df_01['FRC'] = df_split['FRC'].astype(str)
+            df_01['REF'] = df_split['REF'].astype(str)
             # unique_frc_values = df_split['FRC'].unique()
             # df_split['FRC'] = list(unique_frc_values)
 
@@ -204,6 +217,9 @@ if files_01:
     st.session_state['end_mjd_01'] = unique_mjd_int_values1[-1]
     st.session_state['unique_FRC1'] = unique_FRC1
     st.session_state['show_plot1'] = False  # Reset plot visibility
+    st.session_state['REF01'] = ', '.join(map(str, processed_data1['REF'].dropna().unique()))
+
+    
 
 
 def process_4_plot1(given_data1, start_mjd, end_mjd):
@@ -228,6 +244,54 @@ def process_4_plot1(given_data1, start_mjd, end_mjd):
     return filtered_df
 
 
+def create_csv_data_Rx1(starting_mjd, ending_mjd, selected_data, frequency1):
+    # Creating DataFrame for data section
+    # Format the 'MJD' column to have only 5 digits after the decimal
+    selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
+    
+    data_Rx1_df = pd.DataFrame({
+        'MJD': selected_data["MJD"],
+        'Refsys (ns)': selected_data['REFSYS']
+    })
+
+    # Creating header information
+    header_Rx1_info = (
+        f"#{st.session_state['REF01']} REFSYS data: Each point corresponds to average of all visible satellite REFSYS values at each epoch  \n"
+        f"#Start MJD: {starting_mjd}\n"
+        f"#End MJD: {ending_mjd}\n"
+        f"#Frequency: {frequency1}\n")
+
+    return header_Rx1_info, data_Rx1_df
+
+
+def create_csv_data_Rx2(starting_mjd, ending_mjd, selected_data, frequency2):
+    # Creating DataFrame for data section
+    # Format the 'MJD' column to have only 5 digits after the decimal
+    selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
+    
+    data_Rx2_df = pd.DataFrame({
+        'MJD': selected_data["MJD"],
+        'Refsys (ns)': selected_data['REFSYS']
+    })
+
+    # Creating header information
+    header_Rx2_info = (
+        f"#{st.session_state['REF02']} REFSYS data: Each point corresponds to average of all visible satellite REFSYS values at each epoch  \n"
+        f"#Start MJD: {starting_mjd}\n"
+        f"#End MJD: {ending_mjd}\n"
+        f"#Frequency: {frequency2}\n")
+
+    return header_Rx2_info, data_Rx2_df
+    
+
+# Function to convert header and DataFrame to CSV for download
+def convert_to_csv(header, df):
+    output = StringIO()
+    output.write(header)
+    df.to_csv(output,sep='\t', index=False, header=True)
+    return output.getvalue()
+
+
 
 def plot_data1(frequency1):
     # Filter the MJD-filtered data based on the frequency
@@ -237,40 +301,59 @@ def plot_data1(frequency1):
     
 
     if not df1_data_filtered.empty:
-        Avg_refsys_CV = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
-        Avg_refsys_CV["REFSYS"] = (Avg_refsys_CV["REFSYS"]*0.1).round(2)
-        mean_value = (Avg_refsys_CV["REFSYS"].mean())
+        Avg_refsys_Rx1 = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_Rx1["REFSYS"] = (Avg_refsys_Rx1["REFSYS"]*0.1).round(2)
+        Data01_stdev = Avg_refsys_Rx1["REFSYS"].std()
 
-        # st.markdown(f"## Receiver 1 Average REFSYS: {frequency1}")
-
+        # Select the start and end MJD from the user selection 
+        min_Rx1 = math.floor(min(Avg_refsys_Rx1["MJD"]))
+        max_Rx1 = math.ceil(max(Avg_refsys_Rx1["MJD"]))
+        
         # Create a scatter plot with Plotly
         fig = go.Figure()
 
         # Add scatter plot of data points
         fig.add_trace(go.Scatter(
-            x=Avg_refsys_CV["MJD"], 
-            y=Avg_refsys_CV["REFSYS"], 
+            x=Avg_refsys_Rx1["MJD"], 
+            y=Avg_refsys_Rx1["REFSYS"], 
             mode='markers',
             name='REFSYS'
         ))
 
-        # Add a dashed mean line
-        fig.add_hline(y=mean_value, line_dash="dash", line_color="red",
-                    annotation_text=f"Mean: {mean_value:.2f}", 
-                    annotation_position="bottom right",
-                     annotation_font=dict(size=18, color="black"))
+        # Add a standard deviation annotation to the plot 
+        fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {Data01_stdev:.2f} ns",
+        showarrow=False, font=dict(size=18, color="black"),
+        xanchor='right', yanchor='top')
 
         # Update layout for better presentation
+
         fig.update_layout(
-            title=f"Receiver 1 Average REFSYS: {frequency1}",
+            title=f"REFSYS ({st.session_state['REF01']} - GNSS(time)) : [Each point correponds to Average of all satellite refsys per epoch]",
             xaxis_title="MJD",
-            yaxis_title="REFSYS",
+            yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
             xaxis =dict(tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
-
+        fig.update_xaxes(tickformat="05d")
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
+
+        # Create the CSV header and data
+        headerRx1, data_dfRx1 = create_csv_data_Rx1(min_Rx1, max_Rx1, Avg_refsys_Rx1,
+                                        st.session_state.selected_frequency1)
+ 
+        
+        csv_Rx1 = convert_to_csv(headerRx1, data_dfRx1)
+                
+        # Create a download button
+        # csv = convert_Rx1_to_csv(Avg_refsys_Rx1)
+        st.download_button(
+            label="Download REFSYS data",
+            data=csv_Rx1,
+            file_name='Refsys01.csv',
+            mime='text/csv',
+        )
+
 
     else:
         st.error("Selected frequency data is not available in the selected MJD range ")
@@ -325,6 +408,7 @@ with st.form("my-form2", clear_on_submit=True):
 
 Required_Colm_data_02 = []
 
+
 def process_data2(files_02):
     if files_02:
         col3.empty()
@@ -340,13 +424,20 @@ def process_data2(files_02):
         for each_file in files_02:
             all_dataframes = []
             filename = each_file.name
-            st.write(f"File: {filename}")
 
             # Read uploaded file contents directly into memory
             file_content = each_file.read().decode()
 
             # Split the file into lines
             lines = file_content.split('\n')
+
+            # Check if the first line starts with CGGTTS or GGTTS
+            if not (lines[0].startswith("CGGTTS") or lines[0].startswith("GGTTS")):
+                st.error(f"File format not supported for file: {filename}")
+                continue  # Skip to the next file
+            
+            st.write(f"File: {filename}")
+
 
             data_after_head = []
             # Flag to indicate if we are currently inside a header block
@@ -355,15 +446,19 @@ def process_data2(files_02):
             frc_is_at =None
 
             for line in lines:
+                               
+                # Start of the header
+                if line.startswith("CGGTTS")or line.startswith("GGTTS"):
+                    inside_header = True
+                    
                 # Find the position of the FRC in the line 
                 if "hhmmss  s  .1dg .1dg    .1ns" in line and prev_line:
                     frc_position = prev_line.find('FRC')
                     if frc_position != -1:
                         frc_is_at = frc_position
-                
-                # Start of the header
-                if line.startswith("CGGTTS")or line.startswith("GGTTS"):
-                    inside_header = True
+
+                if line.startswith("REF=") or line.startswith("REF ="):
+                    Receiever2 = line.split('=')[1].strip()
 
                 # If we're not inside a header, process the line as data
                 elif not inside_header:
@@ -390,7 +485,8 @@ def process_data2(files_02):
                         'AZTH': line[29:33].strip(),
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
-                        'REFSYS': line[53:64].strip()}
+                        'REFSYS': line[53:64].strip(),
+                        'REF': Receiever2}
                     
                     # Use the 'FRC' position if found
                     if frc_is_at is not None and len(line) > frc_is_at + 2:
@@ -463,6 +559,7 @@ if files_02:
     st.session_state['end_mjd_02'] = unique_mjd_int_values2[-1]
     st.session_state['unique_FRC2'] = unique_FRC2
     st.session_state['show_plot2'] = False  # Reset plot visibility
+    st.session_state['REF02'] = ', '.join(map(str, processed_data2['REF'].dropna().unique()))
 
 
 def process_4_plot2(given_data2, start_mjd, end_mjd):
@@ -495,39 +592,58 @@ def plot_data(frequency2):
 
     #     st.line_chart(Avg_refsys_CV.set_index("MJD")[["REFSYS", "Avg"]])
     if not df2_data_filtered.empty:
-        Avg_refsys_CV = (df2_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
-        Avg_refsys_CV["REFSYS"] = (Avg_refsys_CV["REFSYS"]*0.1).round(2)
-        mean_value = Avg_refsys_CV["REFSYS"].mean()
+        Avg_refsys_Rx2 = (df2_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_Rx2["REFSYS"] = (Avg_refsys_Rx2["REFSYS"]*0.1).round(2)
+        Data02_stdev = Avg_refsys_Rx2["REFSYS"].std()
 
         # st.markdown(f"## Receiver 2 Average REFSYS: {frequency2}")
+        # Select the start and end MJD from the user selection 
+        min_Rx2 = math.floor(min(Avg_refsys_Rx2["MJD"]))
+        max_Rx2 = math.ceil(max(Avg_refsys_Rx2["MJD"]))
 
         # Create a scatter plot with Plotly
         fig = go.Figure()
 
         # Add scatter plot of data points
         fig.add_trace(go.Scatter(
-            x=Avg_refsys_CV["MJD"], 
-            y=Avg_refsys_CV["REFSYS"], 
+            x=Avg_refsys_Rx2["MJD"], 
+            y=Avg_refsys_Rx2["REFSYS"], 
             mode='markers',
             name='REFSYS'
         ))
 
-        # Add a dashed mean line
-        fig.add_hline(y=mean_value, line_dash="dash", line_color="red",
-                    annotation_text=f"Mean: {mean_value:.2f}", 
-                    annotation_position="bottom right",
-                     annotation_font=dict(size=18, color="black"))
+        # Add a standard deviation annotation to the plot 
+        fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {Data02_stdev:.2f} ns",
+        showarrow=False, font=dict(size=18, color="black"),
+        xanchor='right', yanchor='top')
 
         # Update layout for better presentation
         fig.update_layout(
-            title=f"Receiver 2 Average REFSYS: {frequency2}",
+            title=f"REFSYS ({st.session_state['REF02']} - GNSS(time)) : [Each point correponds to Average of all satellite refsys per epoch]",
             xaxis_title="MJD",
-            yaxis_title="REFSYS",
+            yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
             xaxis =dict(tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
+        fig.update_xaxes(tickformat="05d")
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
+
+        # Create the CSV header and data
+        headerRx2, data_dfRx2 = create_csv_data_Rx2(min_Rx2, max_Rx2, Avg_refsys_Rx2,
+                                        st.session_state.selected_frequency2)
+ 
+        
+        csv_Rx2 = convert_to_csv(headerRx2, data_dfRx2)
+                
+        # Create a download button
+        # csv = convert_Rx1_to_csv(Avg_refsys_Rx1)
+        st.download_button(
+            label="Download REFSYS data",
+            data=csv_Rx2,
+            file_name='Refsys02.csv',
+            mime='text/csv',
+        )
 
     else:
         st.error("No valid frequencies available to process the data")
@@ -566,55 +682,50 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
     
 
 # Function to create the DataFrame for CSV
-def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, selected_data):
+def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, Elv_mask, selected_data):
     # Creating DataFrame for data section
     # x=df3_filtered["MJD_time"], 
     #                 y=df3_filtered["CV_avg_diff"]
-    selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
+    selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
     data_df = pd.DataFrame({
-        'MJD': selected_data["MJD_time"],
-        'CV_difference (ns)': selected_data['CV_avg_diff']
+        'MJD': selected_data["MJD"],
+        'CV_difference (ns)': selected_data['CV_avg_diff'].round(2)
     })
 
     # Creating header information
     header_CV_info = (
-        f"Common View Time Transfer Link Performance \n"
-        f"Start MJD: {starting_mjd}\n"
-        f"End MJD: {ending_mjd}\n"
-        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
-        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
-        f"Selected satellites for time transfer: {', '.join(SVids)}\n"
+        f"#Common View Time Transfer Link Performance \n"
+        f"#Start MJD: {starting_mjd}\n"
+        f"#End MJD: {ending_mjd}\n"
+        f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"#Elevation mask applied: {Elv_mask} degrees\n"
+        f"#Selected satellites for time transfer: {', '.join(sorted(SVids))}\n"
     )
 
     return header_CV_info, data_df
 
-# Function to convert header and DataFrame to CSV for download
-def convert_to_csv(header, df):
-    output = StringIO()
-    output.write(header)
-    df.to_csv(output,sep='\t', index=False, header=True)
-    return output.getvalue()
-
 
 # Function to create the DataFrame for CSV
-def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, selected_data):
+def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, Elv_mask, selected_data):
     # Creating DataFrame for data section
     # Format the 'MJD' column to have only 5 digits after the decimal
     selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
     
     data_AV_df = pd.DataFrame({
         'MJD': selected_data["MJD_time"],
-        'AV_difference (ns)': selected_data['AV_diff']
+        'AV_difference (ns)': selected_data['AV_diff'].round(2)
     })
 
     # Creating header information
     header_AV_info = (
-        f"ALL in View Time Transfer Link Performance \n"
-        f"Start MJD: {starting_mjd}\n"
-        f"End MJD: {ending_mjd}\n"
-        f"Frequency selected for comparision in receiver 1: {frequency1}\n"
-        f"Frequency selected for comparision in receiver 2: {frequency2}\n"
-        f"Selected Satellites for time transfer: {', '.join(SVids)}\n"
+        f"#All-in-View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] \n"
+        f"#Start MJD: {starting_mjd}\n"
+        f"#End MJD: {ending_mjd}\n"
+        f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"#Elevation mask applied: {Elv_mask} degrees\n"
+        f"#Selected Satellites for time transfer: {', '.join(SVids)}\n"
     )
 
     return header_AV_info, data_AV_df
@@ -631,17 +742,16 @@ st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200
 
 st.sidebar.header("Time & Frequency Capacity Building")
 
-st.sidebar.header("Pricipals of CV & AV time transfer")
-plot_CV = st.sidebar.button("PDF material", key= 'Material')
+st.sidebar.header("Principals of CV & AV time transfer")
+plot_CV = st.sidebar.button("PDF or PPT", key= 'Material')
 
-st.sidebar.header("Common View Performance")
-plot_CV = st.sidebar.button("Plot CV", key= 'Common_view')
+st.sidebar.header("Common-View Analysis")
+plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
 # plot_button = st.sidebar.button("CV Performance", key=5)
 
-st.sidebar.header("All in View Performance")
-plot_AV = st.sidebar.button("Plot AV", key= 'All_in_view')
+st.sidebar.header("All-in-View Analysis")
+plot_AV = st.sidebar.button("Plot All-in-View", key= 'All_in_view')
 # plot_button = st.sidebar.button("CV Performance", key=5)
-
 
 
 df3 = pd.DataFrame(columns=['MJD_time', 'CV_avg_diff'])
@@ -663,8 +773,8 @@ unique_SVIDs = []
 def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs,Elv_Mask):
     
       # Filter based on ELV values
-    df1 = df1[df1['ELV'] >= Elv_Mask*10]
-    df2 = df2[df2['ELV'] >= Elv_Mask*10]
+    df1 = df1[df1['ELV'] >= (Elv_Mask*10)]
+    df2 = df2[df2['ELV'] >= (Elv_Mask*10)]
     
     # Ensure 'ALL' in selected_svids is handled correctly
     if 'ALL' in selected_svids:
@@ -689,12 +799,6 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs,Elv
     missing_session = list(set(unique_MJD_times) - set(result['MJD']))
 
     return result, missing_session
-
-
-
-# def calculate_k(group):
-#     sum_inv_cos2 = group['sin2'].sum()
-#     return 1 / sum_inv_cos2 if sum_inv_cos2 != 0 else float('inf')
 
 
 
@@ -765,37 +869,44 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                     AV_diff_refsys = weighted_sum_df1 - weighted_sum_df2
                     new_row = {'MJD_time': unique_time, 'AV_diff': round(AV_diff_refsys, 2) if AV_diff_refsys else None}
                     AV_data.append(new_row)
+                    
+                    # Start of the code for printnting the first epoch of AV
+                    #**********************************************
+                    # if print_once ==1:
+                    #     data = {
+                    #         'SAT': df1_filtered.loc[condition1, 'SAT'],
+                    #         'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
+                    #         'Refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*0.1,
+                    #         'Elv': df1_filtered.loc[condition1, 'ELV']/10,
+                    #         'Residual':  np.abs(df1_filtered.loc[condition1, 'REFSYS'] - mean_df1),  
+                    #         # 'sine square': df1_filtered.loc[condition1, 'sin2'],
+                    #         'Weight': [Norm_weigth1] * df1_filtered.loc[condition1, 'sin2'],
+                    #         'Weighted refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*Norm_weigth1*df1_filtered.loc[condition1, 'sin2']*0.1
+                    #     }
+
+                    #     # Create a DataFrame
+                    #     # st.write(f"Length of the column : {condition1}")
+                    #     df_to_display = pd.DataFrame(data)
+                    #     # Display the DataFrame as a table in Streamlit
+                    #     st.write("Overview of All_in_View at FIRST epoch of 1st receiver")
+                    #     st.table(df_to_display)
+                    #     print_once = 2
+                    #**************************************
+                    # End of the code for printing the first epoch of AV
+
             else:
                 # Handle the case when one of the filtered DataFrames is empty
                 AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
 
-             # Assuming unique_time, k1_value are single values and the others are series or similar
-            # filtered_data = df1_filtered[condition1]
-            if print_once ==1:
-                data = {
-                    'SAT': df1_filtered.loc[condition1, 'SAT'],
-                    'MJD': [unique_time] * len(df1_filtered.loc[condition1]),
-                    'Refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*0.1,
-                    'Elv': df1_filtered.loc[condition1, 'ELV']/10,
-                    'Residual':  np.abs(df1_filtered.loc[condition1, 'REFSYS'] - mean_df1),  
-                    # 'sine square': df1_filtered.loc[condition1, 'sin2'],
-                    'Weight': [Norm_weigth1] * df1_filtered.loc[condition1, 'sin2'],
-                    'Weighted refsys (ns)': df1_filtered.loc[condition1, 'REFSYS']*Norm_weigth1*df1_filtered.loc[condition1, 'sin2']*0.1
-                }
-                # Create a DataFrame
-                # st.write(f"Length of the column : {condition1}")
-                df_to_display = pd.DataFrame(data)
-                
-                # Display the DataFrame as a table in Streamlit
-                st.write("Overview of All_in_View at FIRST epoch of 1st receiver")
-                st.table(df_to_display)
-                # Print the required caluclated infromatio in the screen                
-                # st.write(f"Sum of the weights after normalisation at the above (1st) epoch: {round(sum([Norm_weigth1] * df1_filtered.loc[condition1, 'sin2']),2)}")
-                # st.write(f"Sum of the weighted refsys of 1st data set at the above (1st) epoch: {round(weighted_sum_df1,2)}")
-                # st.write(f"sum of the weighted refsys of 2nd data set at the above (1st) epoch: {round(weighted_sum_df2,2)}")
-                # st.write(f"AV difference at the above (1st) epoch: {round(weighted_sum_df1 - weighted_sum_df2,2)}")
-                print_once = 2
-                # st.write(f"sum of the weights: {K_nd_Inverse_cos.sum()}")
+                               
+            # Print the required caluclated infromatio in the screen
+                            
+            # st.write(f"Sum of the weights after normalisation at the above (1st) epoch: {round(sum([Norm_weigth1] * df1_filtered.loc[condition1, 'sin2']),2)}")
+            # st.write(f"Sum of the weighted refsys of 1st data set at the above (1st) epoch: {round(weighted_sum_df1,2)}")
+            # st.write(f"sum of the weighted refsys of 2nd data set at the above (1st) epoch: {round(weighted_sum_df2,2)}")
+            # st.write(f"AV difference at the above (1st) epoch: {round(weighted_sum_df1 - weighted_sum_df2,2)}")
+            
+            # st.write(f"sum of the weights: {K_nd_Inverse_cos.sum()}")
 
 
         return pd.DataFrame(AV_data, columns=['MJD_time', 'AV_diff'])
@@ -804,11 +915,15 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
         return pd.DataFrame()
 
 
-df1_mjd = pd.DataFrame() 
-df2_mjd = pd.DataFrame()
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
     
+    if 'df1_mjd' not in st.session_state:
+        st.session_state.df1_mjd = pd.DataFrame() 
+
+    if 'df2_mjd' not in st.session_state:
+        st.session_state.df2_mjd = pd.DataFrame()
+
     st.session_state.df1_mjd = st.session_state.sel_MJD_FRC_01
     st.session_state.df2_mjd = st.session_state.sel_MJD_FRC_02
     # st.write("Hello world")
@@ -822,13 +937,17 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
         
         unique_SVIDs = []
         unique_MJD_times = sorted(set(st.session_state.df1_mjd["MJD"]).union(set(st.session_state.df2_mjd["MJD"])))
-        
+        Common_MJD_times = sorted(set(st.session_state.df1_mjd["MJD"]).intersection(set(st.session_state.df2_mjd["MJD"])))
+
         all_common_svids = set()
         df1_mjd_01 =[]
         df2_mjd_02 =[]
         missing_session =[]
         filtered_data01 = pd.DataFrame()
         filtered_data02 = pd.DataFrame()
+        st.session_state.df3_filtered = pd.DataFrame()
+        st.session_state.df4_filtered = pd.DataFrame()
+
 
         for mjd_time in unique_MJD_times:
             # Filter dataframes for the current mjd_time
@@ -841,11 +960,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             # common_svids = set(df1_mjd_01["SAT"]) & set(df2_mjd_02["SAT"]) 
 
             all_svids = set(df1_mjd_01["SAT"]).union( set(df2_mjd_02["SAT"]))
-
-           
+          
             all_common_svids.update(all_svids)
-
-
             
          # Store the accumulated data in the session state
         st.session_state.df1_mjd_01 = filtered_data01
@@ -869,6 +985,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             if 'selected_svids' not in st.session_state:
                 st.session_state.selected_svids = ['ALL']
 
+            st.sidebar.markdown('---')  # Add a horizontal line for separation
+            st.sidebar.header("Filters for CV & AV analysis")
             selected_svids = st.sidebar.multiselect(
                 "Choose Satellites (PRN's)",
                 options=['ALL'] + list(unique_SVIDs),
@@ -911,13 +1029,16 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 if not result_df.empty:
                     st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
                 else:
-                    st.write("No data available for plotting.")               
+                    st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code frequency selection ")               
                 
-            # if  not st.session_state.plot_data.empty:
-            # Plotting 
-            
+                # if  not st.session_state.plot_data.empty:
+                # Plotting 
+                
             if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty:
                 df3 = st.session_state.plot_CV_data
+                st.markdown('---')  # Add a horizontal line for separation
+                if st.session_state.selected_frequency1 != st.session_state.selected_frequency2:
+                    st.error("Caution: The selected frequenices are different")
 
                 # User inputs for the y-axis range
                 col1, col2 = st.columns(2)
@@ -928,9 +1049,9 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Filter the data based on user selection and calculate mean
                 df3_filtered = df3[(df3["CV_avg_diff"] >= user_start_y) & (df3["CV_avg_diff"] <= user_end_y)]
-                user_mean_val = df3_filtered["CV_avg_diff"].mean()
+                std_dev = df3_filtered["CV_avg_diff"].std()
 
-                              
+                            
                 # Set x-axis range and filter rows of the dataframe
                 min_mjd_time = df3["MJD"].dropna().min()
                 max_mjd_time = df3["MJD"].dropna().max()
@@ -946,7 +1067,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 else:
                 # Create scatter plot
                     fig = go.Figure()
-                              
+                            
                     # Add scatter plot of data points
                     fig.add_trace(go.Scatter(
                         x=df3_filtered["MJD"], 
@@ -955,18 +1076,17 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         name='CV_avg_diff',
                         marker=dict(size=10)  # Increase marker size
                     ))
-    
-                    # Add a thicker horizontal line for the mean
-                    fig.add_hline(y=user_mean_val, line_dash="dash", line_color="red", line_width=3,
-                                annotation_text=f"Mean: {user_mean_val:.2f} ns", 
-                                annotation_position="top right",
-                                annotation_font=dict(size=18, color="black"))
-    
+        
+                    # Add a standard deviation annotation to the plot 
+                    fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
+                    showarrow=False, font=dict(size=18, color="black"),
+                    xanchor='right', yanchor='top')
+
                     # Set plot titles and labels with increased font size and black color
                     fig.update_layout(
-                        title=f"CV performance (MJD: {min_x} - {max_x-1})",
+                        title=f"Common- View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
                         title_font=dict(size=20, color="black"),
-                        xaxis_title="MJD time",
+                        xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
                         yaxis_title="Time difference (ns)",
                         yaxis_title_font=dict(size=16, color="black"),
@@ -986,27 +1106,27 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         width=800,
                         height=600
                     )
-    
+                    fig.update_xaxes(tickformat="05d")
                     # Display the plot
                     st.plotly_chart(fig, use_container_width=True)
                 
                 # Data file processing 
                                 
-                if st.sidebar.button('Get CV file of this data'): 
+                # if st.sidebar.button('Get CV file of this data'): 
                     # Create the CSV data
                     # Create the CSV header and data
                     header, data_df = create_csv_data_CV(min_x, max_x-1, 
                                                     st.session_state.selected_svids, st.session_state.selected_frequency1,
-                                                    st.session_state.selected_frequency2, df3_filtered)
+                                                    st.session_state.selected_frequency2,st.session_state.elevation_mask, df3_filtered)
 
                     # Convert to CSV
-                    csv = convert_to_csv(header, data_df)
+                    csv_CV = convert_to_csv(header, data_df)
 
                     # Create download button
-                    st.sidebar.download_button(
+                    st.download_button(
                         label="Download CV data",
-                        data=csv,
-                        file_name="common_view_performance.csv",
+                        data=csv_CV,
+                        file_name="Common_View_data.csv",
                         mime="text/csv",
                     )
                         
@@ -1019,9 +1139,13 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                 df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
                 print_once = 1
-                st.session_state.plot_AV_data = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times,st.session_state.elevation_mask )
+                result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times,st.session_state.elevation_mask )
                 
-                
+                if not result_df02.empty:
+                    st.session_state.plot_AV_data = result_df02
+                else:
+                    st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
+            
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
                 df4 = st.session_state.plot_AV_data
 
@@ -1034,7 +1158,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Filter the data based on user selection and calculate mean
                 df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
-                user_mean_val = df4_filtered["AV_diff"].mean()
+                
+                std_dev = df4_filtered["AV_diff"].std()
 
                 # Set x-axis range
                 min_x = math.floor(min(df4["MJD_time"]))
@@ -1052,17 +1177,16 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     marker=dict(size=10)  # Increase marker size
                 ))
 
-                # Add a thicker horizontal line for the mean and customize annotation text
-                fig.add_hline(y=user_mean_val, line_dash="dash", line_color="red", line_width=3,
-                            annotation_text=f"Mean: {user_mean_val:.2f} ns", 
-                            annotation_position="top right",
-                            annotation_font=dict(size=16, color="black"))
+                # Add a standard deviation annotation to the plot 
+                fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
+                showarrow=False, font=dict(size=18, color="black"),
+                xanchor='right', yanchor='top')
 
                 # Set plot titles and labels with increased font size and black color
                 fig.update_layout(
-                    title=f"AV performance ( MJD: {min_x} - {max_x-1}))",
+                    title=f"All-in-View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
                     title_font=dict(size=20, color="black"),
-                    xaxis_title="MJD time",
+                    xaxis_title="MJD",
                     xaxis_title_font=dict(size=16, color="black"),
                     yaxis_title="Time difference (ns)",
                     yaxis_title_font=dict(size=16, color="black"),
@@ -1081,32 +1205,32 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     width=800,
                     height=600
                 )
-
+                fig.update_xaxes(tickformat="05d")
                 # Display the plot
                 st.plotly_chart(fig, use_container_width=True)
-
-                               
-                if st.sidebar.button('Get AV file of this data'): 
+                            
+                # if st.sidebar.button('Get AV file of this data') : 
                     # Create the CSV data
                     # Create the CSV header and data
-                    header, data_df = create_csv_data_AV(min_x, max_x-1, 
-                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
-                                                    st.session_state.selected_frequency2, df4_filtered)
+                header, data_df = create_csv_data_AV(min_x, max_x-1, 
+                                                st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                st.session_state.selected_frequency2, st.session_state.elevation_mask , df4_filtered)
 
-                    # Convert to CSV
-                    csv_AV = convert_to_csv(header, data_df)
+                # Convert to CSV
+                csv_AV = convert_to_csv(header, data_df)
 
-                    # Create download button
-                    st.sidebar.download_button(
-                        label="Download AV result",
-                        data=csv_AV,
-                        file_name="All_in_view_result.csv",
-                        mime="text/csv",
-                    )
+                # Create download button
+                st.download_button(
+                    label="Download AV data",
+                    data=csv_AV,
+                    file_name="All_in_view_data.csv",
+                    mime="text/csv",
+                )
 
     else:
-        st.error("No overlap of selected data to work up on")
-
+        st.error("One of the session data is not available. Either frequency or MJD is not selected properly")
+# else: 
+#     st.error("Only one data set is available, cannot process either CV or AV analysis")
 # Add a spacer to push the contact info to the bottom
 st.sidebar.write("")  # This line adds some space
 # st.sidebar.write("")  # Add as many as needed to push the content down
