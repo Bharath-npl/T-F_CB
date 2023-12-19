@@ -105,9 +105,17 @@ def process_data1(files_01):
                 # Start of the header
                 if line.startswith("CGGTTS")or line.startswith("GGTTS"):
                     inside_header = True
+                    if "=" in line:
+                        Rx1_version = line.split('=')[1].strip()
+                        # Do something with Rx1_version
+                    else:
+                        print("Problem in reading CGGTTS version, please add '=' before version number as per standard format")
                 
                 if line.startswith("REF=") or line.startswith("REF ="):
                     Receiever1 = line.split('=')[1].strip()
+                
+                if line.startswith("LAB=") or line.startswith("LAB ="):
+                    LAB = line.split('=')[1].strip()
 
                 # If we're not inside a header, process the line as data
                 elif not inside_header:
@@ -136,8 +144,9 @@ def process_data1(files_01):
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
                         'REFSYS': line[53:64].strip(),
-                        'REF': Receiever1
-                                                
+                        'REF': Receiever1,
+                        'Version':Rx1_version,
+                        'LAB': LAB                                                
                     }
 
                     # Use the 'FRC' position if found
@@ -183,6 +192,8 @@ def process_data1(files_01):
             df_01['REFSYS'] = df_split['REFSYS'].astype(float)
             df_01['FRC'] = df_split['FRC'].astype(str)
             df_01['REF'] = df_split['REF'].astype(str)
+            df_01['Version'] = df_split['Version'].astype(str)
+            df_01['LAB'] = df_split['LAB'].astype(str)
             # unique_frc_values = df_split['FRC'].unique()
             # df_split['FRC'] = list(unique_frc_values)
 
@@ -218,10 +229,9 @@ if files_01:
     st.session_state['unique_FRC1'] = unique_FRC1
     st.session_state['show_plot1'] = False  # Reset plot visibility
     st.session_state['REF01'] = ', '.join(map(str, processed_data1['REF'].dropna().unique()))
+    st.session_state['LAB1'] = ' '.join(map(str, processed_data1['LAB'].dropna().unique()))
 
     
-
-
 def process_4_plot1(given_data1, start_mjd, end_mjd):
     # Ensure MJD values are of the correct type for comparison
     given_data1["MJD"] = pd.to_numeric(given_data1["MJD"], errors='coerce')
@@ -256,10 +266,12 @@ def create_csv_data_Rx1(starting_mjd, ending_mjd, selected_data, frequency1):
 
     # Creating header information
     header_Rx1_info = (
-        f"#{st.session_state['REF01']} REFSYS data: Each point corresponds to average of all visible satellite REFSYS values at each epoch  \n"
-        f"#Start MJD: {starting_mjd}\n"
-        f"#End MJD: {ending_mjd}\n"
-        f"#Frequency: {frequency1}\n")
+        f"# {st.session_state['REF01']} REFSYS data: Each point corresponds to average of all visible satellite REFSYS values at each epoch  \n"
+        f"# Start MJD: {starting_mjd}\n"
+        f"# End MJD: {ending_mjd}\n"
+        f"# Frequency: {frequency1}\n"
+        f"# Lab:{st.session_state['LAB1']}\n")
+                
 
     return header_Rx1_info, data_Rx1_df
 
@@ -276,10 +288,11 @@ def create_csv_data_Rx2(starting_mjd, ending_mjd, selected_data, frequency2):
 
     # Creating header information
     header_Rx2_info = (
-        f"#{st.session_state['REF02']} REFSYS data: Each point corresponds to average of all visible satellite REFSYS values at each epoch  \n"
-        f"#Start MJD: {starting_mjd}\n"
-        f"#End MJD: {ending_mjd}\n"
-        f"#Frequency: {frequency2}\n")
+        f"# {st.session_state['REF02']} REFSYS data: Each point corresponds to average of all visible satellite REFSYS values at each epoch  \n"
+        f"# Start MJD: {starting_mjd}\n"
+        f"# End MJD: {ending_mjd}\n"
+        f"# Frequency: {frequency2}\n"
+        f"# Lab:{st.session_state['LAB2']}\n")
 
     return header_Rx2_info, data_Rx2_df
     
@@ -328,7 +341,7 @@ def plot_data1(frequency1):
         # Update layout for better presentation
 
         fig.update_layout(
-            title=f"REFSYS ({st.session_state['REF01']} - GNSS(time)) : [Each point correponds to Average of all satellite refsys per epoch]",
+            title=f"{st.session_state['REF01']} - GNSS(time) at Lab: {st.session_state['LAB1']} through {st.session_state.selected_frequency1}. (Each point correponds to Average of all satellite refsys per epoch)",
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
@@ -450,6 +463,11 @@ def process_data2(files_02):
                 # Start of the header
                 if line.startswith("CGGTTS")or line.startswith("GGTTS"):
                     inside_header = True
+                    if "=" in line:
+                        Rx2_version = line.split('=')[1].strip()
+                        # Do something with Rx1_version
+                    else:
+                        print("Problem in reading CGGTTS version, please add '=' before version number as per standard format")
                     
                 # Find the position of the FRC in the line 
                 if "hhmmss  s  .1dg .1dg    .1ns" in line and prev_line:
@@ -459,6 +477,9 @@ def process_data2(files_02):
 
                 if line.startswith("REF=") or line.startswith("REF ="):
                     Receiever2 = line.split('=')[1].strip()
+
+                if line.startswith("LAB=") or line.startswith("LAB ="):
+                    LAB = line.split('=')[1].strip()
 
                 # If we're not inside a header, process the line as data
                 elif not inside_header:
@@ -486,7 +507,9 @@ def process_data2(files_02):
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
                         'REFSYS': line[53:64].strip(),
-                        'REF': Receiever2}
+                        'REF': Receiever2,
+                        'Version':Rx1_version, 
+                        'LAB': LAB}
                     
                     # Use the 'FRC' position if found
                     if frc_is_at is not None and len(line) > frc_is_at + 2:
@@ -529,6 +552,8 @@ def process_data2(files_02):
             df_02['SRSV'] = df_split['SRSV'].astype(float)
             df_02['REFSYS'] = df_split['REFSYS'].astype(float)
             df_02['FRC'] = df_split['FRC'].astype(str)
+            df_02['Version'] = df_split['Version'].astype(str)
+            df_02['LAB'] = df_split['LAB'].astype(str)
             # unique_frc_values = df_split['FRC'].unique()
             # df_split['FRC'] = list(unique_frc_values)
 
@@ -560,6 +585,7 @@ if files_02:
     st.session_state['unique_FRC2'] = unique_FRC2
     st.session_state['show_plot2'] = False  # Reset plot visibility
     st.session_state['REF02'] = ', '.join(map(str, processed_data2['REF'].dropna().unique()))
+    st.session_state['LAB2'] = ' '.join(map(str, processed_data2['LAB'].dropna().unique()))
 
 
 def process_4_plot2(given_data2, start_mjd, end_mjd):
@@ -584,7 +610,7 @@ def process_4_plot2(given_data2, start_mjd, end_mjd):
     return filtered_df
 
 
-def plot_data(frequency2):
+def plot_data2(frequency2):
     # Filter the MJD-filtered data based on the frequency
     df2_data_filtered = st.session_state['sel_MJD_df_02'][st.session_state['sel_MJD_df_02']['FRC'] == frequency2]
     st.session_state["sel_MJD_FRC_02"] = df2_data_filtered
@@ -619,7 +645,7 @@ def plot_data(frequency2):
 
         # Update layout for better presentation
         fig.update_layout(
-            title=f"REFSYS ({st.session_state['REF02']} - GNSS(time)) : [Each point correponds to Average of all satellite refsys per epoch]",
+            title=f"{st.session_state['REF02']} - GNSS(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Average of all satellite refsys per epoch)",
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
@@ -676,10 +702,47 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
             # Re-select the frequency after MJD filtering
             selected_frequency2 = st.radio("Select Frequency", filtered_unique_frequencies, index=0, key='Frequency2', horizontal=True)
             st.session_state.selected_frequency2= selected_frequency2
-            plot_data(selected_frequency2)
+            plot_data2(selected_frequency2)
         else:
             st.error("No valid frequencies available for selection.")
     
+
+# Function to create the DataFrame for CSV
+def create_CVSV_data_CSV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, Elv_mask, selected_data):
+    # Convert 'MJD' to float and then to string with 5 decimal places
+    selected_data['MJD'] = selected_data['MJD'].astype(float).apply(lambda x: f"{x:.5f}")
+
+    # Function to concatenate values into a comma-separated string
+    concat_values = lambda x: ','.join(x.astype(str))
+
+    # Function to concatenate rounded values
+    concat_rounded_values = lambda x: ','.join(x.round(2).astype(str))
+    
+    # Function to count the number of satellites
+    count_satellites = lambda x: len(x)
+
+    # Group by 'MJD' and aggregate SAT and CV_diff columns
+    aggregated_data = selected_data.groupby('MJD').agg({
+        'SAT': [count_satellites, concat_values],
+        'CV_diff': concat_rounded_values
+    }).reset_index()
+
+    # Rename columns for clarity
+    aggregated_data.columns = ['MJD', 'Num_CV_Satellites', 'PRNs', 'Refsys_difference(ns)']
+
+        # Creating header information
+    header_CV_info = (
+        f"# Common satellites in view and their Time Transfer between {st.session_state['LAB1']} and {st.session_state['LAB2']}  \n"
+        f"# Start MJD: {starting_mjd}\n"
+        f"# End MJD: {ending_mjd}\n"
+        f"# Frequency selected for comparision in receiver 1: {frequency1}\n"
+        f"# Frequency selected for comparision in receiver 2: {frequency2}\n"
+        f"# Elevation mask applied: {Elv_mask} degrees\n"
+        f"# Selected satellites for time transfer: {', '.join(sorted(SVids))}\n")
+    
+
+    return header_CV_info, aggregated_data
+
 
 # Function to create the DataFrame for CSV
 def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, Elv_mask, selected_data):
@@ -743,15 +806,16 @@ st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200
 st.sidebar.header("Time & Frequency Capacity Building")
 
 st.sidebar.header("Principals of CV & AV time transfer")
-plot_CV = st.sidebar.button("PDF or PPT", key= 'Material')
+Reference_material = st.sidebar.button("PDF or PPT", key= 'Material')
 
 st.sidebar.header("Common-View Analysis")
 plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
-# plot_button = st.sidebar.button("CV Performance", key=5)
+
+# CV_PRNS = st.sidebar.button("Plot Common PRNs", key= 'Common_PRNs')
+
 
 st.sidebar.header("All-in-View Analysis")
 plot_AV = st.sidebar.button("Plot All-in-View", key= 'All_in_view')
-# plot_button = st.sidebar.button("CV Performance", key=5)
 
 
 df3 = pd.DataFrame(columns=['MJD_time', 'CV_avg_diff'])
@@ -770,17 +834,16 @@ if 'selected_svids' not in st.session_state:
 
 unique_SVIDs = []
 
-def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs,Elv_Mask):
-    
-      # Filter based on ELV values
-    df1 = df1[df1['ELV'] >= (Elv_Mask*10)]
-    df2 = df2[df2['ELV'] >= (Elv_Mask*10)]
+def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, Elv_Mask):
+    # Filter based on ELV values
+    df1 = df1[df1['ELV'] >= (Elv_Mask * 10)]
+    df2 = df2[df2['ELV'] >= (Elv_Mask * 10)]
     
     # Ensure 'ALL' in selected_svids is handled correctly
     if 'ALL' in selected_svids:
         selected_svids = unique_SVIDs
 
-    # Filter the DataFrames based on MJD times and selected satellites
+    # Filter the DataFrames
     df1_filtered = df1[df1["MJD"].isin(unique_MJD_times) & df1["SAT"].isin(selected_svids)]
     df2_filtered = df2[df2["MJD"].isin(unique_MJD_times) & df2["SAT"].isin(selected_svids)]
 
@@ -790,7 +853,7 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs,Elv
     # Compute differences
     merged_df['CV_diff'] = (merged_df['REFSYS_df1'] - merged_df['REFSYS_df2']) * 0.1
 
-    # Group by 'MJD' and calculate average CV_diff
+    # Group by 'MJD' for the result
     result = merged_df.groupby('MJD').agg({'CV_diff': ['mean', 'count']})
     result.columns = ['CV_avg_diff', 'count']
     result.reset_index(inplace=True)
@@ -798,8 +861,15 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs,Elv
     # Handle missing MJD times
     missing_session = list(set(unique_MJD_times) - set(result['MJD']))
 
-    return result, missing_session
+    # Create a new dataframe for CV_SV
+    group = merged_df.groupby('MJD')
+    CV_SV = pd.DataFrame({
+        'MJD': group.groups.keys(),
+        'SAT_list': group['SAT'].apply(list),
+        'CV_diff_list': group['CV_diff'].apply(list)
+    })
 
+    return result, missing_session, CV_SV
 
 
 def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, Elv_Mask):
@@ -974,7 +1044,10 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             # print(f"Unique SAT in combined data: \n{unique_SVIDs}")
             # If the session_state.plot_data doesn't exist, initialize it to None
             if 'plot_CV_data' not in st.session_state:
-                st.session_state.plot_CV_data = None                       
+                st.session_state.plot_CV_data = None    
+
+            if 'CV_SV_data' not in st.session_state:
+                st.session_state.CV_SV_data = None                     
 
             if 'plot_AV_data' not in st.session_state:
                 st.session_state.plot_AV_data = None 
@@ -1018,22 +1091,103 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             st.session_state.selected_svids = svids_to_use
             # plot_button = st.sidebar.button("Plot CV")
 
-            if plot_CV:
+            if plot_CV :
                 # Replace the following with your actual DataFrame and variable names
                 df1_CV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                 df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
                 selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
-                result_df, missing_sessions = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
+                result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
 
                 if not result_df.empty:
                     st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
                 else:
-                    st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code frequency selection ")               
+                    st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ")               
                 
+                if not cv_sv_df.empty:
+                        st.session_state.CV_SV_data = cv_sv_df
+                # else:
+                #     st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
                 # if  not st.session_state.plot_data.empty:
                 # Plotting 
+            
+            if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty:
+                # Use the correct dataframe
+                st.markdown('---')  # Add a horizontal line for separation
                 
+                df_cv_sv = st.session_state.CV_SV_data
+                long_form = []
+
+                # Unpacking the lists in df_cv_sv
+                for _, row in df_cv_sv.iterrows():
+                    for sat, diff in zip(row['SAT_list'], row['CV_diff_list']):
+                        long_form.append({'MJD': row['MJD'], 'SAT': sat, 'CV_diff': diff})
+
+                long_df = pd.DataFrame(long_form)
+
+                # Initialize a figure
+                fig = go.Figure()
+
+                # Add scatter plot for each satellite
+                for sat in long_df['SAT'].unique():
+                    df_sat = long_df[long_df['SAT'] == sat]
+                    fig.add_trace(go.Scatter(
+                        x=df_sat['MJD'],
+                        y=df_sat['CV_diff'],
+                        mode='markers',
+                        name=sat,  # Satellite name as legend entry
+                        marker=dict(size=10)  # Increase marker size
+                    ))
+
+                # Set plot titles and labels
+                fig.update_layout(
+                    title=f"Common satellites in view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to time difference between refsys values for each COMMON Satellite in view at each epoch)",
+                    title_font=dict(size=20, color="black"),
+                    xaxis_title="MJD",
+                    xaxis_title_font=dict(size=16, color="black"),
+                    yaxis_title="Time difference (ns)",
+                    yaxis_title_font=dict(size=16, color="black"),
+                    xaxis=dict(
+                        tickfont=dict(size=14, color="black"),
+                        exponentformat='none' 
+                    ),
+                    yaxis=dict(
+                        tickmode='auto', nticks=10,
+                        tickfont=dict(size=14, color="black")
+                    ),
+                    autosize=False,
+                    width=800,
+                    height=600
+                )
+                fig.update_xaxes(tickformat="05d")
+
+                # Display the plot in Streamlit
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Set x-axis range and filter rows of the dataframe
+                min_mjd_time = long_df["MJD"].dropna().min()
+                max_mjd_time = long_df["MJD"].dropna().max()
+
+                # Now apply math.floor() and math.ceil()
+                min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
+                max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
+
+                header, data_df = create_CVSV_data_CSV(min_x, max_x-1, 
+                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                    st.session_state.selected_frequency2,st.session_state.elevation_mask, long_df)
+
+                # Convert to CSV
+                csv_CV = convert_to_csv(header, data_df)
+
+                # Create download button
+                st.download_button(
+                    label="Download CV Satellite data",
+                    data=csv_CV,
+                    file_name="Common_View_Sat_data.csv",
+                    mime="text/csv",
+                )
+
+                                
             if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty:
                 df3 = st.session_state.plot_CV_data
                 st.markdown('---')  # Add a horizontal line for separation
@@ -1084,7 +1238,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                     # Set plot titles and labels with increased font size and black color
                     fig.update_layout(
-                        title=f"Common- View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
+                        # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
+                        title=f"Common - View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency1}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
                         title_font=dict(size=20, color="black"),
                         xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
@@ -1148,7 +1303,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             
             if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
                 df4 = st.session_state.plot_AV_data
-
+                st.markdown('---')  # Add a horizontal line for separation
                 # User inputs for the y-axis range
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1184,7 +1339,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Set plot titles and labels with increased font size and black color
                 fig.update_layout(
-                    title=f"All-in-View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
+                    title=f"All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average refsys of all satellites in view)",
                     title_font=dict(size=20, color="black"),
                     xaxis_title="MJD",
                     xaxis_title_font=dict(size=16, color="black"),
