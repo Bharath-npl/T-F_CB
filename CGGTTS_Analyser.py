@@ -60,6 +60,9 @@ if 'sel_MJD_df_01' not in st.session_state:
     st.session_state['sel_MJD_df_01'] = pd.DataFrame()
 
 Required_Colm_data_01 = []
+valid_filenames01 = []
+valid_filenames02 = []
+
 
 def process_data1(files_01):
     if files_01:
@@ -87,7 +90,9 @@ def process_data1(files_01):
                 st.error(f"File format not supported for file: {filename}")
                 continue  # Skip to the next file
             
-            st.write(f"File: {filename}")
+            # st.write(f"File: {filename}")
+            # Add the valid filename to the list
+            valid_filenames01.append(filename)
 
             data_after_head = []
             # Flag to indicate if we are currently inside a header block
@@ -211,7 +216,13 @@ def process_data1(files_01):
         # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
         unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
 
-        # st.write(f"combined columns data_01: \n {combined_Colm_data_01}")
+        # Write the list of valid filenames in a row
+        if valid_filenames01:
+            st.write(f"Files uploaded: {', '.join(valid_filenames01)}")
+        else:
+            st.write("No valid files found.")
+
+        
         return combined_Colm_data_01,unique_mjd_int_values1, unique_FRC
 
     else:
@@ -449,7 +460,8 @@ def process_data2(files_02):
                 st.error(f"File format not supported for file: {filename}")
                 continue  # Skip to the next file
             
-            st.write(f"File: {filename}")
+            # st.write(f"File: {filename}")
+            valid_filenames02.append(filename)
 
 
             data_after_head = []
@@ -568,7 +580,13 @@ def process_data2(files_02):
         unique_mjd_values = sorted(unique_mjd_values)
         unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values))
 
-        # st.write(f"combined columns data: \n {combined_Colm_data_02}")
+        # Write the list of valid filenames in a row
+        if valid_filenames02:
+            st.write(f"Files uploaded: {', '.join(valid_filenames02)}")
+        else:
+            st.write("No valid files found.")
+
+       
         return combined_Colm_data_02,unique_mjd_int_values2, unique_FRC
 
     else:
