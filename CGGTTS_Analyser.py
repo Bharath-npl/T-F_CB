@@ -349,6 +349,7 @@ def plot_data1(frequency1):
         showarrow=False, font=dict(size=18, color="black"),
         xanchor='right', yanchor='top')
 
+           
         # Update layout for better presentation
 
         fig.update_layout(
@@ -356,9 +357,11 @@ def plot_data1(frequency1):
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
-            xaxis =dict(tickfont= dict(size=14, color ="black"), exponentformat ='none')
-        )
-        fig.update_xaxes(tickformat="05d")
+            xaxis =dict(tickformat=".2f",  # Set the tick values as original MJD values
+                    # ticktext=formatted_mjd,  # Set the formatted MJD values as tick labels,
+                    tickfont= dict(size=14, color ="black"), 
+                    exponentformat ='none'))
+        
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
 
@@ -667,9 +670,9 @@ def plot_data2(frequency2):
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
-            xaxis =dict(tickfont= dict(size=14, color ="black"), exponentformat ='none')
+            xaxis =dict(tickformat=".2f", tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
-        fig.update_xaxes(tickformat="05d")
+        
         # Display the plot
         st.plotly_chart(fig, use_container_width=True)
 
@@ -824,7 +827,7 @@ st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200
 st.sidebar.header("Time & Frequency Capacity Building")
 
 st.sidebar.header("Principals of CV & AV time transfer")
-Reference_material = st.sidebar.button("PDF or PPT", key= 'Material')
+Reference_material = st.sidebar.button("PDF from expert", key= 'Material')
 
 st.sidebar.header("Common-View Analysis")
 plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
@@ -1165,7 +1168,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     xaxis_title_font=dict(size=16, color="black"),
                     yaxis_title="Time difference (ns)",
                     yaxis_title_font=dict(size=16, color="black"),
-                    xaxis=dict(
+                    xaxis=dict(tickformat=".2f",
                         tickfont=dict(size=14, color="black"),
                         exponentformat='none' 
                     ),
@@ -1177,7 +1180,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     width=800,
                     height=600
                 )
-                fig.update_xaxes(tickformat="05d")
+                
 
                 # Display the plot in Streamlit
                 st.plotly_chart(fig, use_container_width=True)
@@ -1263,7 +1266,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         xaxis_title_font=dict(size=16, color="black"),
                         yaxis_title="Time difference (ns)",
                         yaxis_title_font=dict(size=16, color="black"),
-                        xaxis=dict(
+                        xaxis=dict(tickformat=".2f",
                             tickmode='array',
                             # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
                             # tickformat="05d",
@@ -1279,7 +1282,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         width=800,
                         height=600
                     )
-                    fig.update_xaxes(tickformat="05d")
+                   
                     # Display the plot
                     st.plotly_chart(fig, use_container_width=True)
                 
@@ -1363,7 +1366,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     xaxis_title_font=dict(size=16, color="black"),
                     yaxis_title="Time difference (ns)",
                     yaxis_title_font=dict(size=16, color="black"),
-                    xaxis=dict(
+                    xaxis=dict(tickformat=".2f",
                         tickmode='array',
                         # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
                         # tickformat="05d",
@@ -1378,7 +1381,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     width=800,
                     height=600
                 )
-                fig.update_xaxes(tickformat="05d")
+                
                 # Display the plot
                 st.plotly_chart(fig, use_container_width=True)
                             
