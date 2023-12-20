@@ -14,6 +14,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import math
+import base64
 
 warnings.filterwarnings('ignore')
 
@@ -47,6 +48,62 @@ Avg_refsys_Rx1 = pd.DataFrame()
 Avg_refsys_Rx2 = pd.DataFrame()
 
 
+st.sidebar.image("https://www.bipm.org/documents/20126/27072194/Logo+BIPM+blue.png/797bb4e6-8cfb-5d78-b480-e460ad5eeec2?t=1583920059345", width=200)
+#One line of gap 
+st.sidebar.write("")
+#IEEE UFFSC logo
+st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200)
+
+st.sidebar.header("Time & Frequency Capacity Building")
+
+
+st.sidebar.header("CV & AV Time Transfer")
+
+
+def display_material(file):
+    # Opening file from file path
+    with open(file, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+        
+    # Embedding PDF in HTML using iframe
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+    
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+
+
+def display_material(file):
+    # Opening file from file path
+    with open(file, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+        
+    # Embedding PDF in HTML using iframe
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+    
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+
+def display_manual(file):
+    # Opening file from file path
+    with open(file, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+        
+    # Embedding PDF in HTML using iframe
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+    
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+if st.sidebar.checkbox('Time transfer through GNSS'):
+    # display_material('H:/CB_C_T&F\Development/CGGTTS_Analyser/Review Updated CGGTTS/Expert_presentation.pdf')
+    display_material('https://github.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf')
+# else:
+#     st.write("PDF is hidden. Check the box to view it.")
+
+if st.sidebar.checkbox('User manual'):
+    # display_material('H:/CB_C_T&F\Development/CGGTTS_Analyser/Review Updated CGGTTS/User_manual_cggtts.pdf')
+    display_material('https://github.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
+
+
 combined_Colm_data_01 = pd.DataFrame()
 
 # File uploader and data processing
@@ -62,6 +119,10 @@ if 'sel_MJD_df_01' not in st.session_state:
 Required_Colm_data_01 = []
 valid_filenames01 = []
 valid_filenames02 = []
+
+
+
+
 
 
 def process_data1(files_01):
@@ -431,7 +492,7 @@ if 'show_plot2' not in st.session_state:
 # File uploader and data processing
 with st.form("my-form2", clear_on_submit=True):
     files_02 = st.file_uploader(":file_folder: Upload the CGGTTS files of receiver 2", accept_multiple_files=True)
-    submitted1 = st.form_submit_button("Submit2")
+    submitted2 = st.form_submit_button("Submit2")
 
 Required_Colm_data_02 = []
 
@@ -818,16 +879,6 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 data1_avail =0
 data2_avail =0
 # BIPM Logo
-st.sidebar.image("https://www.bipm.org/documents/20126/27072194/Logo+BIPM+blue.png/797bb4e6-8cfb-5d78-b480-e460ad5eeec2?t=1583920059345", width=200)
-#One line of gap 
-st.sidebar.write("")
-#IEEE UFFSC logo
-st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200)
-
-st.sidebar.header("Time & Frequency Capacity Building")
-
-st.sidebar.header("Principals of CV & AV time transfer")
-Reference_material = st.sidebar.button("PDF from expert", key= 'Material')
 
 st.sidebar.header("Common-View Analysis")
 plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
@@ -837,6 +888,13 @@ plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
 
 st.sidebar.header("All-in-View Analysis")
 plot_AV = st.sidebar.button("Plot All-in-View", key= 'All_in_view')
+
+
+# Check conditions only when plot buttons are clicked
+# if (st.session_state.plot_CV_clicked or st.session_state.plot_AV_clicked):
+#     if not submitted1 or not submitted2:
+#         st.error("One of the receiver data is not uploaded yet. Don't forget to press the Submit button after uploading the files.")
+
 
 
 df3 = pd.DataFrame(columns=['MJD_time', 'CV_avg_diff'])
@@ -1004,6 +1062,7 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
     else:
         st.error("Files don't belong to the same time period")
         return pd.DataFrame()
+
 
 
 
@@ -1212,6 +1271,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty:
                 df3 = st.session_state.plot_CV_data
                 st.markdown('---')  # Add a horizontal line for separation
+                
                 if st.session_state.selected_frequency1 != st.session_state.selected_frequency2:
                     st.error("Caution: The selected frequenices are different")
 
@@ -1314,17 +1374,34 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                 df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
-                print_once = 1
-                result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times,st.session_state.elevation_mask )
+                
+                # Convert 'MJD' columns to sets
+                set_mjd_df1 = set(df1_AV['MJD'])
+                set_mjd_df2 = set(df2_AV['MJD'])
+
+                # Find the intersection of the two sets
+                common_mjd = set_mjd_df1.intersection(set_mjd_df2)
+
+                # Check if there is any common 'MJD' and process
+                if common_mjd:
+                    result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask)
+                else:
+                    # Handle the case where there is no common MJD
+                    result_df02 = pd.DataFrame() 
                 
                 if not result_df02.empty:
                     st.session_state.plot_AV_data = result_df02
+                    
                 else:
                     st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
+                    
             
-            if st.session_state.plot_AV_data is not None and not st.session_state.plot_AV_data.empty:
+            if 'plot_AV_data' in st.session_state and st.session_state.plot_AV_data is not None: 
+                
                 df4 = st.session_state.plot_AV_data
+                                
                 st.markdown('---')  # Add a horizontal line for separation
+                # print(df4)
                 # User inputs for the y-axis range
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1340,68 +1417,69 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 # Set x-axis range
                 min_x = math.floor(min(df4["MJD_time"]))
                 max_x = math.ceil(max(df4["MJD_time"]))
+               
+                if min_x is not None and max_x is not None:
+                    # Create scatter plot using Plotly
+                    fig = go.Figure()
 
-                # Create scatter plot using Plotly
-                fig = go.Figure()
+                    # Add scatter plot of data points
+                    fig.add_trace(go.Scatter(
+                        x=df4_filtered["MJD_time"], 
+                        y=df4_filtered["AV_diff"], 
+                        mode='markers',
+                        name='AV_diff',
+                        marker=dict(size=10)  # Increase marker size
+                    ))
 
-                # Add scatter plot of data points
-                fig.add_trace(go.Scatter(
-                    x=df4_filtered["MJD_time"], 
-                    y=df4_filtered["AV_diff"], 
-                    mode='markers',
-                    name='AV_diff',
-                    marker=dict(size=10)  # Increase marker size
-                ))
+                    # Add a standard deviation annotation to the plot 
+                    fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
+                    showarrow=False, font=dict(size=18, color="black"),
+                    xanchor='right', yanchor='top')
 
-                # Add a standard deviation annotation to the plot 
-                fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
-                showarrow=False, font=dict(size=18, color="black"),
-                xanchor='right', yanchor='top')
+                    # Set plot titles and labels with increased font size and black color
+                    fig.update_layout(
+                        title=f"All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average refsys of all satellites in view)",
+                        title_font=dict(size=20, color="black"),
+                        xaxis_title="MJD",
+                        xaxis_title_font=dict(size=16, color="black"),
+                        yaxis_title="Time difference (ns)",
+                        yaxis_title_font=dict(size=16, color="black"),
+                        xaxis=dict(tickformat=".2f",
+                            tickmode='array',
+                            # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
+                            # tickformat="05d",
+                            tickfont=dict(size=14, color="black"), 
+                            exponentformat='none'
+                        ),
+                        yaxis=dict(
+                            tickmode='auto',nticks =10,
+                            tickfont=dict(size=16, color="black")
+                        ),
+                        autosize=False,
+                        width=800,
+                        height=600
+                    )
+                    
+                    # Display the plot
+                    st.plotly_chart(fig, use_container_width=True)
+                                
+                    # if st.sidebar.button('Get AV file of this data') : 
+                        # Create the CSV data
+                        # Create the CSV header and data
+                    header, data_df = create_csv_data_AV(min_x, max_x-1, 
+                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                    st.session_state.selected_frequency2, st.session_state.elevation_mask , df4_filtered)
 
-                # Set plot titles and labels with increased font size and black color
-                fig.update_layout(
-                    title=f"All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average refsys of all satellites in view)",
-                    title_font=dict(size=20, color="black"),
-                    xaxis_title="MJD",
-                    xaxis_title_font=dict(size=16, color="black"),
-                    yaxis_title="Time difference (ns)",
-                    yaxis_title_font=dict(size=16, color="black"),
-                    xaxis=dict(tickformat=".2f",
-                        tickmode='array',
-                        # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
-                        # tickformat="05d",
-                        tickfont=dict(size=14, color="black"), 
-                        exponentformat='none'
-                    ),
-                    yaxis=dict(
-                        tickmode='auto',nticks =10,
-                        tickfont=dict(size=16, color="black")
-                    ),
-                    autosize=False,
-                    width=800,
-                    height=600
-                )
-                
-                # Display the plot
-                st.plotly_chart(fig, use_container_width=True)
-                            
-                # if st.sidebar.button('Get AV file of this data') : 
-                    # Create the CSV data
-                    # Create the CSV header and data
-                header, data_df = create_csv_data_AV(min_x, max_x-1, 
-                                                st.session_state.selected_svids, st.session_state.selected_frequency1,
-                                                st.session_state.selected_frequency2, st.session_state.elevation_mask , df4_filtered)
+                    # Convert to CSV
+                    csv_AV = convert_to_csv(header, data_df)
 
-                # Convert to CSV
-                csv_AV = convert_to_csv(header, data_df)
-
-                # Create download button
-                st.download_button(
-                    label="Download AV data",
-                    data=csv_AV,
-                    file_name="All_in_view_data.csv",
-                    mime="text/csv",
-                )
+                    # Create download button
+                    st.download_button(
+                        label="Download AV data",
+                        data=csv_AV,
+                        file_name="All_in_view_data.csv",
+                        mime="text/csv",
+                    )
 
     else:
         st.error("One of the session data is not available. Either frequency or MJD is not selected properly")
