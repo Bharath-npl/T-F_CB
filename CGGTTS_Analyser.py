@@ -71,7 +71,7 @@ def display_pdf_from_url(url):
         base64_pdf = base64.b64encode(response.content).decode('utf-8')
         
         # Embedding PDF in HTML using iframe
-        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1200" height="1000" type="application/pdf"></iframe>'
         
         # Display the PDF in Streamlit
         st.markdown(pdf_display, unsafe_allow_html=True)
