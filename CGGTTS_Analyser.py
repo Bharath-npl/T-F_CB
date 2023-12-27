@@ -101,7 +101,7 @@ def display_pdf_from_gdrive(gdrive_link):
     # Display the PDF in Streamlit
     st.markdown(pdf_display, unsafe_allow_html=True)
 
-if st.sidebar.checkbox('User manual'):
+if st.sidebar.checkbox('Time Transfer through GNSS'):
     # Replace the link below with your actual Google Drive sharing link
     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
 
