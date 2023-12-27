@@ -96,7 +96,7 @@ def display_pdf_from_gdrive(gdrive_link):
     embed_link = f"https://drive.google.com/file/d/{file_id}/preview"
     
     # Embedding PDF in HTML using iframe
-    pdf_display = f'<iframe src="{embed_link}" width="700" height="1000" type="application/pdf"></iframe>'
+    pdf_display = f'<iframe src="{embed_link}" width="1300" height="1000" type="application/pdf"></iframe>'
     
     # Display the PDF in Streamlit
     st.markdown(pdf_display, unsafe_allow_html=True)
@@ -105,11 +105,10 @@ if st.sidebar.checkbox('Time Transfer through GNSS'):
     # Replace the link below with your actual Google Drive sharing link
     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
 
-
-
 if st.sidebar.checkbox('User manual'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
-    display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
+    # display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
+    display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
 # else:
 #     st.write("PDF is hidden. Check the box to view it.")
 
