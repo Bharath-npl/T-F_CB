@@ -80,14 +80,32 @@ def display_pdf_from_url(url):
 
 # if st.sidebar.checkbox('Time transfer through GNSS'):
     # st.markdown("[View Expert Presentation](https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf)", unsafe_allow_html=True)
-if st.sidebar.checkbox('Time transfer through GNSS'):
-    st.markdown('<a href="https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf" target="_blank">View Expert Presentation</a>', unsafe_allow_html=True)
+# if st.sidebar.checkbox('Time transfer through GNSS'):
+    # st.markdown('<a href="https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf" target="_blank">View Expert Presentation</a>', unsafe_allow_html=True)
 # if st.sidebar.checkbox('Time transfer through GNSS'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
     # display_pdf_from_url('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view?usp=sharing')
     # display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf')
 # else:
 #     st.write("PDF is hidden. Check the box to view it.")
+def display_pdf_from_gdrive(gdrive_link):
+    # Extract the file ID from the Google Drive link
+    file_id = gdrive_link.split("/")[5]
+    
+    # Create the embed link
+    embed_link = f"https://drive.google.com/file/d/{file_id}/preview"
+    
+    # Embedding PDF in HTML using iframe
+    pdf_display = f'<iframe src="{embed_link}" width="700" height="1000" type="application/pdf"></iframe>'
+    
+    # Display the PDF in Streamlit
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+if st.sidebar.checkbox('User manual'):
+    # Replace the link below with your actual Google Drive sharing link
+    display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
+
+
 
 if st.sidebar.checkbox('User manual'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
