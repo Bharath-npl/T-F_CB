@@ -82,13 +82,13 @@ def display_manual(file):
     
     st.markdown(pdf_display, unsafe_allow_html=True)
 
-if st.sidebar.checkbox('Time transfer through GNSS'):
-    display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
+# if st.sidebar.checkbox('Time transfer through GNSS'):
+    # display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
 # else:
 #     st.write("PDF is hidden. Check the box to view it.")
 
-if st.sidebar.checkbox('User manual'):
-    display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
+# if st.sidebar.checkbox('User manual'):
+    # display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
 
 
 combined_Colm_data_01 = pd.DataFrame()
