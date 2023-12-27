@@ -79,9 +79,12 @@ def display_pdf_from_url(url):
         st.error("Failed to load PDF")
 
 if st.sidebar.checkbox('Time transfer through GNSS'):
+    st.markdown("[View Expert Presentation](https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf)", unsafe_allow_html=True)
+
+# if st.sidebar.checkbox('Time transfer through GNSS'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf')
-    display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf')
+    # display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf')
 # else:
 #     st.write("PDF is hidden. Check the box to view it.")
 
