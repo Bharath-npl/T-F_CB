@@ -60,35 +60,35 @@ st.sidebar.header("Time & Frequency Capacity Building")
 st.sidebar.header("CV & AV Time Transfer")
 
 
-# def display_material(file):
-#     # Opening file from file path
-#     with open(file, "rb") as f:
-#         base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+def display_material(file):
+    # Opening file from file path
+    with open(file, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
         
-#     # Embedding PDF in HTML using iframe
-#     pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+    # Embedding PDF in HTML using iframe
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
     
-#     st.markdown(pdf_display, unsafe_allow_html=True)
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
 
 
-# def display_manual(file):
-#     # Opening file from file path
-#     with open(file, "rb") as f:
-#         base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+def display_manual(file):
+    # Opening file from file path
+    with open(file, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
         
-#     # Embedding PDF in HTML using iframe
-#     pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+    # Embedding PDF in HTML using iframe
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
     
-#     st.markdown(pdf_display, unsafe_allow_html=True)
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
-# if st.sidebar.checkbox('Time transfer through GNSS'):
-    # display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
-# else:
-#     st.write("PDF is hidden. Check the box to view it.")
+if st.sidebar.checkbox('Time transfer through GNSS'):
+    display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
+else:
+    st.write("PDF is hidden. Check the box to view it.")
 
-# if st.sidebar.checkbox('User manual'):
-    # display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
+if st.sidebar.checkbox('User manual'):
+    display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
 
 
 combined_Colm_data_01 = pd.DataFrame()
