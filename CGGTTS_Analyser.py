@@ -15,6 +15,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import math
 import base64
+import requests
 
 warnings.filterwarnings('ignore')
 
@@ -60,35 +61,32 @@ st.sidebar.header("Time & Frequency Capacity Building")
 st.sidebar.header("CV & AV Time Transfer")
 
 
-def display_material(file):
-    # Opening file from file path
-    with open(file, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-        
-    # Embedding PDF in HTML using iframe
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+def display_pdf_from_url(url):
+    # Send a GET request to the URL
+    response = requests.get(url)
     
-    st.markdown(pdf_display, unsafe_allow_html=True)
-
-
-
-def display_manual(file):
-    # Opening file from file path
-    with open(file, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Encode the PDF content in base64
+        base64_pdf = base64.b64encode(response.content).decode('utf-8')
         
-    # Embedding PDF in HTML using iframe
-    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
-    
-    st.markdown(pdf_display, unsafe_allow_html=True)
+        # Embedding PDF in HTML using iframe
+        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
+        
+        # Display the PDF in Streamlit
+        st.markdown(pdf_display, unsafe_allow_html=True)
+    else:
+        st.error("Failed to load PDF")
 
 if st.sidebar.checkbox('Time transfer through GNSS'):
-    display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
+    display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
 else:
     st.write("PDF is hidden. Check the box to view it.")
 
 if st.sidebar.checkbox('User manual'):
-    display_material('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
+    display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
+else:
+    st.write("PDF is hidden. Check the box to view it.")
 
 
 combined_Colm_data_01 = pd.DataFrame()
