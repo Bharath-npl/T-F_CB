@@ -80,13 +80,13 @@ def display_pdf_from_url(url):
 
 if st.sidebar.checkbox('Time transfer through GNSS'):
     display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
-else:
-    st.write("PDF is hidden. Check the box to view it.")
+# else:
+#     st.write("PDF is hidden. Check the box to view it.")
 
 if st.sidebar.checkbox('User manual'):
     display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
-else:
-    st.write("PDF is hidden. Check the box to view it.")
+# else:
+#     st.write("PDF is hidden. Check the box to view it.")
 
 
 combined_Colm_data_01 = pd.DataFrame()
