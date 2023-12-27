@@ -87,7 +87,7 @@ if st.sidebar.checkbox('Time transfer through GNSS'):
 
 if st.sidebar.checkbox('User manual'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
-    display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
+    display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
 # else:
 #     st.write("PDF is hidden. Check the box to view it.")
 
