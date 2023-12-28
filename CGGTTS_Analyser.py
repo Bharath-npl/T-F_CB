@@ -128,9 +128,6 @@ if 'sel_MJD_df_01' not in st.session_state:
 Required_Colm_data_01 = []
 
 
-
-
-
 def process_data1(files_01):
     if files_01:
         col1.empty()
@@ -142,10 +139,35 @@ def process_data1(files_01):
         combined_Colm_data_01 = pd.DataFrame()
         # A list to store cleaned data across multiple files
         valid_filenames01 = []
-         
+        gnss_type = None
+
+        # Initialize 'GNSS1' in session state if it doesn't exist
+        if 'GNSS1' not in st.session_state:
+            st.session_state['GNSS1'] = None
+
+
         for each_file in files_01:
             all_dataframes = []
             filename = each_file.name
+
+            # Check if the file name follows the XFLLmodd.ddd format
+            if len(filename) >= 1 and filename[0].upper() in ['G', 'R', 'E', 'C', 'J', 'I']:
+                # Determine the GNSS type based on the first character
+                current_gnss = {'G': 'GPS', 'R': 'GLONASS', 'E': 'Galileo', 
+                                'C': 'BeiDou', 'J': 'QZSS', 'I': 'IRNSS'}[filename[0].upper()]
+
+                if gnss_type is None:
+                    # Set the GNSS type if not already set
+                    gnss_type = current_gnss
+                    st.session_state["GNSS1"] = gnss_type
+                elif gnss_type != current_gnss:
+                    # Notify the user if there's a mismatch in GNSS type
+                    st.error("Please upload files of one GNSS type. Found multiple types.")
+                    break
+
+            else:
+                st.error(f"Invalid file name format for GNSS detection: {filename}")
+
             # Read uploaded file contents directly into memory
             file_content = each_file.read().decode()
 
@@ -348,7 +370,8 @@ def create_csv_data_Rx1(starting_mjd, ending_mjd, selected_data, frequency1):
         f"# Start MJD: {starting_mjd}\n"
         f"# End MJD: {ending_mjd}\n"
         f"# Frequency: {frequency1}\n"
-        f"# Lab:{st.session_state['LAB1']}\n")
+        f"# Lab:{st.session_state['LAB1']}\n"
+        f"# GNSS reference time: {st.session_state['GNSS1']}")
                 
 
     return header_Rx1_info, data_Rx1_df
@@ -370,7 +393,8 @@ def create_csv_data_Rx2(starting_mjd, ending_mjd, selected_data, frequency2):
         f"# Start MJD: {starting_mjd}\n"
         f"# End MJD: {ending_mjd}\n"
         f"# Frequency: {frequency2}\n"
-        f"# Lab:{st.session_state['LAB2']}\n")
+        f"# Lab:{st.session_state['LAB2']}\n"
+        f"# GNSS reference time: {st.session_state['GNSS2']}")
 
     return header_Rx2_info, data_Rx2_df
     
@@ -420,7 +444,7 @@ def plot_data1(frequency1):
         # Update layout for better presentation
 
         fig.update_layout(
-            title=f"{st.session_state['REF01']} - GNSS(time) at Lab: {st.session_state['LAB1']} through {st.session_state.selected_frequency1}. (Each point correponds to Average of all satellite refsys per epoch)",
+            title=f"{st.session_state['REF01']} - {st.session_state['GNSS1']}(time) at Lab: {st.session_state['LAB1']} through {st.session_state.selected_frequency1}. (Each point correponds to Average of all satellite refsys per epoch)",
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
@@ -514,11 +538,31 @@ def process_data2(files_02):
         combined_Colm_data_02 = pd.DataFrame()
         # A list to store cleaned data across multiple files
         valid_filenames02 = []
-                 
+        gnss_type2 = None
+        # Initialize 'GNSS2' in session state if it doesn't exist
+        if 'GNSS2' not in st.session_state:
+            st.session_state['GNSS2'] = None
+
         for each_file in files_02:
             all_dataframes = []
             filename = each_file.name
+            # Check if the file name follows the XFLLmodd.ddd format
+            if len(filename) >= 1 and filename[0].upper() in ['G', 'R', 'E', 'C', 'J', 'I']:
+                # Determine the GNSS type based on the first character
+                current_gnss2 = {'G': 'GPS', 'R': 'GLONASS', 'E': 'Galileo', 
+                                'C': 'BeiDou', 'J': 'QZSS', 'I': 'IRNSS'}[filename[0].upper()]
+                
+                if gnss_type2 is None:
+                    # Set the GNSS type if not already set
+                    gnss_type2 = current_gnss2
+                    st.session_state['GNSS2'] = gnss_type2
+                elif gnss_type2 != current_gnss2:
+                    # Notify the user if there's a mismatch in GNSS type
+                    st.error("Please upload files of only one GNSS type. Found multiple types.")
+                    break
 
+            else:
+                st.error(f"Invalid file name format for GNSS detection: {filename}")
             # Read uploaded file contents directly into memory
             file_content = each_file.read().decode()
 
@@ -547,7 +591,7 @@ def process_data2(files_02):
                     inside_header = True
                     if "=" in line:
                         Rx2_version = line.split('=')[1].strip()
-                        # Do something with Rx1_version
+                        
                     else:
                         print("Problem in reading CGGTTS version, please add '=' before version number as per standard format")
                     
@@ -590,7 +634,7 @@ def process_data2(files_02):
                         'SRSV': line[46:52].strip(),
                         'REFSYS': line[53:64].strip(),
                         'REF': Receiever2,
-                        'Version':Rx1_version, 
+                        'Version':Rx2_version, 
                         'LAB': LAB}
                     
                     # Use the 'FRC' position if found
@@ -636,6 +680,7 @@ def process_data2(files_02):
             df_02['FRC'] = df_split['FRC'].astype(str)
             df_02['Version'] = df_split['Version'].astype(str)
             df_02['LAB'] = df_split['LAB'].astype(str)
+            df_02['REF'] = df_split['REF'].astype(str)
             # unique_frc_values = df_split['FRC'].unique()
             # df_split['FRC'] = list(unique_frc_values)
 
@@ -664,7 +709,7 @@ def process_data2(files_02):
 
 
 if files_02:
-    processed_data2, unique_mjd_values, unique_FRC2 = process_data1(files_02)
+    processed_data2, unique_mjd_values, unique_FRC2 = process_data2(files_02)
     # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
     unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
     st.session_state['df2_total'] = processed_data2
@@ -733,7 +778,7 @@ def plot_data2(frequency2):
 
         # Update layout for better presentation
         fig.update_layout(
-            title=f"{st.session_state['REF02']} - GNSS(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Average of all satellite refsys per epoch)",
+            title=f"{st.session_state['REF02']} - {st.session_state['GNSS2']}(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Average of all satellite refsys per epoch)",
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
@@ -1178,25 +1223,27 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             # plot_button = st.sidebar.button("Plot CV")
 
             if plot_CV :
-                # Replace the following with your actual DataFrame and variable names
-                df1_CV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
-                df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
-                selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
+                if st.session_state['GNSS1'] == st.session_state['GNSS2']:
+                    # Replace the following with your actual DataFrame and variable names
+                    df1_CV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
+                    df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
+                    selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
-                result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
+                    result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
 
-                if not result_df.empty:
-                    st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
+                    if not result_df.empty:
+                        st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
+                    else:
+                        st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ")               
+                    
+                    if not cv_sv_df.empty:
+                            st.session_state.CV_SV_data = cv_sv_df
+                    # else:
+                    #     st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
+                    # if  not st.session_state.plot_data.empty:
+                    # Plotting 
                 else:
-                    st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ")               
-                
-                if not cv_sv_df.empty:
-                        st.session_state.CV_SV_data = cv_sv_df
-                # else:
-                #     st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
-                # if  not st.session_state.plot_data.empty:
-                # Plotting 
-            
+                    st.error("Common view cannot be processed: The two data sets are of different GNSS constellation ")
             if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty:
                 # Use the correct dataframe
                 st.markdown('---')  # Add a horizontal line for separation
@@ -1377,30 +1424,31 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 st.session_state.selected_svids = ['ALL']
 
             if plot_AV:
-
-                df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
-                df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
-                
-                # Convert 'MJD' columns to sets
-                set_mjd_df1 = set(df1_AV['MJD'])
-                set_mjd_df2 = set(df2_AV['MJD'])
-
-                # Find the intersection of the two sets
-                common_mjd = set_mjd_df1.intersection(set_mjd_df2)
-
-                # Check if there is any common 'MJD' and process
-                if common_mjd:
-                    result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask)
-                else:
-                    # Handle the case where there is no common MJD
-                    result_df02 = pd.DataFrame() 
-                
-                if not result_df02.empty:
-                    st.session_state.plot_AV_data = result_df02
+                if st.session_state['GNSS1'] == st.session_state['GNSS2']:
+                    df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
+                    df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
                     
-                else:
-                    st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
+                    # Convert 'MJD' columns to sets
+                    set_mjd_df1 = set(df1_AV['MJD'])
+                    set_mjd_df2 = set(df2_AV['MJD'])
+
+                    # Find the intersection of the two sets
+                    common_mjd = set_mjd_df1.intersection(set_mjd_df2)
+
+                    # Check if there is any common 'MJD' and process
+                    if common_mjd:
+                        result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask)
+                    else:
+                        # Handle the case where there is no common MJD
+                        result_df02 = pd.DataFrame() 
                     
+                    if not result_df02.empty:
+                        st.session_state.plot_AV_data = result_df02
+                        
+                    else:
+                        st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
+                else:
+                    st.error("All-in-view cannot be processed. The two data sets are of different GNSS constellation ")
             
             if 'plot_AV_data' in st.session_state and st.session_state.plot_AV_data is not None: 
                 
@@ -1501,4 +1549,6 @@ st.sidebar.markdown('---')  # Add a horizontal line for separation
 st.sidebar.markdown('**Contact Information**')
 st.sidebar.text('Mr/Ms XYZ')
 st.sidebar.text('Email: XYZ@bipm.org')
+   
+
    
