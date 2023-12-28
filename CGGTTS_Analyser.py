@@ -128,6 +128,9 @@ if 'sel_MJD_df_01' not in st.session_state:
 Required_Colm_data_01 = []
 
 
+
+
+
 def process_data1(files_01):
     if files_01:
         col1.empty()
@@ -223,7 +226,7 @@ def process_data1(files_01):
 
             # Create DataFrame from the data list
             data_rows = []
-
+            file01_empty = False
             for line in data_after_head:
                 if line.strip():  # Skip empty lines
                     # Extract the columns based on their fixed positions
@@ -254,6 +257,12 @@ def process_data1(files_01):
 
             # Create DataFrame from the data list
             df_split = pd.DataFrame(data_rows)
+
+            # Check if the DataFrame is empty or the 'SAT' column has only null/empty values
+            if df_split.empty or df_split['SAT'].isnull().all():
+                st.error(f"It seems the {each_file.name} is empty")
+                file01_empty = True
+                continue  # Skip further processing for this file
 
             df_split = df_split[df_split['SAT'].notna()] # Skip the lines where SAT column is missing 
             # print(f"File read is :\n {df_split}")
@@ -312,24 +321,25 @@ def process_data1(files_01):
             st.write("No valid files found.")
 
         
-        return combined_Colm_data_01,unique_mjd_int_values1, unique_FRC
+        return combined_Colm_data_01,unique_mjd_int_values1, unique_FRC, file01_empty
 
     else:
         return pd.DataFrame()
 
 
 if files_01:
-    processed_data1, unique_mjd_values1, unique_FRC1 = process_data1(files_01)
-    # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
-    # st.write("All MJD values from files:", unique_mjd_values1)
-    unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values1 if not pd.isna(mjd)))
-    st.session_state['df1_total'] = processed_data1
-    st.session_state['start_mjd_01'] = unique_mjd_int_values1[0]
-    st.session_state['end_mjd_01'] = unique_mjd_int_values1[-1]
-    st.session_state['unique_FRC1'] = unique_FRC1
-    st.session_state['show_plot1'] = False  # Reset plot visibility
-    st.session_state['REF01'] = ', '.join(map(str, processed_data1['REF'].dropna().unique()))
-    st.session_state['LAB1'] = ' '.join(map(str, processed_data1['LAB'].dropna().unique()))
+    processed_data1, unique_mjd_values1, unique_FRC1, file01_empty = process_data1(files_01)
+    if file01_empty == False:
+        # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
+        # st.write("All MJD values from files:", unique_mjd_values1)
+        unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values1 if not pd.isna(mjd)))
+        st.session_state['df1_total'] = processed_data1
+        st.session_state['start_mjd_01'] = unique_mjd_int_values1[0]
+        st.session_state['end_mjd_01'] = unique_mjd_int_values1[-1]
+        st.session_state['unique_FRC1'] = unique_FRC1
+        st.session_state['show_plot1'] = False  # Reset plot visibility
+        st.session_state['REF01'] = ', '.join(map(str, processed_data1['REF'].dropna().unique()))
+        st.session_state['LAB1'] = ' '.join(map(str, processed_data1['LAB'].dropna().unique()))
 
     
 def process_4_plot1(given_data1, start_mjd, end_mjd):
@@ -618,7 +628,7 @@ def process_data2(files_02):
 
             # Create DataFrame from the data list
             data_rows = []
-
+            file02_empty = False
             for line in data_after_head:
                 if line.strip():  # Skip empty lines
                     # Extract the columns based on their fixed positions
@@ -648,6 +658,12 @@ def process_data2(files_02):
             # Create DataFrame from the data list
             df_split = pd.DataFrame(data_rows)
 
+            # Check if the DataFrame is empty or the 'SAT' column has only null/empty values
+            if df_split.empty or df_split['SAT'].isnull().all():
+                st.error(f"It seems the {each_file.name} is empty")
+                file02_empty = True
+                continue  # Skip further processing for this file
+            
             df_split = df_split[df_split['SAT'].notna()] # Skip the lines where SAT column is missing 
             # print(f"File read is :\n {df_split}")
             # print(f"Sv ids in the Data: \n {df_split['SAT']}")
@@ -702,23 +718,24 @@ def process_data2(files_02):
             st.write("No valid files found.")
 
        
-        return combined_Colm_data_02,unique_mjd_int_values2, unique_FRC
+        return combined_Colm_data_02,unique_mjd_int_values2, unique_FRC, file02_empty
 
     else:
         return pd.DataFrame()
 
 
 if files_02:
-    processed_data2, unique_mjd_values, unique_FRC2 = process_data2(files_02)
-    # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
-    unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
-    st.session_state['df2_total'] = processed_data2
-    st.session_state['start_mjd_02'] = unique_mjd_int_values2[0]
-    st.session_state['end_mjd_02'] = unique_mjd_int_values2[-1]
-    st.session_state['unique_FRC2'] = unique_FRC2
-    st.session_state['show_plot2'] = False  # Reset plot visibility
-    st.session_state['REF02'] = ', '.join(map(str, processed_data2['REF'].dropna().unique()))
-    st.session_state['LAB2'] = ' '.join(map(str, processed_data2['LAB'].dropna().unique()))
+    processed_data2, unique_mjd_values, unique_FRC2, file02_empty = process_data2(files_02)
+    if file02_empty == False: 
+        # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
+        unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
+        st.session_state['df2_total'] = processed_data2
+        st.session_state['start_mjd_02'] = unique_mjd_int_values2[0]
+        st.session_state['end_mjd_02'] = unique_mjd_int_values2[-1]
+        st.session_state['unique_FRC2'] = unique_FRC2
+        st.session_state['show_plot2'] = False  # Reset plot visibility
+        st.session_state['REF02'] = ', '.join(map(str, processed_data2['REF'].dropna().unique()))
+        st.session_state['LAB2'] = ' '.join(map(str, processed_data2['LAB'].dropna().unique()))
 
 
 def process_4_plot2(given_data2, start_mjd, end_mjd):
@@ -1549,6 +1566,4 @@ st.sidebar.markdown('---')  # Add a horizontal line for separation
 st.sidebar.markdown('**Contact Information**')
 st.sidebar.text('Mr/Ms XYZ')
 st.sidebar.text('Email: XYZ@bipm.org')
-   
-
    
