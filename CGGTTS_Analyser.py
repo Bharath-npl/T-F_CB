@@ -260,7 +260,7 @@ def process_data1(files_01):
 
             # Check if the DataFrame is empty or the 'SAT' column has only null/empty values
             if df_split.empty or df_split['SAT'].isnull().all():
-                st.error(f"It seems the {each_file.name} is empty")
+                st.error(f"It seems {each_file.name} file is empty")
                 file01_empty = True
                 continue  # Skip further processing for this file
 
@@ -660,7 +660,7 @@ def process_data2(files_02):
 
             # Check if the DataFrame is empty or the 'SAT' column has only null/empty values
             if df_split.empty or df_split['SAT'].isnull().all():
-                st.error(f"It seems the {each_file.name} is empty")
+                st.error(f"It seems {each_file.name} file is empty")
                 file02_empty = True
                 continue  # Skip further processing for this file
             
