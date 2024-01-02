@@ -1132,6 +1132,11 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
         return pd.DataFrame()
 
 
+# Define the function to map old GPS SVIDs to new format
+def map_svids(svids, gnss_const):
+    if gnss_const == 'GPS':
+        return ['G' + svid if svid.isdigit() and int(svid) <= 63 else svid for svid in svids]
+    return svids
 
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
@@ -1172,14 +1177,19 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             df1_mjd_01 = st.session_state.df1_mjd[st.session_state.df1_mjd["MJD"] == mjd_time]
             df2_mjd_02 = st.session_state.df2_mjd[st.session_state.df2_mjd["MJD"] == mjd_time]
             
-                # Accumulate the filtered data
+            # Check if both GNSS types are 'GPS' to match the old version of SAT 21 to new version of SAT as G21
+            if st.session_state['GNSS1'] == 'GPS' and st.session_state['GNSS2'] == 'GPS':
+                # Map SVIDs to the new format
+                df1_mjd_01["SAT"] = map_svids(df1_mjd_01["SAT"].tolist(), 'GPS')
+                df2_mjd_02["SAT"] = map_svids(df2_mjd_02["SAT"].tolist(), 'GPS')
+            
+            # Accumulate all SVIDs
+            all_svids = set(df1_mjd_01["SAT"]).union(set(df2_mjd_02["SAT"]))
+            all_common_svids.update(all_svids)
+
+            # Accumulate the filtered data
             filtered_data01 = pd.concat([filtered_data01, df1_mjd_01])
             filtered_data02 = pd.concat([filtered_data02, df2_mjd_02])
-            # common_svids = set(df1_mjd_01["SAT"]) & set(df2_mjd_02["SAT"]) 
-
-            all_svids = set(df1_mjd_01["SAT"]).union( set(df2_mjd_02["SAT"]))
-          
-            all_common_svids.update(all_svids)
             
          # Store the accumulated data in the session state
         st.session_state.df1_mjd_01 = filtered_data01
@@ -1251,7 +1261,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     if not result_df.empty:
                         st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
                     else:
-                        st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ")               
+                        st.error("No COMMON data available for processing. Possible reasons might be two data sets doesnt belong to the same time period or they are of different versions or different code of frequency is selected ")               
                     
                     if not cv_sv_df.empty:
                             st.session_state.CV_SV_data = cv_sv_df
