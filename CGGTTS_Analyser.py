@@ -1301,7 +1301,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Set plot titles and labels
                 fig.update_layout(
-                    title=f"Common satellites in view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to time difference between refsys values for each COMMON Satellite in view at each epoch)",
+                    title=f" {{st.session_state['GNSS2']}} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to time difference between refsys values for each COMMON Satellite in view at each epoch)",
                     title_font=dict(size=20, color="black"),
                     xaxis_title="MJD",
                     xaxis_title_font=dict(size=16, color="black"),
@@ -1400,7 +1400,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # Set plot titles and labels with increased font size and black color
                     fig.update_layout(
                         # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
-                        title=f"Common - View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency1}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
+                        title=f"{st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency1}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
                         title_font=dict(size=20, color="black"),
                         xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
