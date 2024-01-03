@@ -733,14 +733,14 @@ def process_data2(files_02):
                 unique_mjd_values.update(df_02['MJD'].unique())
                 unique_sv_id.update(df_02['SAT'].unique())
             
-                combined_Colm_data_02 = pd.concat(Required_Colm_data_02, ignore_index=True)
+                combined_Colm_data_02 = pd.concat([combined_Colm_data_02, df_02])
 
             except Exception as e:      
                 st.error(f"Data is not in proper format. Please check the file: {filename}") 
                 file02_empty = True
                 # Update the "Start MJD" and "End MJD" select boxes
         unique_mjd_values = sorted(unique_mjd_values)
-        unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values))
+        unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
 
         # Write the list of valid filenames in a row
         if valid_filenames02:
