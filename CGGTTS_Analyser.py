@@ -288,15 +288,18 @@ def process_data1(files_01):
             # Apply the conversion to STTIME and add it to MJD
             df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x))
             df_01['MJD'] = df_split['MJD']
-            # Convert other relevant columns to desired datatypes
-            df_01['ELV'] = df_split['ELV'].astype(float)
-            df_01['REFSV'] = df_split['REFSV'].astype(float)
-            df_01['SRSV'] = df_split['SRSV'].astype(float)
-            df_01['REFSYS'] = df_split['REFSYS'].astype(float)
-            df_01['FRC'] = df_split['FRC'].astype(str)
-            df_01['REF'] = df_split['REF'].astype(str)
-            df_01['Version'] = df_split['Version'].astype(str)
-            df_01['LAB'] = df_split['LAB'].astype(str)
+            try: 
+                # Convert other relevant columns to desired datatypes
+                df_01['ELV'] = df_split['ELV'].astype(float)
+                df_01['REFSV'] = df_split['REFSV'].astype(float)
+                df_01['SRSV'] = df_split['SRSV'].astype(float)
+                df_01['REFSYS'] = df_split['REFSYS'].astype(float)
+                df_01['FRC'] = df_split['FRC'].astype(str)
+                df_01['REF'] = df_split['REF'].astype(str)
+                df_01['Version'] = df_split['Version'].astype(str)
+                df_01['LAB'] = df_split['LAB'].astype(str)
+            except Exception as e:
+                st.error(f"Data file is not in proper format. Please check the file {filename}")
             # unique_frc_values = df_split['FRC'].unique()
             # df_split['FRC'] = list(unique_frc_values)
 
@@ -706,15 +709,19 @@ def process_data2(files_02):
             # Apply the conversion to STTIME and add it to MJD
             df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x) )
             df_02['MJD'] = df_split['MJD']
-            # Convert other relevant columns to desired datatypes
-            df_02['ELV'] = df_split['ELV'].astype(float)
-            df_02['REFSV'] = df_split['REFSV'].astype(float)
-            df_02['SRSV'] = df_split['SRSV'].astype(float)
-            df_02['REFSYS'] = df_split['REFSYS'].astype(float)
-            df_02['FRC'] = df_split['FRC'].astype(str)
-            df_02['Version'] = df_split['Version'].astype(str)
-            df_02['LAB'] = df_split['LAB'].astype(str)
-            df_02['REF'] = df_split['REF'].astype(str)
+            try: 
+                
+                # Convert other relevant columns to desired datatypes
+                df_02['ELV'] = df_split['ELV'].astype(float)
+                df_02['REFSV'] = df_split['REFSV'].astype(float)
+                df_02['SRSV'] = df_split['SRSV'].astype(float)
+                df_02['REFSYS'] = df_split['REFSYS'].astype(float)
+                df_02['FRC'] = df_split['FRC'].astype(str)
+                df_02['Version'] = df_split['Version'].astype(str)
+                df_02['LAB'] = df_split['LAB'].astype(str)
+                df_02['REF'] = df_split['REF'].astype(str)
+            except Exception as e:
+                st.error(f"Data file is not in proper format. Please check the file {filename}") 
             # unique_frc_values = df_split['FRC'].unique()
             # df_split['FRC'] = list(unique_frc_values)
 
