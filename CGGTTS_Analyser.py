@@ -1,4 +1,6 @@
 
+# This version does the averaging of the data only not weighted average in case of refsys1 and refsys2 and also CV
+
 import streamlit as st
 import pandas as pd
 import os
@@ -878,7 +880,7 @@ def create_CVSV_data_CSV(starting_mjd, ending_mjd, SVids, frequency1, frequency2
     }).reset_index()
 
     # Rename columns for clarity
-    aggregated_data.columns = ['MJD', 'Num_CV_Satellites', 'PRNs', 'Refsys_difference(ns)']
+    aggregated_data.columns = ['MJD', '    CV_SATs', 'PRNs', '    Weighted_Refsys_difference(ns)']
 
         # Creating header information
     header_CV_info = (
@@ -982,6 +984,7 @@ if 'selected_svids' not in st.session_state:
 unique_SVIDs = []
 
 def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, Elv_Mask):
+    
     # Filter based on ELV values
     df1 = df1[df1['ELV'] >= (Elv_Mask * 10)]
     df2 = df2[df2['ELV'] >= (Elv_Mask * 10)]
@@ -989,34 +992,112 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, El
     # Ensure 'ALL' in selected_svids is handled correctly
     if 'ALL' in selected_svids:
         selected_svids = unique_SVIDs
-
-    # Filter the DataFrames
+    
+    # Filter the DataFrames as per the user selection of svids and SAT and MJD
     df1_filtered = df1[df1["MJD"].isin(unique_MJD_times) & df1["SAT"].isin(selected_svids)]
     df2_filtered = df2[df2["MJD"].isin(unique_MJD_times) & df2["SAT"].isin(selected_svids)]
+    
+    # Initialize lists to store results
+    df1_results = []
+    df2_results = []
+    avg_diff_results = []
 
-    # Merge the filtered DataFrames
-    merged_df = pd.merge(df1_filtered, df2_filtered, on=['SAT', 'MJD'], suffixes=('_df1', '_df2'))
+    # Iterate over each unique MJD time
+    for mjd in unique_MJD_times:
+        # Filter for the current MJD and find common satellites
+        df1_mjd = df1_filtered[df1_filtered['MJD'] == mjd]
+        df2_mjd = df2_filtered[df2_filtered['MJD'] == mjd]
+        common_sats = df1_mjd[df1_mjd['SAT'].isin(df2_mjd['SAT'])]['SAT'].unique()
 
-    # Compute differences
-    merged_df['CV_diff'] = (merged_df['REFSYS_df1'] - merged_df['REFSYS_df2']) * 0.1
+        # Calculate sine square of ELV in radians for common satellites
+        df1_mjd['sin2'] = np.sin(np.radians(df1_mjd['ELV']))**2
+        df2_mjd['sin2'] = np.sin(np.radians(df2_mjd['ELV']))**2
 
-    # Group by 'MJD' for the result
-    result = merged_df.groupby('MJD').agg({'CV_diff': ['mean', 'count']})
-    result.columns = ['CV_avg_diff', 'count']
-    result.reset_index(inplace=True)
+        # List to store differences for the current MJD
+        differences = []
+        # Perform calculations only if there are common satellites
+        if len(common_sats) > 0:
+            # Calculate normalized weights and weighted sums for common satellites
+            for sat in common_sats:
+                condition1 = df1_mjd['SAT'] == sat
+                condition2 = df2_mjd['SAT'] == sat
+
+                Norm_weigth1 = 1 / np.sum(df1_mjd.loc[condition1, 'sin2'])
+                Norm_weight2 = 1 / np.sum(df2_mjd.loc[condition2, 'sin2'])
+
+                weighted_sum_df1 = (df1_mjd.loc[condition1, 'REFSYS'] * Norm_weigth1 * df1_mjd.loc[condition1, 'sin2']).sum() * 0.1
+                weighted_sum_df2 = (df2_mjd.loc[condition2, 'REFSYS'] * Norm_weight2 * df2_mjd.loc[condition2, 'sin2']).sum() * 0.1
+
+                # Calculate and store the difference
+                difference = weighted_sum_df1 - weighted_sum_df2
+                differences.append(difference)
+
+            # Calculate average difference for the current MJD and add to results
+            if differences:
+                avg_diff = sum(differences) / len(differences)
+                avg_diff_results.append((mjd, avg_diff))
+
+    # Create a DataFrame for avg_diff results
+    avg_diff_df = pd.DataFrame(avg_diff_results, columns=['MJD', 'CV_avg_diff'])
+
+    # Calculate mean and standard deviation of avg_diff
+    mean_avg_diff = avg_diff_df['CV_avg_diff'].mean()
+    std_avg_diff = avg_diff_df['CV_avg_diff'].std()
+
+    # Filter out rows where the residual from the mean is more than 1.5 times the standard deviation
+    filtered_avg_diff_df = avg_diff_df[abs(avg_diff_df['CV_avg_diff'] - mean_avg_diff) <= 1.5 * std_avg_diff]
 
     # Handle missing MJD times
-    missing_session = list(set(unique_MJD_times) - set(result['MJD']))
+    missing_session = list(set(unique_MJD_times) - set(filtered_avg_diff_df['MJD']))
+    
+    # The following code is for plotting the individual sattellite weighted refsys difference values 
+    # Create a new DataFrame for CV_SV
+    CV_SV_results = []
 
-    # Create a new dataframe for CV_SV
-    group = merged_df.groupby('MJD')
-    CV_SV = pd.DataFrame({
-        'MJD': group.groups.keys(),
-        'SAT_list': group['SAT'].apply(list),
-        'CV_diff_list': group['CV_diff'].apply(list)
-    })
+    # Iterate over each unique MJD time
+    for mjd in unique_MJD_times:
+        # Filter for the current MJD and find common satellites
+        df1_mjd = df1[df1['MJD'] == mjd]
+        df2_mjd = df2[df2['MJD'] == mjd]
+        common_sats = df1_mjd[df1_mjd['SAT'].isin(df2_mjd['SAT'])]['SAT'].unique()
 
-    return result, missing_session, CV_SV
+        # Skip if no common satellites or MJD not in filtered_avg_diff_df
+        if len(common_sats) == 0 or mjd not in filtered_avg_diff_df['MJD'].values:
+            continue
+
+        # Calculate sine square of ELV in radians for common satellites
+        df1_mjd['sin2'] = np.sin(np.radians(df1_mjd['ELV']))**2
+        df2_mjd['sin2'] = np.sin(np.radians(df2_mjd['ELV']))**2
+
+        sat_diffs = []
+
+        # Calculate normalized weights and weighted sums for common satellites
+        for sat in common_sats:
+            condition1 = df1_mjd['SAT'] == sat
+            condition2 = df2_mjd['SAT'] == sat
+
+            Norm_weigth1 = 1 / np.sum(df1_mjd.loc[condition1, 'sin2'])
+            Norm_weight2 = 1 / np.sum(df2_mjd.loc[condition2, 'sin2'])
+
+            weighted_sum_df1 = (df1_mjd.loc[condition1, 'REFSYS'] * Norm_weigth1 * df1_mjd.loc[condition1, 'sin2']).sum() * 0.1
+            weighted_sum_df2 = (df2_mjd.loc[condition2, 'REFSYS'] * Norm_weight2 * df2_mjd.loc[condition2, 'sin2']).sum() * 0.1
+
+            # Calculate and store the difference
+            difference = weighted_sum_df1 - weighted_sum_df2
+            sat_diffs.append(difference)
+
+        # Append results for this MJD
+        CV_SV_results.append({
+            'MJD': mjd,
+            'Num_Common_SATs': len(common_sats),
+            'Common_SATs': ', '.join(common_sats),
+            'CV_diff': sat_diffs
+        })
+
+    # Convert the results to a DataFrame
+    CV_SV = pd.DataFrame(CV_SV_results)
+
+    return filtered_avg_diff_df, missing_session, CV_SV
 
 
 def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, Elv_Mask):
@@ -1131,7 +1212,6 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
         st.error("Files don't belong to the same time period")
         return pd.DataFrame()
 
-
 # Define the function to map old GPS SVIDs to new format
 def map_svids(svids, gnss_const):
     if gnss_const == 'GPS':
@@ -1177,12 +1257,14 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             df1_mjd_01 = st.session_state.df1_mjd[st.session_state.df1_mjd["MJD"] == mjd_time]
             df2_mjd_02 = st.session_state.df2_mjd[st.session_state.df2_mjd["MJD"] == mjd_time]
             
-            # Check if both GNSS types are 'GPS' to match the old version of SAT 21 to new version of SAT as G21
+             # Check if both GNSS types are 'GPS'
             if st.session_state['GNSS1'] == 'GPS' and st.session_state['GNSS2'] == 'GPS':
                 # Map SVIDs to the new format
                 df1_mjd_01["SAT"] = map_svids(df1_mjd_01["SAT"].tolist(), 'GPS')
                 df2_mjd_02["SAT"] = map_svids(df2_mjd_02["SAT"].tolist(), 'GPS')
             
+            # print(f"df1 SATs: \n {df1_mjd_01['SAT']}")
+            # print(f"df2 SATs: \n {df2_mjd_02['SAT']}")
             # Accumulate all SVIDs
             all_svids = set(df1_mjd_01["SAT"]).union(set(df2_mjd_02["SAT"]))
             all_common_svids.update(all_svids)
@@ -1190,7 +1272,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             # Accumulate the filtered data
             filtered_data01 = pd.concat([filtered_data01, df1_mjd_01])
             filtered_data02 = pd.concat([filtered_data02, df2_mjd_02])
-            
+                    
          # Store the accumulated data in the session state
         st.session_state.df1_mjd_01 = filtered_data01
         st.session_state.df2_mjd_02 = filtered_data02
@@ -1257,11 +1339,11 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
                     result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
-
+                    
                     if not result_df.empty:
                         st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
                     else:
-                        st.error("No COMMON data available for processing. Possible reasons might be two data sets doesnt belong to the same time period or they are of different versions or different code of frequency is selected ")               
+                        st.error("No COMMON data available for processing. Possible reasons might be two data sets doesnt belong to the same time period or they are of different versions or different code of frequency selection ")               
                     
                     if not cv_sv_df.empty:
                             st.session_state.CV_SV_data = cv_sv_df
@@ -1278,11 +1360,18 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 df_cv_sv = st.session_state.CV_SV_data
                 long_form = []
 
-                # Unpacking the lists in df_cv_sv
+                # Unpacking the lists in df_cv_sv (CV_SV)
                 for _, row in df_cv_sv.iterrows():
-                    for sat, diff in zip(row['SAT_list'], row['CV_diff_list']):
-                        long_form.append({'MJD': row['MJD'], 'SAT': sat, 'CV_diff': diff})
+                    mjd = row['MJD']
+                    common_sats = row['Common_SATs'].split(', ')  
+                    sat_diffs = row['CV_diff']
 
+                    # Iterate over each satellite and its corresponding difference
+                    for sat, diff in zip(common_sats, sat_diffs):
+                        long_form.append({'MJD': mjd, 'SAT': sat, 'CV_diff': diff})
+
+
+                
                 long_df = pd.DataFrame(long_form)
 
                 # Initialize a figure
@@ -1301,7 +1390,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Set plot titles and labels
                 fig.update_layout(
-                    title=f" {{st.session_state['GNSS2']}} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to time difference between refsys values for each COMMON Satellite in view at each epoch)",
+                    title=f"{st.session_state['GNSS2']} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to difference of weighted refsys values for each COMMON Satellite in view at each epoch)",
                     title_font=dict(size=20, color="black"),
                     xaxis_title="MJD",
                     xaxis_title_font=dict(size=16, color="black"),
@@ -1400,7 +1489,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # Set plot titles and labels with increased font size and black color
                     fig.update_layout(
                         # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
-                        title=f"{st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency1}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
+                        title=f" {st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency1}) <br> (Each point is average of weighted difference between refsys values of all common satellites at each epoch)",
                         title_font=dict(size=20, color="black"),
                         xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
@@ -1519,7 +1608,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                     # Set plot titles and labels with increased font size and black color
                     fig.update_layout(
-                        title=f"{st.session_state['GNSS2']} All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average refsys of all satellites in view)",
+                        title=f"All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average weighted refsys of all satellites in view)",
                         title_font=dict(size=20, color="black"),
                         xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
