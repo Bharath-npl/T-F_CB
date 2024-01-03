@@ -1,5 +1,5 @@
 
-# This version does the averaging of the data only not weighted average in case of refsys1 and refsys2 and also CV
+# This version does the WEIGHTED averaging of the data only not weighted average in case of refsys1 and refsys2 and also CV
 
 import streamlit as st
 import pandas as pd
@@ -426,6 +426,24 @@ def plot_data1(frequency1):
     # st.write(f"Filtered data: \n {df1_data_filtered}")
     st.session_state["sel_MJD_FRC_01"] = df1_data_filtered
     
+    # Calculate sine square of ELV
+    df1_data_filtered['sin2'] = np.sin(np.radians(df1_data_filtered['ELV']))**2
+
+    # Calculate weighted REFSYS value
+    df1_data_filtered['weighted_REFYS'] = df1_data_filtered['REFSYS'] * df1_data_filtered['sin2']
+
+    # Group by MJD
+    grouped = df1_data_filtered.groupby('MJD')
+
+    # Normalize weighted REFSYS for each MJD
+    normalized_REFYS = grouped.apply(lambda x: x['weighted_REFYS'] / x['sin2'].sum())
+
+    # Flatten the result
+    normalized_REFYS = normalized_REFYS.reset_index(level=0, drop=True)
+
+    # Join the normalized REFSYS back to the original DataFrame
+    df1_data_filtered['REFSYS'] = normalized_REFYS
+
 
     if not df1_data_filtered.empty:
         Avg_refsys_Rx1 = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
@@ -456,7 +474,7 @@ def plot_data1(frequency1):
         # Update layout for better presentation
 
         fig.update_layout(
-            title=f"{st.session_state['REF01']} - {st.session_state['GNSS1']}(time) at Lab: {st.session_state['LAB1']} through {st.session_state.selected_frequency1}. (Each point correponds to Average of all satellite refsys per epoch)",
+            title=f"{st.session_state['REF01']} - {st.session_state['GNSS1']}(time) at Lab: {st.session_state['LAB1']} through {st.session_state.selected_frequency1}. (Each point correponds to Average of all satellite weighted refsys per epoch)",
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
@@ -766,9 +784,27 @@ def plot_data2(frequency2):
     # Filter the MJD-filtered data based on the frequency
     df2_data_filtered = st.session_state['sel_MJD_df_02'][st.session_state['sel_MJD_df_02']['FRC'] == frequency2]
     st.session_state["sel_MJD_FRC_02"] = df2_data_filtered
-    # st.write(f"Filtered data: \n {df1_data_filtered}")
+    
+    # Calculate sine square of ELV
+    df2_data_filtered['sin2'] = np.sin(np.radians(df2_data_filtered['ELV']))**2
 
-    #     st.line_chart(Avg_refsys_CV.set_index("MJD")[["REFSYS", "Avg"]])
+    # Calculate weighted REFSYS value
+    df2_data_filtered['weighted_REFYS'] = df2_data_filtered['REFSYS'] * df2_data_filtered['sin2']
+
+    # Group by MJD
+    grouped = df2_data_filtered.groupby('MJD')
+
+    # Normalize weighted REFSYS for each MJD
+    normalized_REFYS = grouped.apply(lambda x: x['weighted_REFYS'] / x['sin2'].sum())
+
+    # Flatten the result
+    normalized_REFYS = normalized_REFYS.reset_index(level=0, drop=True)
+
+    # Join the normalized REFSYS back to the original DataFrame
+    df2_data_filtered['REFSYS'] = normalized_REFYS
+
+
+    # st.line_chart(Avg_refsys_CV.set_index("MJD")[["REFSYS", "Avg"]])
     if not df2_data_filtered.empty:
         Avg_refsys_Rx2 = (df2_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
         Avg_refsys_Rx2["REFSYS"] = (Avg_refsys_Rx2["REFSYS"]*0.1).round(2)
@@ -797,7 +833,7 @@ def plot_data2(frequency2):
 
         # Update layout for better presentation
         fig.update_layout(
-            title=f"{st.session_state['REF02']} - {st.session_state['GNSS2']}(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Average of all satellite refsys per epoch)",
+            title=f"{st.session_state['REF02']} - {st.session_state['GNSS2']}(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Average of all satellite weighted refsys per epoch)",
             xaxis_title="MJD",
             yaxis_title="REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
