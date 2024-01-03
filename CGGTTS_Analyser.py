@@ -131,8 +131,6 @@ Required_Colm_data_01 = []
 
 
 
-
-
 def process_data1(files_01):
     if files_01:
         col1.empty()
@@ -1019,7 +1017,7 @@ if 'selected_svids' not in st.session_state:
 
 unique_SVIDs = []
 
-def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, Elv_Mask):
+def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, Elv_Mask, outlier):
     
     # Filter based on ELV values
     df1 = df1[df1['ELV'] >= (Elv_Mask * 10)]
@@ -1081,7 +1079,7 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, El
     std_avg_diff = avg_diff_df['CV_avg_diff'].std()
 
     # Filter out rows where the residual from the mean is more than 1.5 times the standard deviation
-    filtered_avg_diff_df = avg_diff_df[abs(avg_diff_df['CV_avg_diff'] - mean_avg_diff) <= 1.5 * std_avg_diff]
+    filtered_avg_diff_df = avg_diff_df[abs(avg_diff_df['CV_avg_diff'] - mean_avg_diff) <= outlier * std_avg_diff]
 
     # Handle missing MJD times
     missing_session = list(set(unique_MJD_times) - set(filtered_avg_diff_df['MJD']))
@@ -1136,7 +1134,7 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, El
     return filtered_avg_diff_df, missing_session, CV_SV
 
 
-def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, Elv_Mask):
+def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, Elv_Mask, outlier):
     global print_once
      # Filter based on ELV values
     df1 = df1[df1['ELV'] >= Elv_Mask*10]
@@ -1165,8 +1163,8 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
             mean_df2 = df2_filtered['REFSYS'].mean()
             std_df2 = df2_filtered['REFSYS'].std()
 
-            df1_filtered = df1_filtered[np.abs(df1_filtered['REFSYS'] - mean_df1) <= 1.5 * std_df1]
-            df2_filtered = df2_filtered[np.abs(df2_filtered['REFSYS'] - mean_df2) <= 1.5 * std_df2]
+            df1_filtered = df1_filtered[np.abs(df1_filtered['REFSYS'] - mean_df1) <= outlier * std_df1]
+            df2_filtered = df2_filtered[np.abs(df2_filtered['REFSYS'] - mean_df2) <= outlier * std_df2]
 
             if not df1_filtered.empty and not df2_filtered.empty:
                 
@@ -1191,8 +1189,8 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                     std_df2 = np.sqrt(np.sum(res2**2)/len(res2))
 
 
-                    df1_filtered = df1_filtered[np.abs(res1) <= 1.5 * std_df1]
-                    df2_filtered = df2_filtered[np.abs(res2) <= 1.5 * std_df2]
+                    df1_filtered = df1_filtered[np.abs(res1) <= outlier * std_df1]
+                    df2_filtered = df2_filtered[np.abs(res2) <= outlier * std_df2]
 
                     Norm_weigth1 = 1/np.sum(df1_filtered.loc[condition1, 'sin2'])
                     Norm_weight2 = 1/np.sum(df2_filtered.loc[condition2, 'sin2'])
@@ -1353,7 +1351,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             if 'elevation_mask' not in st.session_state:
                 st.session_state.elevation_mask = 15.0
 
-            # Elevation mask input
+            # Elevation mask user input
             elevation_mask = st.sidebar.number_input('Elevation Mask (0 to 90 degrees)',
                                                     min_value=0.0, 
                                                     max_value=90.0, 
@@ -1362,6 +1360,20 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
             # Update session state for elevation mask
             st.session_state.elevation_mask = elevation_mask
+
+            # Set the Outlier filter in session_state
+            if 'outlier_filter' not in st.session_state:
+                st.session_state.outlier_filter = 1.5
+            
+            # Outlierfilter user input 
+            outlier_filter = st.sidebar.number_input('Outlier ( >  x * Std Dev) ',
+                                        min_value= 1.0, 
+                                        max_value= 20.0, 
+                                        value=1.5,  # default value
+                                        step=0.1)  # step size for increment/decrement
+
+             # Update session state for elevation mask
+            st.session_state.outlier_filter = outlier_filter
 
             # Update session state for selected svids
             st.session_state.selected_svids = svids_to_use
@@ -1374,7 +1386,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
                     selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
-                    result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask)
+                    result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask, st.session_state.outlier_filter)
                     
                     if not result_df.empty:
                         st.session_state.plot_CV_data = result_df[['MJD', 'CV_avg_diff']]
@@ -1589,7 +1601,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                     # Check if there is any common 'MJD' and process
                     if common_mjd:
-                        result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask)
+                        result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask, st.session_state.outlier_filter)
                     else:
                         # Handle the case where there is no common MJD
                         result_df02 = pd.DataFrame() 
