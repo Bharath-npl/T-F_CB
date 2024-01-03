@@ -676,7 +676,7 @@ def process_data2(files_02):
                     if frc_is_at is not None and len(line) > frc_is_at + 2:
                         data_row['FRC'] = line[frc_is_at:frc_is_at + 3].strip()
                     else:
-                        data_row['FRC'] = "No_FRC"
+                        data_row['FRC'] = "L1C"
 
                     data_rows.append(data_row)
 
