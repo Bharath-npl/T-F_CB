@@ -298,10 +298,11 @@ def process_data1(files_01):
                 df_01['REF'] = df_split['REF'].astype(str)
                 df_01['Version'] = df_split['Version'].astype(str)
                 df_01['LAB'] = df_split['LAB'].astype(str)
+
             
                 # unique_frc_values = df_split['FRC'].unique()
                 # df_split['FRC'] = list(unique_frc_values)
-    
+
                 Required_Colm_data_01.append(df_01)
                 # st.write(f"Required data columns : \n {Required_Colm_data_01}")
                 unique_FRC.update(df_01['FRC'].unique())
@@ -310,9 +311,10 @@ def process_data1(files_01):
                 
                 combined_Colm_data_01 = pd.concat([combined_Colm_data_01, df_01])
                 # combined_Colm_data_01 = pd.concat(Required_Colm_data_01, ignore_index=True)
-           except Exception as e:
-                st.error(f"Data is not in proper format. Please check the file {filename}")
-                file01_empty = True
+
+            except Exception as e:
+                st.error(f"Data is not in proper format. Please check the file: {filename}") 
+                file01_empty = True 
 
                 # Update the "Start MJD" and "End MJD" select boxes
         unique_mjd_values = sorted(unique_mjd_values)
@@ -711,8 +713,8 @@ def process_data2(files_02):
             # Apply the conversion to STTIME and add it to MJD
             df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x) )
             df_02['MJD'] = df_split['MJD']
+
             try: 
-                
                 # Convert other relevant columns to desired datatypes
                 df_02['ELV'] = df_split['ELV'].astype(float)
                 df_02['REFSV'] = df_split['REFSV'].astype(float)
@@ -722,18 +724,19 @@ def process_data2(files_02):
                 df_02['Version'] = df_split['Version'].astype(str)
                 df_02['LAB'] = df_split['LAB'].astype(str)
                 df_02['REF'] = df_split['REF'].astype(str)
-           
+
                 # unique_frc_values = df_split['FRC'].unique()
                 # df_split['FRC'] = list(unique_frc_values)
-    
+
                 Required_Colm_data_02.append(df_02)
                 unique_FRC.update(df_02['FRC'].unique())
                 unique_mjd_values.update(df_02['MJD'].unique())
                 unique_sv_id.update(df_02['SAT'].unique())
             
                 combined_Colm_data_02 = pd.concat(Required_Colm_data_02, ignore_index=True)
-            except Exception as e:
-                st.error(f"Data file is not in proper format. Please check the file {filename}") 
+
+            except Exception as e:      
+                st.error(f"Data is not in proper format. Please check the file: {filename}") 
                 file02_empty = True
                 # Update the "Start MJD" and "End MJD" select boxes
         unique_mjd_values = sorted(unique_mjd_values)
