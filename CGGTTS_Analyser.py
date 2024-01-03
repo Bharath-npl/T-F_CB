@@ -1366,7 +1366,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 st.session_state.outlier_filter = 1.5
             
             # Outlierfilter user input 
-            outlier_filter = st.sidebar.number_input('Outlier ( >  x * Std Dev) ',
+            outlier_filter = st.sidebar.number_input('Filter the outlier ( >  x * Std Dev) ',
                                         min_value= 1.0, 
                                         max_value= 20.0, 
                                         value=1.5,  # default value
