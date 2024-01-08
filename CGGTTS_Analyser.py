@@ -817,7 +817,7 @@ def plot_data2(frequency2):
 
     # st.line_chart(Avg_refsys_CV.set_index("MJD")[["REFSYS", "Avg"]])
     if not df2_data_filtered.empty:
-        Avg_refsys_Rx2 = (df2_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_Rx2 = (df2_data_filtered.groupby("MJD")["REFSYS"].sum().reset_index())
         Avg_refsys_Rx2["REFSYS"] = (Avg_refsys_Rx2["REFSYS"]*0.1).round(2)
         Data02_stdev = Avg_refsys_Rx2["REFSYS"].std()
 
