@@ -451,7 +451,7 @@ def plot_data1(frequency1):
 
 
     if not df1_data_filtered.empty:
-        Avg_refsys_Rx1 = (df1_data_filtered.groupby("MJD")["REFSYS"].mean().reset_index())
+        Avg_refsys_Rx1 = (df1_data_filtered.groupby("MJD")["REFSYS"].sum().reset_index())
         Avg_refsys_Rx1["REFSYS"] = (Avg_refsys_Rx1["REFSYS"]*0.1).round(2)
         Data01_stdev = Avg_refsys_Rx1["REFSYS"].std()
 
