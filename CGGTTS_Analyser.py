@@ -119,8 +119,8 @@ combined_Colm_data_01 = pd.DataFrame()
 
 # File uploader and data processing
 with st.form("my-form1", clear_on_submit=True):
-    files_01 = st.file_uploader(":file_folder: Upload the CGGTTS files of receiver 1", accept_multiple_files=True)
-    submitted1 = st.form_submit_button("Submit1")
+    files_01 = st.file_uploader(":file_folder: **Upload the CGGTTS files of receiver 1**", accept_multiple_files=True)
+    submitted1 = st.form_submit_button("**Submit1**")
 
 
 # Initialize selected_df_01 in session state if not present
@@ -128,7 +128,6 @@ if 'sel_MJD_df_01' not in st.session_state:
     st.session_state['sel_MJD_df_01'] = pd.DataFrame()
 
 Required_Colm_data_01 = []
-
 
 
 def process_data1(files_01):
@@ -544,7 +543,7 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
         filtered_unique_frequencies = [freq for freq in st.session_state['unique_FRC1'] if pd.notna(freq)]
         if filtered_unique_frequencies:
             # Re-select the frequency after MJD filtering
-            selected_frequency1 = st.radio("Select Frequency", filtered_unique_frequencies, index=0, key='Frequency1', horizontal=True)
+            selected_frequency1 = st.radio("**Select Frequency**", filtered_unique_frequencies, index=0, key='Frequency1', horizontal=True)
             st.session_state.selected_frequency1= selected_frequency1
             plot_data1(selected_frequency1)
         else:
@@ -564,8 +563,8 @@ if 'show_plot2' not in st.session_state:
 
 # File uploader and data processing
 with st.form("my-form2", clear_on_submit=True):
-    files_02 = st.file_uploader(":file_folder: Upload the CGGTTS files of receiver 2", accept_multiple_files=True)
-    submitted2 = st.form_submit_button("Submit2")
+    files_02 = st.file_uploader(":file_folder: **Upload the CGGTTS files of receiver 2**", accept_multiple_files=True)
+    submitted2 = st.form_submit_button("**Submit2**")
 
 Required_Colm_data_02 = []
 
@@ -912,7 +911,7 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
         filtered_unique_frequencies = [freq for freq in st.session_state['unique_FRC2'] if pd.notna(freq)]
         if filtered_unique_frequencies:
             # Re-select the frequency after MJD filtering
-            selected_frequency2 = st.radio("Select Frequency", filtered_unique_frequencies, index=0, key='Frequency2', horizontal=True)
+            selected_frequency2 = st.radio("**Select Frequency**", filtered_unique_frequencies, index=0, key='Frequency2', horizontal=True)
             st.session_state.selected_frequency2= selected_frequency2
             plot_data2(selected_frequency2)
         else:
