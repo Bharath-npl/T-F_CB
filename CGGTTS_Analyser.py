@@ -107,12 +107,22 @@ if st.sidebar.checkbox('Time Transfer through GNSS'):
     # Replace the link below with your actual Google Drive sharing link
     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
 
+if st.sidebar.checkbox('CGGTTS data format'):
+    print("CGGTTS data format")
+
 if st.sidebar.checkbox('User manual'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
     # display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
     display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
 # else:
 #     st.write("PDF is hidden. Check the box to view it.")
+
+if st.sidebar.checkbox('Demonstartion'):
+    print('Demonstration')
+
+
+if st.sidebar.checkbox('References'):
+    print("Reference Material")
 
 
 combined_Colm_data_01 = pd.DataFrame()
