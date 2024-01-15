@@ -154,7 +154,7 @@ header_lines = [
                     <li>
                         <strong>X Coordinate Information</strong>
                         <ul>
-                            # <li>Value: -4648199.41 meters</li>
+                            /* <li>Value: -4648199.41 meters</li>*/
                             <li>Coordinate in the ITRF (International Terrestrial Reference Frame)</li>
                             <li>Represents the X-axis position of the antenna phase center</li>
                             <li>Accuracy: Provided with at least 2 decimal places</li>
@@ -171,7 +171,7 @@ header_lines = [
                     <li>
                         <strong>Y Coordinate Information</strong>
                         <ul>
-                            # <li>Value: +2560480.72 meters</li>
+                            /* <li>Value: +2560480.72 meters</li>*/
                             <li>Coordinate in the ITRF (International Terrestrial Reference Frame)</li>
                             <li>Represents the Y-axis position of the antenna phase center</li>
                             <li>Accuracy: Provided with at least 2 decimal places</li>
@@ -188,7 +188,7 @@ header_lines = [
                     <li>
                         <strong>Z Coordinate Information</strong>
                         <ul>
-                            # <li>Value: -3526508.67 meters</li>
+                            /* <li>Value: -3526508.67 meters</li>*/
                             <li>Coordinate in the ITRF (International Terrestrial Reference Frame)</li>
                             <li>Represents the Z-axis position of the antenna phase center</li>
                             <li>Accuracy: Provided with at least 2 decimal places</li>
