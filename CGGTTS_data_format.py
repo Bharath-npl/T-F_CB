@@ -148,13 +148,13 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-7">
-            <pre>X = -4648199.41 m</pre>
+            <pre>X = -1432891.86 m</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
                         <strong>X Coordinate Information</strong>
                         <ul>
-                            <li>Value: -4648199.41 meters</li>
+                            # <li>Value: -4648199.41 meters</li>
                             <li>Coordinate in the ITRF (International Terrestrial Reference Frame)</li>
                             <li>Represents the X-axis position of the antenna phase center</li>
                             <li>Accuracy: Provided with at least 2 decimal places</li>
@@ -165,13 +165,13 @@ header_lines = [
         </div>'''
 
     '''<div class="header-line header-line-8">
-            <pre>Y = +2560480.72 m</pre>
+            <pre>Y = +6050260.21 m</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
                         <strong>Y Coordinate Information</strong>
                         <ul>
-                            <li>Value: +2560480.72 meters</li>
+                            # <li>Value: +2560480.72 meters</li>
                             <li>Coordinate in the ITRF (International Terrestrial Reference Frame)</li>
                             <li>Represents the Y-axis position of the antenna phase center</li>
                             <li>Accuracy: Provided with at least 2 decimal places</li>
@@ -182,13 +182,13 @@ header_lines = [
         </div>'''
 
     '''<div class="header-line header-line-9">
-            <pre>Z = -3526508.67 m</pre>
+            <pre>Z = -5739698.67 m</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
                         <strong>Z Coordinate Information</strong>
                         <ul>
-                            <li>Value: -3526508.67 meters</li>
+                            # <li>Value: -3526508.67 meters</li>
                             <li>Coordinate in the ITRF (International Terrestrial Reference Frame)</li>
                             <li>Represents the Z-axis position of the antenna phase center</li>
                             <li>Accuracy: Provided with at least 2 decimal places</li>
