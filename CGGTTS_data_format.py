@@ -1056,7 +1056,7 @@ width_classes = [
 def CGGTTS_data_format():
     
 
-    st.header(" Version 2E ")
+    st.header(" CGGTTS data format: Version 2E ")
     st.subheader ("File name")
 
     # Render the file name using st.markdown
