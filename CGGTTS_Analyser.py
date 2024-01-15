@@ -18,7 +18,7 @@ import plotly.graph_objects as go
 import math
 import base64
 import requests
-
+from CGGTTS_data_format import CGGTTS_data_format
 warnings.filterwarnings('ignore')
 
 
@@ -108,7 +108,7 @@ if st.sidebar.checkbox('Time Transfer through GNSS'):
     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
 
 if st.sidebar.checkbox('CGGTTS data format'):
-    print("CGGTTS data format")
+    CGGTTS_data_format()
 
 if st.sidebar.checkbox('User manual'):
     # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
