@@ -814,7 +814,31 @@ custom_css = '''
             border: 1px solid #000000; /* Optional: show border on hover */
         }
 
-        .tooltip-text {
+        # .tooltip-text {
+        #     visibility: hidden;
+        #     width: 800px;
+        #     background-color: #ADD8E6;
+        #     color: #000000;
+        #     text-align: left;
+        #     border-radius: 6px;
+        #     # padding: 5px;
+        #     position: absolute;
+        #     z-index: 1;
+        #     top: 100%;
+        #     # left: 90%;
+        #     # transform: translateX(-50%);
+        #     opacity: 0;
+        #     transition: opacity 0.3s;
+        #     display: inline-block;
+        #     margin-right: 0;
+        # }
+
+                /* Left aligned tooltips for columns on the left side */
+        .tooltip-text-left {
+            position: absolute;
+            left: 100%; /* Align tooltip to the left of the cell */
+            top: 100%;
+            transform: translateY(-50%);
             visibility: hidden;
             width: 800px;
             background-color: #ADD8E6;
@@ -823,7 +847,7 @@ custom_css = '''
             border-radius: 6px;
             # padding: 5px;
             position: absolute;
-            z-index: 1;
+            z-index: 1000;
             top: 100%;
             # left: 90%;
             # transform: translateX(-50%);
@@ -833,22 +857,26 @@ custom_css = '''
             margin-right: 0;
         }
 
-        /* Left aligned tooltips for columns on the left side */
-        .tooltip-text-left {
-        position: absolute;
-        left: 100%; /* Align tooltip to the left of the cell */
-        top: 100%;
-        transform: translateY(-50%);
-        /* Other tooltip styles (width, background-color, etc.) */
-        }
-
         /* Right aligned tooltips for columns on the right side */
         .tooltip-text-right {
-        position: absolute;
-        right: 100%; /* Align tooltip to the right of the cell */
-        top: 100%;
-        transform: translateX(-600px);
-        /* Other tooltip styles (width, background-color, etc.) */
+            position: absolute;
+            right: 100%; /* Align tooltip to the right of the cell */
+            top: 100%;
+            transform: translateX(-10px);
+            visibility: hidden;
+            width: 800px;
+            background-color: #ADD8E6;
+            color: #000000;
+            text-align: left;
+            border-radius: 6px;
+            # padding: 5px;
+            position: absolute;
+            z-index: 1000;
+            top: 100%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: inline-block;
+            margin-right: 0;
         }
 
         .data-cell:hover .tooltip-text {
