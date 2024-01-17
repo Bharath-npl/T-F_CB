@@ -856,7 +856,7 @@ custom_css = '''
             position: absolute;
             right: 100%; /* Align tooltip to the right of the cell */
             top: 100%;
-            transform: translateX(-10px);
+            transform: translateX(150px);
             visibility: hidden;
             width: 800px;
             background-color: #ADD8E6;
@@ -1113,7 +1113,7 @@ def CGGTTS_data_format():
 
     # Create the formatted data display
     formatted_data = ""
-    rightmost_column_start = 13
+    rightmost_column_start = 12
     # Generate HTML table with tooltips
     html = "<div class='data-table'>"
     for row_index, row in enumerate(data):
