@@ -1113,7 +1113,7 @@ def CGGTTS_data_format():
 
     # Create the formatted data display
     formatted_data = ""
-    rightmost_column_start = 12
+    rightmost_column_start = 13
     # Generate HTML table with tooltips
     html = "<div class='data-table'>"
     for row_index, row in enumerate(data):
