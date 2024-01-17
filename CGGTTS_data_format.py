@@ -698,7 +698,6 @@ tooltip_texts = [
 ]
 
 
-
 # Define custom CSS for colored columns with 24 different colors
 custom_css = '''
     <style> 
@@ -775,7 +774,7 @@ custom_css = '''
         }
 
         .stMarkdown div.header-line:hover .tooltip-text {
-            visibility: visible;
+            visibility: visible;  
             opacity: 1;
         }
         
@@ -809,11 +808,6 @@ custom_css = '''
             border: 1px solid #000000; /* Optional: show border on hover */
         }
 
-        .data-cell:hover {
-            background-color: #ADD8E6; /* Highlight color */
-            border: 1px solid #000000; /* Optional: show border on hover */
-        }
-
         # .tooltip-text {
         #     visibility: hidden;
         #     width: 800px;
@@ -823,7 +817,7 @@ custom_css = '''
         #     border-radius: 6px;
         #     # padding: 5px;
         #     position: absolute;
-        #     z-index: 1;
+        #     z-index: 1000;
         #     top: 100%;
         #     # left: 90%;
         #     # transform: translateX(-50%);
@@ -833,12 +827,12 @@ custom_css = '''
         #     margin-right: 0;
         # }
 
-                /* Left aligned tooltips for columns on the left side */
+        /* Left aligned tooltips for columns on the left side */
         .tooltip-text-left {
             position: absolute;
             left: 100%; /* Align tooltip to the left of the cell */
             top: 100%;
-            transform: translateY(-50%);
+            # transform: translateY(-5%);
             visibility: hidden;
             width: 800px;
             background-color: #ADD8E6;
@@ -883,6 +877,18 @@ custom_css = '''
             visibility: visible;
             opacity: 1;
         }
+
+         /* Ensure tooltips are not clipped */
+        .data-table {
+            overflow: visible;
+        }
+        # @media screen and (max-width: 1200px) { /* Adjust the breakpoint as needed */
+        #     .tooltip-text-right {
+        #         left: auto;
+        #         right: 100%;
+        #     }
+        # }
+
         # .tooltip-text ul {
         #     margin: 0; /* Remove default margin */
         #     padding: 0; /* Remove default padding */
@@ -895,7 +901,14 @@ custom_css = '''
         #     text-align: left; /* Align text to the left */
         # }
 
-        .data-cell:hover .tooltip-text {
+        # .data-cell:hover .tooltip-text {
+        #     visibility: visible;
+        #     opacity: 1;
+        # }
+
+         /* Show tooltips on hover */
+        .data-cell:hover .tooltip-text-right,
+        .data-cell:hover .tooltip-text-left {
             visibility: visible;
             opacity: 1;
         }
@@ -962,30 +975,30 @@ custom_css = '''
         .col-width-23 { display: inline-block; width: 40px; } /* column_widths[22] = 4 */
         .col-width-24 { display: inline-block; width: 30px; } /* column_widths[23] = 3 */
         /* ... Define classes for color ... */
-        .col-1 { color: red; }
-        .col-2 { color: blue; }
-        .col-3 { color: green; }
-        .col-4 { color: orange; }
-        .col-5 { color: purple; }
-        .col-6 { color: brown; }
-        .col-7 { color: magenta; }
-        .col-8 { color: teal; }
-        .col-9 { color: olive; }
-        .col-10 { color: navy; }
-        .col-11 { color: maroon; }
-        .col-12 { color: coral; }
-        .col-13 { color: chocolate; }
-        .col-14 { color: darkgreen; }
-        .col-15 { color: darkblue; }
-        .col-16 { color: darkred; }
-        .col-17 { color: darkorchid; }
-        .col-18 { color: darkgoldenrod; }
-        .col-19 { color: crimson; }
-        .col-20 { color: green; }
-        .col-21 { color: darkslateblue; }
-        .col-22 { color: deepskyblue; }
-        .col-23 { color: dodgerblue; }
-        .col-24 { color: firebrick; }
+        # .col-1 { color: red; }
+        # .col-2 { color: blue; }
+        # .col-3 { color: green; }
+        # .col-4 { color: orange; }
+        # .col-5 { color: purple; }
+        # .col-6 { color: brown; }
+        # .col-7 { color: magenta; }
+        # .col-8 { color: teal; }
+        # .col-9 { color: olive; }
+        # .col-10 { color: navy; }
+        # .col-11 { color: maroon; }
+        # .col-12 { color: coral; }
+        # .col-13 { color: chocolate; }
+        # .col-14 { color: darkgreen; }
+        # .col-15 { color: darkblue; }
+        # .col-16 { color: darkred; }
+        # .col-17 { color: darkorchid; }
+        # .col-18 { color: darkgoldenrod; }
+        # .col-19 { color: crimson; }
+        # .col-20 { color: green; }
+        # .col-21 { color: darkslateblue; }
+        # .col-22 { color: deepskyblue; }
+        # .col-23 { color: dodgerblue; }
+        # .col-24 { color: firebrick; }
 
         
          /* Font style for file name  */
@@ -1029,7 +1042,6 @@ custom_css = '''
     </style>
 '''
 
-
 # # Insert label rows 
 # data.insert(0, unit_labels)  # Insert the units as the first row
 
@@ -1063,7 +1075,7 @@ width_classes = [
 
 # # Create the formatted data display
 # formatted_data = ""
-# rightmost_column_start = 12
+# rightmost_column_start = 13
 # # Generate HTML table with tooltips
 # html = "<div class='data-table'>"
 # for row_index, row in enumerate(data):
