@@ -835,15 +835,20 @@ custom_css = '''
 
         /* Left aligned tooltips for columns on the left side */
         .tooltip-text-left {
-            left: 85%;
-            transform: translateX(0%);
+        position: absolute;
+        left: 100%; /* Align tooltip to the left of the cell */
+        top: 100%;
+        transform: translateY(-50%);
+        /* Other tooltip styles (width, background-color, etc.) */
         }
 
         /* Right aligned tooltips for columns on the right side */
         .tooltip-text-right {
-            left: auto;
-            right: 0;
-            # transform: translateX(-100%);
+        position: absolute;
+        right: 100%; /* Align tooltip to the right of the cell */
+        top: 100%;
+        transform: translateX(-600px);
+        /* Other tooltip styles (width, background-color, etc.) */
         }
 
         .data-cell:hover .tooltip-text {
