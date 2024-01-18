@@ -103,26 +103,38 @@ def display_pdf_from_gdrive(gdrive_link):
     # Display the PDF in Streamlit
     st.markdown(pdf_display, unsafe_allow_html=True)
 
-if st.sidebar.checkbox('Time Transfer through GNSS'):
-    # Replace the link below with your actual Google Drive sharing link
+# Define the options for the dropdown, including a default 'None' option
+options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Demonstration', 'References']
+
+reduce_gap_css = '''
+<style>
+    .sidebar .sidebar-content { padding-top: -2rem; }
+    .sidebar .st-bx { margin-bottom: -150px; }
+    .sidebar .st-b7 { margin-bottom: -150px; }
+</style>
+'''
+# Inject custom CSS with markdown
+st.sidebar.markdown(reduce_gap_css, unsafe_allow_html=True)
+
+# Create the select box with the options
+selected_option = st.sidebar.selectbox("Choose an option", options, index=0)
+
+# Check which option was selected and take action accordingly
+if selected_option == 'Time Transfer through GNSS':
     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
 
-if st.sidebar.checkbox('CGGTTS data format'):
+elif selected_option == 'CGGTTS data format':
     CGGTTS_data_format()
 
-if st.sidebar.checkbox('User manual'):
-    # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/User_manual_cggtts.pdf')
-    # display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/User_manual_cggtts.pdf')
+elif selected_option == 'User manual':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
-# else:
-#     st.write("PDF is hidden. Check the box to view it.")
 
-if st.sidebar.checkbox('Demonstartion'):
-    print('Demonstration')
+elif selected_option == 'Demonstration':
+    st.write('Demonstration')
 
-
-if st.sidebar.checkbox('References'):
+elif selected_option == 'References':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
+
 
 
 combined_Colm_data_01 = pd.DataFrame()
