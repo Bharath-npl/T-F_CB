@@ -18,7 +18,7 @@ import plotly.graph_objects as go
 import math
 import base64
 import requests
-from CGGTTS_data_format import CGGTTS_data_format
+from Pub_data_format import CGGTTS_data_format
 warnings.filterwarnings('ignore')
 
 
@@ -60,14 +60,17 @@ st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200
 st.sidebar.header("Time & Frequency Capacity Building")
 
 
-st.sidebar.header("Information for user")
+
+
+st.sidebar.header("User Information")
+
 
 
 def display_pdf_from_url(url):
     # Send a GET request to the URL
     response = requests.get(url)
     
-    # Check if the request was successful
+    # Check if the request was successful 
     if response.status_code == 200:
         # Encode the PDF content in base64
         base64_pdf = base64.b64encode(response.content).decode('utf-8')
@@ -135,7 +138,9 @@ elif selected_option == 'Demonstration':
 elif selected_option == 'References':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
 
-
+# # If the default option is selected, do nothing
+# elif selected_option == 'Select an option':
+#     st.write("Please select an option to display information.")
 
 combined_Colm_data_01 = pd.DataFrame()
 
@@ -547,7 +552,7 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
 
     # "Start MJD" in the first column
     with cols[0]:
-        start_mjd_input1 = st.selectbox("Start MJD", options=unique_mjd_int_values1, key='start_mjd01')
+        start_mjd_input1 = st.selectbox("**Start MJD**", options=unique_mjd_int_values1, key='start_mjd01')
 
     # st.session_state['start_mjd_input1'] = start_mjd_input1
     # "End MJD" in the second column
@@ -555,7 +560,7 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
         # Update the end_values1 list based on the selected start_mjd_input
         end_values1 = [mjd for mjd in unique_mjd_int_values1 if mjd >= start_mjd_input1]
         # end_values1 = [mjd for mjd in all_mjd_float_values if mjd >= start_mjd_input1]
-        end_mjd_input1 = st.selectbox("End MJD", options=end_values1, index=len(end_values1)-1  if end_values1 else 0, key='end_mjd01')
+        end_mjd_input1 = st.selectbox("**End MJD**", options=end_values1, index=len(end_values1)-1  if end_values1 else 0, key='end_mjd01')
         # end_mjd_input1 = st.selectbox("End MJD", options=end_values1, index=0 if end_values1 else -1, key='end_mjd01')
 
     st.session_state['sel_MJD_df_01'] = process_4_plot1(st.session_state['df1_total'], start_mjd_input1, end_mjd_input1)
@@ -914,13 +919,13 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
 
     # "Start MJD" in the first column
     with cols[0]:
-        start_mjd_input2 = st.selectbox("Start MJD", options=unique_mjd_int_values2, key='start_mjd02')
+        start_mjd_input2 = st.selectbox("**Start MJD**", options=unique_mjd_int_values2, key='start_mjd02')
 
     # "End MJD" in the second column
     with cols[1]:
         # Update the end_values1 list based on the selected start_mjd_input
         end_values2 = [mjd for mjd in unique_mjd_int_values2 if mjd >= start_mjd_input2]
-        end_mjd_input2 = st.selectbox("End MJD", options=end_values2, index=len(end_values2) - 1 if end_values2 else 0, key='end_mjd02')
+        end_mjd_input2 = st.selectbox("**End MJD**", options=end_values2, index=len(end_values2) - 1 if end_values2 else 0, key='end_mjd02')
     
     # Filter the DataFrame based on the MJD selection
 
@@ -982,13 +987,14 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
     # Creating DataFrame for data section
     # x=df3_filtered["MJD_time"], 
     #                 y=df3_filtered["CV_diff"]
+    selected_data["MJD"] =selected_data["MJD"].astype(float) 
     selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
     data_df = pd.DataFrame({
         'MJD': selected_data["MJD"],
         'CV_difference (ns)': selected_data['CV_diff'].round(2)
     })
 
-    # Creating header information
+    # Creating header information 
     header_CV_info = (
         f"#Common View Time Transfer Link Performance \n"
         f"#Start MJD: {starting_mjd}\n"
@@ -997,6 +1003,7 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
         f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
         f"#Elevation mask applied: {Elv_mask} degrees\n"
         f"#Selected satellites for time transfer: {', '.join(sorted(SVids))}\n"
+        f"#Outliers selected as : {st.session_state.outlier_filter} times of standard deviation \n"
     )
 
     return header_CV_info, data_df
@@ -1006,6 +1013,7 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, Elv_mask, selected_data):
     # Creating DataFrame for data section
     # Format the 'MJD' column to have only 5 digits after the decimal
+    selected_data["MJD_time"] = selected_data["MJD_time"].astype(float)
     selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
     
     data_AV_df = pd.DataFrame({
@@ -1022,6 +1030,7 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
         f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
         f"#Elevation mask applied: {Elv_mask} degrees\n"
         f"#Selected Satellites for time transfer: {', '.join(SVids)}\n"
+        f"#Outliers selected as : {st.session_state.outlier_filter} times of standard deviation \n"
     )
 
     return header_AV_info, data_AV_df
@@ -1412,7 +1421,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         y=df_sat['CV_diff'],
                         mode='markers',
                         name=sat,  # Satellite name as legend entry
-                        marker=dict(size=10)  # Increase marker size
+                        marker=dict(size=10)  # Inc rease marker size
                     ))
 
                 # Set plot titles and labels
@@ -1472,21 +1481,29 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     st.error("Caution: The selected frequenices are different")
 
                 # User inputs for the y-axis range
-                col1, col2 = st.columns(2)
-                with col1:
-                    user_start_y = st.number_input("Lower Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].min()))
-                with col2:
-                    user_end_y = st.number_input("Upper Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].max()))
+                # col1, col2 = st.columns(2)
+                # with col1:
+                #     user_start_y = st.number_input("Lower Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].min()))
+                # with col2:
+                #     user_end_y = st.number_input("Upper Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].max()))
 
                 # Filter the data based on user selection and calculate mean
-                df3_filtered = df3[(df3["CV_diff"] >= user_start_y) & (df3["CV_diff"] <= user_end_y)]
+                # df3_filtered = df3[(df3["CV_diff"] >= user_start_y) & (df3["CV_diff"] <= user_end_y)]
+                # std_dev = df3_filtered["CV_diff"].std()
+                df3_filtered = df3
                 std_dev = df3_filtered["CV_diff"].std()
 
-                            
-                # Set x-axis range and filter rows of the dataframe
-                min_mjd_time = df3["MJD"].dropna().min()
-                max_mjd_time = df3["MJD"].dropna().max()
 
+                # # Set x-axis range and filter rows of the dataframe
+                # min_mjd_time = df3["MJD"].dropna().min()
+                # max_mjd_time = df3["MJD"].dropna().max()
+
+
+                 # Set x-axis range and filter rows of the dataframe
+                min_mjd_time = float(df3["MJD"].dropna().min())
+                max_mjd_time = float(df3["MJD"].dropna().max())
+
+                print(f"min value: {min_mjd_time}")
                 # Now apply math.floor() and math.ceil()
                 min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
                 max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
@@ -1600,20 +1617,20 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 st.markdown('---')  # Add a horizontal line for separation
                 # print(df4)
                 # User inputs for the y-axis range
-                col1, col2 = st.columns(2)
-                with col1:
-                    user_start_y = st.number_input("Lower Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].min()))
-                with col2:
-                    user_end_y = st.number_input("Upper Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].max()))
+                # col1, col2 = st.columns(2)
+                # with col1:
+                #     user_start_y = st.number_input("Lower Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].min()))
+                # with col2:
+                #     user_end_y = st.number_input("Upper Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].max()))
 
                 # Filter the data based on user selection and calculate mean
-                df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
-                
+                # df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
+                df4_filtered = df4
                 std_dev = df4_filtered["AV_diff"].std()
 
                 # Set x-axis range
-                min_x = math.floor(min(df4["MJD_time"]))
-                max_x = math.ceil(max(df4["MJD_time"]))
+                min_x = math.floor(float(min(df4["MJD_time"])))
+                max_x = math.ceil(float(max(df4["MJD_time"])))
                
                 if min_x is not None and max_x is not None:
                     # Create scatter plot using Plotly
