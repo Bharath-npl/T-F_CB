@@ -1213,9 +1213,9 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                     #**************************************
                     # End of the code for printing the first epoch of AV
 
-            else:
+            # else:
                 # Handle the case when one of the filtered DataFrames is empty
-                AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
+                # AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
 
                                
             # Print the required caluclated infromatio in the screen
