@@ -60,7 +60,7 @@ st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200
 st.sidebar.header("Time & Frequency Capacity Building")
 
 
-st.sidebar.header("CV & AV Time Transfer")
+st.sidebar.header("Information for user")
 
 
 def display_pdf_from_url(url):
