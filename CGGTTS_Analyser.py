@@ -61,6 +61,7 @@ st.sidebar.header("Time & Frequency Capacity Building")
 
 
 
+st.markdown('----')  # Add a horizontal line for separation
 
 st.sidebar.header("User Information")
 
@@ -1016,6 +1017,9 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
     selected_data["MJD_time"] = selected_data["MJD_time"].astype(float)
     selected_data["MJD_time"] = selected_data["MJD_time"].apply(lambda x: f"{x:.5f}")
     
+    # Remove rows where 'AV_diff' is None
+    selected_data = selected_data.dropna(subset=['AV_diff'])
+
     data_AV_df = pd.DataFrame({
         'MJD': selected_data["MJD_time"],
         'AV_difference (ns)': selected_data['AV_diff'].round(2)
@@ -1214,8 +1218,8 @@ def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, El
                     # End of the code for printing the first epoch of AV
 
             # else:
-                # Handle the case when one of the filtered DataFrames is empty
-                # AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
+            #     # Handle the case when one of the filtered DataFrames is empty
+            #     AV_data.append({'MJD_time': unique_time, 'AV_diff': None})
 
                                
             # Print the required caluclated infromatio in the screen
@@ -1238,6 +1242,10 @@ def map_svids(svids, gnss_const):
     if gnss_const == 'GPS':
         return ['G' + svid if svid.isdigit() and int(svid) <= 63 else svid for svid in svids]
     return svids
+
+
+CV_result_df = pd.DataFrame()
+AV_result_df = pd.DataFrame()
 
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
@@ -1274,6 +1282,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
 
         for mjd_time in unique_MJD_times:
+            
+
             # Filter dataframes for the current mjd_time
             df1_mjd_01 = st.session_state.df1_mjd[st.session_state.df1_mjd["MJD"] == mjd_time]
             df2_mjd_02 = st.session_state.df2_mjd[st.session_state.df2_mjd["MJD"] == mjd_time]
@@ -1321,6 +1331,9 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
             st.sidebar.markdown('---')  # Add a horizontal line for separation
             st.sidebar.header("Filters for CV & AV analysis")
+
+            Update_CV_AV = st.sidebar.button("Apply for CV & AV", key= 'Update_plots')
+
             selected_svids = st.sidebar.multiselect(
                 "**Choose Satellites (PRN's)**",
                 options=['ALL'] + list(unique_SVIDs),
@@ -1353,7 +1366,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 st.session_state.outlier_filter = 1.5
             
             # Outlierfilter user input 
-            outlier_filter = st.sidebar.number_input('**Outlier ( x  Std Dev)**',
+            outlier_filter = st.sidebar.number_input('**Outlier (  = x  Std Dev)**',
                                                     min_value= 0.5, 
                                                     max_value= 20.0, 
                                                     value=1.5,  # default value
@@ -1366,19 +1379,20 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             st.session_state.selected_svids = svids_to_use
             # plot_button = st.sidebar.button("Plot CV")
 
-            if plot_CV :
+            if plot_CV or Update_CV_AV:
                 if st.session_state['GNSS1'] == st.session_state['GNSS2']:
                     # Replace the following with your actual DataFrame and variable names
                     df1_CV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                     df2_CV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
                     selected_svids = st.session_state.selected_svids  # Replace with your actual list of selected svids
 
-                    result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask, st.session_state.outlier_filter)
+                    CV_result_df, missing_sessions, cv_sv_df = process_plot_CV(df1_CV, df2_CV, unique_MJD_times, selected_svids, unique_SVIDs, st.session_state.elevation_mask, st.session_state.outlier_filter)
                     
-                    if not result_df.empty:
-                        st.session_state.plot_CV_data = result_df[['MJD', 'CV_diff']]
+                    if not CV_result_df.empty:
+                        st.session_state.plot_CV_data = CV_result_df[['MJD', 'CV_diff']]
                     else:
-                        st.error("No COMMON data available for processing. Possible reasons might be two data sets doesnt belong to the same time period or they are of different versions or different code of frequency selection ")               
+                        print(f"Result of CV: \n {CV_result_df}")
+                        st.error("**Common-View cannot be performed.** Possibly:  \n\n Two data sets doesn't belong to the same time period or \n\n They are of different CGGTTS versions (if not GPS) or \n\n The two data sets are from diferent GNSS systems or \n\n No data available as per your filters ")               
                     
                     if not cv_sv_df.empty:
                             st.session_state.CV_SV_data = cv_sv_df
@@ -1389,7 +1403,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 else:
                     st.error("Common view cannot be processed: The two data sets are of different GNSS constellation ")
 
-            if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty:
+            if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty and not CV_result_df.empty:
                 # Use the correct dataframe
                 st.markdown('---')  # Add a horizontal line for separation
                 
@@ -1409,8 +1423,9 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 
                 long_df = pd.DataFrame(long_form)
-
-                # Initialize a figure
+                
+                # if not CV_result_df.empty:
+                    # Initialize a figure
                 fig = go.Figure()
 
                 # Add scatter plot for each satellite
@@ -1426,7 +1441,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                 # Set plot titles and labels
                 fig.update_layout(
-                    title=f"{st.session_state['GNSS2']} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to difference of refsys values for each COMMON Satellite in view at each epoch)",
+                    title=f"{st.session_state['GNSS2']} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to difference of refsys values for each common satellite in view at each epoch)",
                     title_font=dict(size=20, color="black"),
                     xaxis_title="MJD",
                     xaxis_title_font=dict(size=16, color="black"),
@@ -1443,8 +1458,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     autosize=False,
                     width=800,
                     height=600
-                )
-                
+                    )
+                    
 
                 # Display the plot in Streamlit
                 st.plotly_chart(fig, use_container_width=True)
@@ -1472,13 +1487,13 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     mime="text/csv",
                 )
 
-                                
-            if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty:
+            
+            if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty and not CV_result_df.empty:
                 df3 = st.session_state.plot_CV_data
                 st.markdown('---')  # Add a horizontal line for separation
                 
                 if st.session_state.selected_frequency1 != st.session_state.selected_frequency2:
-                    st.error("Caution: The selected frequenices are different")
+                    st.error(f"**Caution:** Your are comparing the two receiver clocks with GNSS(time) using two different code measurements ({st.session_state.selected_frequency1},{st.session_state.selected_frequency2})")
 
                 # User inputs for the y-axis range
                 # col1, col2 = st.columns(2)
@@ -1499,11 +1514,11 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 # max_mjd_time = df3["MJD"].dropna().max()
 
 
-                 # Set x-axis range and filter rows of the dataframe
+                # Set x-axis range and filter rows of the dataframe
                 min_mjd_time = float(df3["MJD"].dropna().min())
                 max_mjd_time = float(df3["MJD"].dropna().max())
 
-                print(f"min value: {min_mjd_time}")
+                
                 # Now apply math.floor() and math.ceil()
                 min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
                 max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
@@ -1533,7 +1548,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # Set plot titles and labels with increased font size and black color
                     fig.update_layout(
                         # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
-                        title=f" {st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency1}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
+                        title=f" {st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency2}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
                         title_font=dict(size=20, color="black"),
                         xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
@@ -1555,7 +1570,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         width=800,
                         height=600
                     )
-                   
+                
                     # Display the plot
                     st.plotly_chart(fig, use_container_width=True)
                 
@@ -1578,12 +1593,12 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         file_name="Common_View_data.csv",
                         mime="text/csv",
                     )
-                        
+                            
 
             if 'selected_svids' not in st.session_state:
                 st.session_state.selected_svids = ['ALL']
 
-            if plot_AV:
+            if plot_AV or Update_CV_AV:
                 if st.session_state['GNSS1'] == st.session_state['GNSS2']:
                     df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                     df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
@@ -1597,20 +1612,20 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                     # Check if there is any common 'MJD' and process
                     if common_mjd:
-                        result_df02 = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask, st.session_state.outlier_filter)
+                        AV_result_df = process_plot_AV(df1_AV, df2_AV, st.session_state.selected_svids, unique_SVIDs, unique_MJD_times, st.session_state.elevation_mask, st.session_state.outlier_filter)
                     else:
                         # Handle the case where there is no common MJD
-                        result_df02 = pd.DataFrame() 
+                        AV_result_df = pd.DataFrame() 
                     
-                    if not result_df02.empty:
-                        st.session_state.plot_AV_data = result_df02
+                    if not AV_result_df.empty:
+                        st.session_state.plot_AV_data = AV_result_df
                         
                     else:
-                        st.error("No COMMON data available for processing. Check if the two data sets belong to the same time period and same code of frequency selection ") 
+                        st.error("**All-in-view cannot be performed**. Possibly: \n\n The two data sets doesn't belong to the same time period or\n\n No data available as per your filters") 
                 else:
-                    st.error("All-in-view cannot be processed. The two data sets are of different GNSS constellation ")
+                    st.error("**All-in-view cannot be processed.** The two data sets are of different GNSS constellation ")
             
-            if 'plot_AV_data' in st.session_state and st.session_state.plot_AV_data is not None: 
+            if 'plot_AV_data' in st.session_state and st.session_state.plot_AV_data is not None and not AV_result_df.empty: 
                 
                 df4 = st.session_state.plot_AV_data
                                 
@@ -1627,11 +1642,21 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 # df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
                 df4_filtered = df4
                 std_dev = df4_filtered["AV_diff"].std()
+                
+
+                # # Set x-axis range and filter rows of the dataframe
+                # min_mjd_time = float(df3["MJD_time"].dropna().min())
+                # max_mjd_time = float(df3["MJD_time"].dropna().max())
+
+                # # Now apply math.floor() and math.ceil()
+                # min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
+                # max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
+
 
                 # Set x-axis range
                 min_x = math.floor(float(min(df4["MJD_time"])))
                 max_x = math.ceil(float(max(df4["MJD_time"])))
-               
+                            
                 if min_x is not None and max_x is not None:
                     # Create scatter plot using Plotly
                     fig = go.Figure()
