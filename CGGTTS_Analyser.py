@@ -1,4 +1,3 @@
-
 # ********************************* CGGTTS data analyser ***********************
 
 import streamlit as st
@@ -110,15 +109,15 @@ def display_pdf_from_gdrive(gdrive_link):
 # Define the options for the dropdown, including a default 'None' option
 options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Demonstration', 'References']
 
-reduce_gap_css = '''
-<style>
-    .sidebar .sidebar-content { padding-top: -2rem; }
-    .sidebar .st-bx { margin-bottom: -150px; }
-    .sidebar .st-b7 { margin-bottom: -150px; }
-</style>
-'''
-# Inject custom CSS with markdown
-st.sidebar.markdown(reduce_gap_css, unsafe_allow_html=True)
+# reduce_gap_css = '''
+# <style>
+#     .sidebar .sidebar-content { padding-top: -2rem; }
+#     .sidebar .st-bx { margin-bottom: -150px; }
+#     .sidebar .st-b7 { margin-bottom: -150px; }
+# </style>
+# '''
+# # Inject custom CSS with markdown
+# st.sidebar.markdown(reduce_gap_css, unsafe_allow_html=True)
 
 # Create the select box with the options
 selected_option = st.sidebar.selectbox("Choose an option", options, index=0)
@@ -233,7 +232,7 @@ def process_data1(files_01):
                         Rx1_version = line.split('=')[1].strip()
                         # Do something with Rx1_version
                     else:
-                        print("Problem in reading CGGTTS version, please add '=' before version number as per standard format")
+                        st.error("Problem in reading CGGTTS version in the header, please add '=' before version number as per standard format")
                 
                 if line.startswith("REF=") or line.startswith("REF ="):
                     Receiever1 = line.split('=')[1].strip()
@@ -663,7 +662,7 @@ def process_data2(files_02):
                         Rx2_version = line.split('=')[1].strip()
                         
                     else:
-                        print("Problem in reading CGGTTS version, please add '=' before version number as per standard format")
+                        st.error("Problem in reading CGGTTS version in the header, please add '=' before version number as per standard format")
                     
                 # Find the position of the FRC in the line 
                 if "hhmmss  s  .1dg .1dg    .1ns" in line and prev_line:
