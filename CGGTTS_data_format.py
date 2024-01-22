@@ -852,7 +852,7 @@ custom_css = '''
             z-index: 1000;
             top: 1%;
             left: 15%;
-            transform: translateY(25%);
+            transform: translateY(20%);
             opacity: 0;
             transition: opacity 0.3s;
             display: inline-block;
