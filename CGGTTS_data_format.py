@@ -850,7 +850,7 @@ custom_css = '''
             # padding: 5px;
             position: absolute;
             z-index: 1000;
-            top: 5%;
+            bottom: 5%;
             left: 15%;
             # transform: translateX(-50%);
             opacity: 0;
