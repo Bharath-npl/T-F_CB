@@ -17,7 +17,7 @@ import plotly.graph_objects as go
 import math
 import base64
 import requests
-from Pub_data_format import CGGTTS_data_format
+from CGGTTS_data_format import CGGTTS_data_format
 warnings.filterwarnings('ignore')
 
 
