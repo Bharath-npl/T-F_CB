@@ -697,6 +697,29 @@ tooltip_texts = [
 
 ]
 
+# Empty line to indicate the end of header 
+Empty_line_tooltip = '''
+<span class="tooltiptext">
+    <ul>
+        <li><strong>Blank line</strong>: 
+            <ul>
+                <li>Blank Line indicates the end of the header</li>
+            </ul>
+        </li>
+    </ul>
+</span>
+'''
+
+
+# HTML for the empty line with tooltip
+empty_line_html = '''
+<div class="tooltip" style="background-color: #DCDCDC; height: 20px;">
+    {tooltip_content}
+</div>
+'''.format(tooltip_content=Empty_line_tooltip)
+
+
+
 
 # Define custom CSS for colored columns with 24 different colors
 custom_css = '''
@@ -791,6 +814,11 @@ custom_css = '''
             margin: 0px 0px 0.5rem;
         }
 
+        .st-emotion-cache-5rimss {
+            # font-family: "Source Sans Pro", sans-serif;
+            margin-bottom: -1.5rem;
+        }
+        
         .data-table {
             display: table;
             width: 100%;
@@ -812,24 +840,24 @@ custom_css = '''
             border: 1px solid #000000; /* Optional: show border on hover */
         }
 
-        # .tooltip-text {
-        #     visibility: hidden;
-        #     width: 800px;
-        #     background-color: #ADD8E6;
-        #     color: #000000;
-        #     text-align: left;
-        #     border-radius: 6px;
-        #     # padding: 5px;
-        #     position: absolute;
-        #     z-index: 1000;
-        #     top: 100%;
-        #     # left: 90%;
-        #     # transform: translateX(-50%);
-        #     opacity: 0;
-        #     transition: opacity 0.3s;
-        #     display: inline-block;
-        #     margin-right: 0;
-        # }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 800px;
+            background-color: #ADD8E6;
+            color: #000000;
+            text-align: left;
+            border-radius: 6px;
+            # padding: 5px;
+            position: absolute;
+            z-index: 1000;
+            top: 100%;
+            # left: 90%;
+            # transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: inline-block;
+            margin-right: 0;
+        }
 
         /* Left aligned tooltips for columns on the left side */
         .tooltip-text-left {
@@ -910,6 +938,10 @@ custom_css = '''
         #     opacity: 1;
         # }
 
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
          /* Show tooltips on hover */
         .data-cell:hover .tooltip-text-right,
         .data-cell:hover .tooltip-text-left {
@@ -1112,7 +1144,7 @@ def CGGTTS_data_format():
 
     header_html = '<div class="header-bg">' + '<br>'.join(header_lines) + '</div>'
     st.markdown(custom_css + header_html, unsafe_allow_html=True)
-
+    st.markdown(custom_css + empty_line_html, unsafe_allow_html=True)
     transposed_data = list(zip(*data))
 
     # Create the formatted data display
