@@ -17,7 +17,7 @@ import plotly.graph_objects as go
 import math
 import base64
 import requests
-from CGGTTS_data_format import CGGTTS_data_format
+from Pub_data_format import CGGTTS_data_format
 warnings.filterwarnings('ignore')
 
 
@@ -1402,196 +1402,196 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 else:
                     st.error("Common view cannot be processed: The two data sets are of different GNSS constellation ")
 
-            if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty and not CV_result_df.empty:
-                # Use the correct dataframe
-                st.markdown('---')  # Add a horizontal line for separation
-                
-                df_cv_sv = st.session_state.CV_SV_data
-                long_form = []
-
-                # Unpacking the lists in df_cv_sv (CV_SV)
-                for _, row in df_cv_sv.iterrows():
-                    mjd = row['MJD']
-                    common_sats = row['SAT_list']
-                    sat_diffs = row['CV_diff_list']
-
-                    # Iterate over each satellite and its corresponding difference
-                    for sat, diff in zip(common_sats, sat_diffs):
-                        long_form.append({'MJD': mjd, 'SAT': sat, 'CV_diff': diff})
-
-
-                
-                long_df = pd.DataFrame(long_form)
-                
-                # if not CV_result_df.empty:
-                    # Initialize a figure
-                fig = go.Figure()
-
-                # Add scatter plot for each satellite
-                for sat in long_df['SAT'].unique():
-                    df_sat = long_df[long_df['SAT'] == sat]
-                    fig.add_trace(go.Scatter(
-                        x=df_sat['MJD'],
-                        y=df_sat['CV_diff'],
-                        mode='markers',
-                        name=sat,  # Satellite name as legend entry
-                        marker=dict(size=10)  # Inc rease marker size
-                    ))
-
-                # Set plot titles and labels
-                fig.update_layout(
-                    title=f"{st.session_state['GNSS2']} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to difference of refsys values for each common satellite in view at each epoch)",
-                    title_font=dict(size=20, color="black"),
-                    xaxis_title="MJD",
-                    xaxis_title_font=dict(size=16, color="black"),
-                    yaxis_title="Time difference (ns)",
-                    yaxis_title_font=dict(size=16, color="black"),
-                    xaxis=dict(tickformat=".2f",
-                        tickfont=dict(size=14, color="black"),
-                        exponentformat='none' 
-                    ),
-                    yaxis=dict(
-                        tickmode='auto', nticks=10,
-                        tickfont=dict(size=14, color="black")
-                    ),
-                    autosize=False,
-                    width=800,
-                    height=600
-                    )
+                if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty and not CV_result_df.empty:
+                    # Use the correct dataframe
+                    st.markdown('---')  # Add a horizontal line for separation
                     
+                    df_cv_sv = st.session_state.CV_SV_data
+                    long_form = []
 
-                # Display the plot in Streamlit
-                st.plotly_chart(fig, use_container_width=True)
+                    # Unpacking the lists in df_cv_sv (CV_SV)
+                    for _, row in df_cv_sv.iterrows():
+                        mjd = row['MJD']
+                        common_sats = row['SAT_list']
+                        sat_diffs = row['CV_diff_list']
 
-                # Set x-axis range and filter rows of the dataframe
-                min_mjd_time = long_df["MJD"].dropna().min()
-                max_mjd_time = long_df["MJD"].dropna().max()
-
-                # Now apply math.floor() and math.ceil()
-                min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
-                max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
-
-                header, data_df = create_CVSV_data_CSV(min_x, max_x-1, 
-                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
-                                                    st.session_state.selected_frequency2,st.session_state.elevation_mask, long_df)
-
-                # Convert to CSV
-                csv_CV = convert_to_csv(header, data_df)
-
-                # Create download button
-                st.download_button(
-                    label="Download CV Satellite data",
-                    data=csv_CV,
-                    file_name="Common_View_Sat_data.csv",
-                    mime="text/csv",
-                )
-
-            
-            if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty and not CV_result_df.empty:
-                df3 = st.session_state.plot_CV_data
-                st.markdown('---')  # Add a horizontal line for separation
-                
-                if st.session_state.selected_frequency1 != st.session_state.selected_frequency2:
-                    st.error(f"**Caution:** Your are comparing the two receiver clocks with GNSS(time) using two different code measurements ({st.session_state.selected_frequency1},{st.session_state.selected_frequency2})")
-
-                # User inputs for the y-axis range
-                # col1, col2 = st.columns(2)
-                # with col1:
-                #     user_start_y = st.number_input("Lower Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].min()))
-                # with col2:
-                #     user_end_y = st.number_input("Upper Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].max()))
-
-                # Filter the data based on user selection and calculate mean
-                # df3_filtered = df3[(df3["CV_diff"] >= user_start_y) & (df3["CV_diff"] <= user_end_y)]
-                # std_dev = df3_filtered["CV_diff"].std()
-                df3_filtered = df3
-                std_dev = df3_filtered["CV_diff"].std()
+                        # Iterate over each satellite and its corresponding difference
+                        for sat, diff in zip(common_sats, sat_diffs):
+                            long_form.append({'MJD': mjd, 'SAT': sat, 'CV_diff': diff})
 
 
-                # # Set x-axis range and filter rows of the dataframe
-                # min_mjd_time = df3["MJD"].dropna().min()
-                # max_mjd_time = df3["MJD"].dropna().max()
-
-
-                # Set x-axis range and filter rows of the dataframe
-                min_mjd_time = float(df3["MJD"].dropna().min())
-                max_mjd_time = float(df3["MJD"].dropna().max())
-
-                
-                # Now apply math.floor() and math.ceil()
-                min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
-                max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
-
-                # Add a check if min_x and max_x are None
-                if min_x is None or max_x is None:
-                    print("Error: MJD_time column contains only NaN values")
-                    # Handle the error appropriately
-                else:
-                # Create scatter plot
+                    
+                    long_df = pd.DataFrame(long_form)
+                    
+                    # if not CV_result_df.empty:
+                        # Initialize a figure
                     fig = go.Figure()
-                            
-                    # Add scatter plot of data points
-                    fig.add_trace(go.Scatter(
-                        x=df3_filtered["MJD"], 
-                        y=df3_filtered["CV_diff"], 
-                        mode='markers',
-                        name='CV_diff',
-                        marker=dict(size=10)  # Increase marker size
-                    ))
-        
-                    # Add a standard deviation annotation to the plot 
-                    fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
-                    showarrow=False, font=dict(size=18, color="black"),
-                    xanchor='right', yanchor='top')
 
-                    # Set plot titles and labels with increased font size and black color
+                    # Add scatter plot for each satellite
+                    for sat in long_df['SAT'].unique():
+                        df_sat = long_df[long_df['SAT'] == sat]
+                        fig.add_trace(go.Scatter(
+                            x=df_sat['MJD'],
+                            y=df_sat['CV_diff'],
+                            mode='markers',
+                            name=sat,  # Satellite name as legend entry
+                            marker=dict(size=10)  # Inc rease marker size
+                        ))
+
+                    # Set plot titles and labels
                     fig.update_layout(
-                        # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
-                        title=f" {st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency2}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
+                        title=f"{st.session_state['GNSS2']} satellites in common-view between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']} ({st.session_state.selected_frequency2}) <br> (Each point corresponds to difference of refsys values for each common satellite in view at each epoch)",
                         title_font=dict(size=20, color="black"),
                         xaxis_title="MJD",
                         xaxis_title_font=dict(size=16, color="black"),
                         yaxis_title="Time difference (ns)",
                         yaxis_title_font=dict(size=16, color="black"),
                         xaxis=dict(tickformat=".2f",
-                            tickmode='array',
-                            # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
-                            # tickformat="05d",
                             tickfont=dict(size=14, color="black"),
                             exponentformat='none' 
                         ),
                         yaxis=dict(
-                            tickmode='auto', nticks =10,
+                            tickmode='auto', nticks=10,
                             tickfont=dict(size=14, color="black")
                         ),
-                        # yaxis=dict(tickmode='auto', nticks =10)
                         autosize=False,
                         width=800,
                         height=600
-                    )
-                
-                    # Display the plot
+                        )
+                        
+
+                    # Display the plot in Streamlit
                     st.plotly_chart(fig, use_container_width=True)
-                
-                # Data file processing 
-                                
-                # if st.sidebar.button('Get CV file of this data'): 
-                    # Create the CSV data
-                    # Create the CSV header and data
-                    header, data_df = create_csv_data_CV(min_x, max_x-1, 
-                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
-                                                    st.session_state.selected_frequency2,st.session_state.elevation_mask, df3_filtered)
+
+                    # Set x-axis range and filter rows of the dataframe
+                    min_mjd_time = long_df["MJD"].dropna().min()
+                    max_mjd_time = long_df["MJD"].dropna().max()
+
+                    # Now apply math.floor() and math.ceil()
+                    min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
+                    max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
+
+                    header, data_df = create_CVSV_data_CSV(min_x, max_x-1, 
+                                                        st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                        st.session_state.selected_frequency2,st.session_state.elevation_mask, long_df)
 
                     # Convert to CSV
                     csv_CV = convert_to_csv(header, data_df)
 
                     # Create download button
                     st.download_button(
-                        label="Download CV data",
+                        label="Download CV Satellite data",
                         data=csv_CV,
-                        file_name="Common_View_data.csv",
+                        file_name="Common_View_Sat_data.csv",
                         mime="text/csv",
                     )
+
+                
+                if st.session_state.plot_CV_data is not None and not st.session_state.plot_CV_data.empty and not CV_result_df.empty:
+                    df3 = st.session_state.plot_CV_data
+                    st.markdown('---')  # Add a horizontal line for separation
+                    
+                    if st.session_state.selected_frequency1 != st.session_state.selected_frequency2:
+                        st.error(f"**Caution:** Your are comparing the two receiver clocks with GNSS(time) using two different code measurements ({st.session_state.selected_frequency1},{st.session_state.selected_frequency2})")
+
+                    # User inputs for the y-axis range
+                    # col1, col2 = st.columns(2)
+                    # with col1:
+                    #     user_start_y = st.number_input("Lower Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].min()))
+                    # with col2:
+                    #     user_end_y = st.number_input("Upper Outlier limit", min_value=float(df3["CV_diff"].min()), max_value=float(df3["CV_diff"].max()), value=float(df3["CV_diff"].max()))
+
+                    # Filter the data based on user selection and calculate mean
+                    # df3_filtered = df3[(df3["CV_diff"] >= user_start_y) & (df3["CV_diff"] <= user_end_y)]
+                    # std_dev = df3_filtered["CV_diff"].std()
+                    df3_filtered = df3
+                    std_dev = df3_filtered["CV_diff"].std()
+
+
+                    # # Set x-axis range and filter rows of the dataframe
+                    # min_mjd_time = df3["MJD"].dropna().min()
+                    # max_mjd_time = df3["MJD"].dropna().max()
+
+
+                    # Set x-axis range and filter rows of the dataframe
+                    min_mjd_time = float(df3["MJD"].dropna().min())
+                    max_mjd_time = float(df3["MJD"].dropna().max())
+
+                    
+                    # Now apply math.floor() and math.ceil()
+                    min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
+                    max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
+
+                    # Add a check if min_x and max_x are None
+                    if min_x is None or max_x is None:
+                        print("Error: MJD_time column contains only NaN values")
+                        # Handle the error appropriately
+                    else:
+                    # Create scatter plot
+                        fig = go.Figure()
+                                
+                        # Add scatter plot of data points
+                        fig.add_trace(go.Scatter(
+                            x=df3_filtered["MJD"], 
+                            y=df3_filtered["CV_diff"], 
+                            mode='markers',
+                            name='CV_diff',
+                            marker=dict(size=10)  # Increase marker size
+                        ))
+            
+                        # Add a standard deviation annotation to the plot 
+                        fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
+                        showarrow=False, font=dict(size=18, color="black"),
+                        xanchor='right', yanchor='top')
+
+                        # Set plot titles and labels with increased font size and black color
+                        fig.update_layout(
+                            # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
+                            title=f" {st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency2}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
+                            title_font=dict(size=20, color="black"),
+                            xaxis_title="MJD",
+                            xaxis_title_font=dict(size=16, color="black"),
+                            yaxis_title="Time difference (ns)",
+                            yaxis_title_font=dict(size=16, color="black"),
+                            xaxis=dict(tickformat=".2f",
+                                tickmode='array',
+                                # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
+                                # tickformat="05d",
+                                tickfont=dict(size=14, color="black"),
+                                exponentformat='none' 
+                            ),
+                            yaxis=dict(
+                                tickmode='auto', nticks =10,
+                                tickfont=dict(size=14, color="black")
+                            ),
+                            # yaxis=dict(tickmode='auto', nticks =10)
+                            autosize=False,
+                            width=800,
+                            height=600
+                        )
+                    
+                        # Display the plot
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Data file processing 
+                                    
+                    # if st.sidebar.button('Get CV file of this data'): 
+                        # Create the CSV data
+                        # Create the CSV header and data
+                        header, data_df = create_csv_data_CV(min_x, max_x-1, 
+                                                        st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                        st.session_state.selected_frequency2,st.session_state.elevation_mask, df3_filtered)
+
+                        # Convert to CSV
+                        csv_CV = convert_to_csv(header, data_df)
+
+                        # Create download button
+                        st.download_button(
+                            label="Download CV data",
+                            data=csv_CV,
+                            file_name="Common_View_data.csv",
+                            mime="text/csv",
+                        )
                             
 
             if 'selected_svids' not in st.session_state:
@@ -1624,100 +1624,100 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                 else:
                     st.error("**All-in-view cannot be processed.** The two data sets are of different GNSS constellation ")
             
-            if 'plot_AV_data' in st.session_state and st.session_state.plot_AV_data is not None and not AV_result_df.empty: 
-                
-                df4 = st.session_state.plot_AV_data
-                                
-                st.markdown('---')  # Add a horizontal line for separation
-                # print(df4)
-                # User inputs for the y-axis range
-                # col1, col2 = st.columns(2)
-                # with col1:
-                #     user_start_y = st.number_input("Lower Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].min()))
-                # with col2:
-                #     user_end_y = st.number_input("Upper Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].max()))
-
-                # Filter the data based on user selection and calculate mean
-                # df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
-                df4_filtered = df4
-                std_dev = df4_filtered["AV_diff"].std()
-                
-
-                # # Set x-axis range and filter rows of the dataframe
-                # min_mjd_time = float(df3["MJD_time"].dropna().min())
-                # max_mjd_time = float(df3["MJD_time"].dropna().max())
-
-                # # Now apply math.floor() and math.ceil()
-                # min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
-                # max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
-
-
-                # Set x-axis range
-                min_x = math.floor(float(min(df4["MJD_time"])))
-                max_x = math.ceil(float(max(df4["MJD_time"])))
-                            
-                if min_x is not None and max_x is not None:
-                    # Create scatter plot using Plotly
-                    fig = go.Figure()
-
-                    # Add scatter plot of data points
-                    fig.add_trace(go.Scatter(
-                        x=df4_filtered["MJD_time"], 
-                        y=df4_filtered["AV_diff"], 
-                        mode='markers',
-                        name='AV_diff',
-                        marker=dict(size=10)  # Increase marker size
-                    ))
-
-                    # Add a standard deviation annotation to the plot 
-                    fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
-                    showarrow=False, font=dict(size=18, color="black"),
-                    xanchor='right', yanchor='top')
-
-                    # Set plot titles and labels with increased font size and black color
-                    fig.update_layout(
-                        title=f"{st.session_state['GNSS2']} All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average weighted refsys of all satellites in view)",
-                        title_font=dict(size=20, color="black"),
-                        xaxis_title="MJD",
-                        xaxis_title_font=dict(size=16, color="black"),
-                        yaxis_title="Time difference (ns)",
-                        yaxis_title_font=dict(size=16, color="black"),
-                        xaxis=dict(tickformat=".2f",
-                            tickmode='array',
-                            # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
-                            # tickformat="05d",
-                            tickfont=dict(size=14, color="black"), 
-                            exponentformat='none'
-                        ),
-                        yaxis=dict(
-                            tickmode='auto',nticks =10,
-                            tickfont=dict(size=16, color="black")
-                        ),
-                        autosize=False,
-                        width=800,
-                        height=600
-                    )
+                if 'plot_AV_data' in st.session_state and st.session_state.plot_AV_data is not None and not AV_result_df.empty: 
                     
-                    # Display the plot
-                    st.plotly_chart(fig, use_container_width=True)
+                    df4 = st.session_state.plot_AV_data
+                                    
+                    st.markdown('---')  # Add a horizontal line for separation
+                    # print(df4)
+                    # User inputs for the y-axis range
+                    # col1, col2 = st.columns(2)
+                    # with col1:
+                    #     user_start_y = st.number_input("Lower Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].min()))
+                    # with col2:
+                    #     user_end_y = st.number_input("Upper Outlier limit", min_value=float(df4["AV_diff"].min()), max_value=float(df4["AV_diff"].max()), value=float(df4["AV_diff"].max()))
+
+                    # Filter the data based on user selection and calculate mean
+                    # df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
+                    df4_filtered = df4
+                    std_dev = df4_filtered["AV_diff"].std()
+                    
+
+                    # # Set x-axis range and filter rows of the dataframe
+                    # min_mjd_time = float(df3["MJD_time"].dropna().min())
+                    # max_mjd_time = float(df3["MJD_time"].dropna().max())
+
+                    # # Now apply math.floor() and math.ceil()
+                    # min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
+                    # max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
+
+
+                    # Set x-axis range
+                    min_x = math.floor(float(min(df4["MJD_time"])))
+                    max_x = math.ceil(float(max(df4["MJD_time"])))
                                 
-                    # if st.sidebar.button('Get AV file of this data') : 
-                        # Create the CSV data
-                        # Create the CSV header and data
-                    header, data_df = create_csv_data_AV(min_x, max_x-1, 
-                                                    st.session_state.selected_svids, st.session_state.selected_frequency1,
-                                                    st.session_state.selected_frequency2, st.session_state.elevation_mask , df4_filtered)
+                    if min_x is not None and max_x is not None:
+                        # Create scatter plot using Plotly
+                        fig = go.Figure()
 
-                    # Convert to CSV
-                    csv_AV = convert_to_csv(header, data_df)
+                        # Add scatter plot of data points
+                        fig.add_trace(go.Scatter(
+                            x=df4_filtered["MJD_time"], 
+                            y=df4_filtered["AV_diff"], 
+                            mode='markers',
+                            name='AV_diff',
+                            marker=dict(size=10)  # Increase marker size
+                        ))
 
-                    # Create download button
-                    st.download_button(
-                        label="Download AV data",
-                        data=csv_AV,
-                        file_name="All_in_view_data.csv",
-                        mime="text/csv",
-                    )
+                        # Add a standard deviation annotation to the plot 
+                        fig.add_annotation(xref='paper', yref='paper', x=1, y=1, text=f"Std Dev: {std_dev:.2f} ns",
+                        showarrow=False, font=dict(size=18, color="black"),
+                        xanchor='right', yanchor='top')
+
+                        # Set plot titles and labels with increased font size and black color
+                        fig.update_layout(
+                            title=f"{st.session_state['GNSS2']} All-in-View link between {st.session_state['REF01']} ({st.session_state.selected_frequency1}) and {st.session_state['REF02']} ({st.session_state.selected_frequency2}) <br> (Each point is the difference of the average weighted refsys of all satellites in view)",
+                            title_font=dict(size=20, color="black"),
+                            xaxis_title="MJD",
+                            xaxis_title_font=dict(size=16, color="black"),
+                            yaxis_title="Time difference (ns)",
+                            yaxis_title_font=dict(size=16, color="black"),
+                            xaxis=dict(tickformat=".2f",
+                                tickmode='array',
+                                # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
+                                # tickformat="05d",
+                                tickfont=dict(size=14, color="black"), 
+                                exponentformat='none'
+                            ),
+                            yaxis=dict(
+                                tickmode='auto',nticks =10,
+                                tickfont=dict(size=16, color="black")
+                            ),
+                            autosize=False,
+                            width=800,
+                            height=600
+                        )
+                        
+                        # Display the plot
+                        st.plotly_chart(fig, use_container_width=True)
+                                    
+                        # if st.sidebar.button('Get AV file of this data') : 
+                            # Create the CSV data
+                            # Create the CSV header and data
+                        header, data_df = create_csv_data_AV(min_x, max_x-1, 
+                                                        st.session_state.selected_svids, st.session_state.selected_frequency1,
+                                                        st.session_state.selected_frequency2, st.session_state.elevation_mask , df4_filtered)
+
+                        # Convert to CSV
+                        csv_AV = convert_to_csv(header, data_df)
+
+                        # Create download button
+                        st.download_button(
+                            label="Download AV data",
+                            data=csv_AV,
+                            file_name="All_in_view_data.csv",
+                            mime="text/csv",
+                        )
 
     else:
         st.error("One of the session data is not available. Either frequency or MJD is not selected properly")
