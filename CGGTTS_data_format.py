@@ -851,7 +851,7 @@ custom_css = '''
             position: absolute;
             z-index: 1000;
             top: 100%;
-            # left: 90%;
+            left: 15%;
             # transform: translateX(-50%);
             opacity: 0;
             transition: opacity 0.3s;
