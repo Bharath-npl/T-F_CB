@@ -786,6 +786,10 @@ custom_css = '''
             /*gap:0px;*/
             /*display: flex;*/
         }
+        .st-emotion-cache-1347cmu {
+            position: relative;
+            margin: 0px 0px 0.5rem;
+        }
 
         .data-table {
             display: table;
