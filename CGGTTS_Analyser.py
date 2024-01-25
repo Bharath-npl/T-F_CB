@@ -62,7 +62,7 @@ st.sidebar.header("Time & Frequency Capacity Building")
 
 st.markdown('----')  # Add a horizontal line for separation
 
-st.sidebar.header("Information for the user")
+st.sidebar.header("User Information")
 
 
 
@@ -107,7 +107,7 @@ def display_pdf_from_gdrive(gdrive_link):
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 # Define the options for the dropdown, including a default 'None' option
-options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Video Demo', 'References']
+options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Demonstration', 'References']
 
 # reduce_gap_css = '''
 # <style>
@@ -132,7 +132,7 @@ elif selected_option == 'CGGTTS data format':
 elif selected_option == 'User manual':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
 
-elif selected_option == 'Video Demo':
+elif selected_option == 'Demonstration':
     st.write('Demonstration')
 
 elif selected_option == 'References':
@@ -885,7 +885,7 @@ def plot_data2(frequency2):
         fig.update_layout(
             title=f"{st.session_state['REF02']} - {st.session_state['GNSS2']}(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Sum of all satellite weighted refsys per epoch)",
             xaxis_title="MJD",
-            yaxis_title="Weighted REFSYS(ns)",
+            yaxis_title="Weighted REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
             xaxis =dict(tickformat=".2f", tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
@@ -976,6 +976,7 @@ def create_CVSV_data_CSV(starting_mjd, ending_mjd, SVids, frequency1, frequency2
         f"# Frequency selected for comparision in receiver 1: {frequency1}\n"
         f"# Frequency selected for comparision in receiver 2: {frequency2}\n"
         f"# Elevation mask applied: {Elv_mask} degrees\n"
+        f"#Outliers selected as : {st.session_state.outlier_filter} times of standard deviation \n"
         f"# Selected satellites for time transfer: {', '.join(sorted(SVids))}\n")
     
 
@@ -996,14 +997,15 @@ def create_csv_data_CV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
 
     # Creating header information 
     header_CV_info = (
-        f"#Common View Time Transfer Link Performance \n"
+        f"#Common View Time Transfer Link Performance between {st.session_state['LAB1']} and {st.session_state['LAB2']}\n"
         f"#Start MJD: {starting_mjd}\n"
         f"#End MJD: {ending_mjd}\n"
         f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
         f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
         f"#Elevation mask applied: {Elv_mask} degrees\n"
-        f"#Selected satellites for time transfer: {', '.join(sorted(SVids))}\n"
         f"#Outliers selected as : {st.session_state.outlier_filter} times of standard deviation \n"
+        f"#Selected satellites for time transfer: {', '.join(sorted(SVids))}\n"
+        
     )
 
     return header_CV_info, data_df
@@ -1032,8 +1034,9 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
         f"#Frequency selected for comparision in receiver 1: {frequency1}\n"
         f"#Frequency selected for comparision in receiver 2: {frequency2}\n"
         f"#Elevation mask applied: {Elv_mask} degrees\n"
-        f"#Selected Satellites for time transfer: {', '.join(SVids)}\n"
         f"#Outliers selected as : {st.session_state.outlier_filter} times of standard deviation \n"
+        f"#Selected Satellites for time transfer: {', '.join(SVids)}\n"
+        
     )
 
     return header_AV_info, data_AV_df
@@ -1043,14 +1046,31 @@ data1_avail =0
 data2_avail =0
 # BIPM Logo
 
+
+if 'plot_CV_clicked' not in st.session_state:
+    st.session_state.plot_CV_clicked = False
+
+if 'plot_AV_clicked' not in st.session_state:
+    st.session_state.plot_AV_clicked = False
+
 st.sidebar.header("Common-View Analysis")
 plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
 
-# CV_PRNS = st.sidebar.button("Plot Common PRNs", key= 'Common_PRNs')
+if plot_CV:
+    st.session_state.plot_CV_clicked = True
+
+
+# st.sidebar.header("Common-View Analysis")
+# plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
+
+# # CV_PRNS = st.sidebar.button("Plot Common PRNs", key= 'Common_PRNs')
 
 
 st.sidebar.header("All-in-View Analysis")
 plot_AV = st.sidebar.button("Plot All-in-View", key= 'All_in_view')
+
+if plot_AV:
+    st.session_state.plot_AV_clicked = True
 
 
 # Check conditions only when plot buttons are clicked
@@ -1331,7 +1351,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             st.sidebar.markdown('---')  # Add a horizontal line for separation
             st.sidebar.header("Filters for CV & AV analysis")
 
-            Update_CV_AV = st.sidebar.button("Apply for CV & AV", key= 'Update_plots')
+            # Update_CV_AV = st.sidebar.button("Apply for CV & AV", key= 'Update_plots')
 
             selected_svids = st.sidebar.multiselect(
                 "**Choose Satellites (PRN's)**",
@@ -1378,7 +1398,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             st.session_state.selected_svids = svids_to_use
             # plot_button = st.sidebar.button("Plot CV")
 
-            if plot_CV or Update_CV_AV:
+            if st.session_state.plot_CV_clicked:
                 if st.session_state['GNSS1'] == st.session_state['GNSS2']:
                     # Replace the following with your actual DataFrame and variable names
                     df1_CV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
@@ -1597,7 +1617,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             if 'selected_svids' not in st.session_state:
                 st.session_state.selected_svids = ['ALL']
 
-            if plot_AV or Update_CV_AV:
+            if st.session_state.plot_AV_clicked:
                 if st.session_state['GNSS1'] == st.session_state['GNSS2']:
                     df1_AV = st.session_state.df1_mjd_01  # Replace with your actual DataFrame
                     df2_AV = st.session_state.df2_mjd_02  # Replace with your actual DataFrame
