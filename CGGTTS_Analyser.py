@@ -1387,7 +1387,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
             # Outlierfilter user input 
             outlier_filter = st.sidebar.number_input('**Outlier (  = x  Std Dev)**',
                                                     min_value= 0.5, 
-                                                    max_value= 20.0, 
+                                                    max_value= 100.0, 
                                                     value=1.5,  # default value
                                                     step=0.1)  # step size for increment/decrement
 
