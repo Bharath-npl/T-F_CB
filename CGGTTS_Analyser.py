@@ -132,7 +132,7 @@ elif selected_option == 'CGGTTS data format':
 elif selected_option == 'User manual':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
 
-elif selected_option == 'Demonstration':
+elif selected_option == 'Video Demo':
     st.write('Demonstration')
 
 elif selected_option == 'References':
