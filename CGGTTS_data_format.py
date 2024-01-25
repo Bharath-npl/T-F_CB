@@ -1,7 +1,7 @@
 import streamlit as st
 
-st.set_page_config(page_title="CGGTTS data format", page_icon=":newspaper:", layout="wide")
-st.title(":clipboard: CGGTTS data format")
+# st.set_page_config(page_title="CGGTTS data format", page_icon=":newspaper:", layout="wide")
+# st.title(":clipboard: CGGTTS data format")
 
 # st.header("**Welcome to data format**")
 
@@ -14,7 +14,7 @@ st.title(":clipboard: CGGTTS data format")
 
 # File name text with tooltip
 file_name_text = '''
-<div class="file-name">gzau0660.309
+<div class="file-name">gmpt1060.312
     <span class="tooltip-text">
     The file name should be of the form: XFLLmodd.ddd where<br><br>
     <ul>
@@ -63,7 +63,7 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-2">
-            <pre>REV DATE = 2023-01-22</pre>
+            <pre>REV DATE = 2022-06-22</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
@@ -78,16 +78,16 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-3">
-            <pre>RCVR = Sep PolaRx5TR S/N 3048136     R2CGGTTS v8.3</pre>
+            <pre>RCVR = GTR51 1309042 1.9.0</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
                         <strong>Receiver Information</strong>
                         <ul>
                             <li>Maker acronym: Sep</li>
-                            <li>Type: PolaRx5TR</li>
-                            <li>Serial Number: 3048136</li>
-                            <li>Software Number: R2CGGTTS v8.3</li>
+                            <li>Type: GTR51</li>
+                            <li>Serial Number: 1309042</li>
+                            <li>Software Number: 1.9.0</li>
                             <li>Additional Details: First year of operation and other relevant information</li>
                         </ul>
                     </li>
@@ -117,7 +117,7 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-5">
-            <pre>IMS = Sep PolaRx5TR S/N 3048136</pre>
+            <pre>IMS = GTR51 1309042 1.9.0</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
@@ -132,14 +132,14 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-6">
-            <pre>LAB = NMI Australia</pre>
+            <pre>LAB = PTB Germany</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
                         <strong>Laboratory Information</strong>
                         <ul>
-                            <li>LAB acronym: NMI</li>
-                            <li>Country: Australia</li>
+                            <li>LAB acronym: PTB</li>
+                            <li>Country: Germany</li>
                             <li>Facility where satellite observations are conducted and analyzed</li>
                             <li>Key focus on geospatial and astronomical research</li>
                         </ul>
@@ -220,6 +220,7 @@ header_lines = [
                             <li>Comments regarding the coordinates, such as methods used for determination or estimated uncertainty</li>
                             <li>Details on corrections applied, like the identification of specific Ccode/P-code biases</li>
                             <li>Example: Comments include details related to AUSPOS ITRF2014 data as of 2020-11-23</li>
+                            <li> There can be multiple comment lines in the header</li>
                         </ul>
                     </li>
                 </ul>
@@ -227,7 +228,7 @@ header_lines = [
         </div>'''
 
     '''<div class="header-line header-line-12">
-            <pre>INT DLY = 30.0 ns (GPS P1), 29.0 ns (GPS P2) CAL_ID = 1015-2021</pre>
+            <pre>INT DLY = 33.2 ns (GPS C1),  31.4 ns (GPS P1),   0.0 ns (GPS C2),  24.8 ns (GPS P2),   0.0 ns (GPS L5),   0.0 ns (GPS L1C)     CAL_ID = 1001-2020</pre>
             <span class="tooltip-text">
                 <ul>
                     <strong>Internal delays of the receiver:</strong>
@@ -246,7 +247,7 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-13">
-        <pre>CAB DLY = 173.9 ns</pre>
+        <pre>CAB DLY = 250.0 ns</pre>
         <span class="tooltip-text">
             <ul>
                 <strong>Antenna cable delay of the receiver:</strong>
@@ -262,7 +263,7 @@ header_lines = [
         </span>
     </div>'''
     '''<div class="header-line header-line-14">
-            <pre>REF DLY = 155.5 ns</pre>
+            <pre>REF DLY = 36.6 ns</pre>
             <span class="tooltip-text">
                 <ul>
                     <strong>Reference delay :</strong>
@@ -278,13 +279,13 @@ header_lines = [
             </span>
         </div>'''
     '''<div class="header-line header-line-15">
-            <pre>REF = UTC(AUS)</pre>
+            <pre>REF = UTC(PTB)</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
                         <strong>Time Reference Information</strong>
                         <ul>
-                            <li>Reference: "REF = UTC(AUS)" indicates the time reference used</li>
+                            <li>Reference: Indicates the time reference used</li>
                             <li>Identifier: For time synchronization, GNSS time receivers use specific reference codes</li>
                             <li>TAI Contribution: For labs contributing to TAI (International Atomic Time), a 7-digit clock code or a 5-digit local UTC code is used, as assigned by the BIPM (Bureau International des Poids et Mesures)</li>
                         </ul>
@@ -294,7 +295,7 @@ header_lines = [
         </div>'''
 
     '''<div class="header-line header-line-16">
-            <pre>CKSUM = C5</pre>
+            <pre>CKSUM = DA</pre>
             <span class="tooltip-text">
                 <ul>
                     <li>
@@ -313,54 +314,130 @@ header_lines = [
         </div>'''
     '''<div class="header-line header-line-17"> <span class="tooltip-text">Blank line.</span></div>''']
 
-# # Format and display the header lines
-# header_html = '<div class="header-line">' + '<br>'.join(header_lines) + '</div>'
-# st.markdown(header_html, unsafe_allow_html=True)
 
-# Define the unit labels
-# unit_labels = [
-#     "SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", 
-#     "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", 
-#     "MSIO", "SMSI", "ISG", "FR", "HC", "FRC", "CK"]
-
-
-# # Define the unit values
-# units = [
-#     "", "", "", "hhmmss", "s", ".1dg", ".1dg", ".1ns", ".1ps/s",
-#     ".1ns", ".1ps/s", ".1ns","", ".1ns", ".1ps/s", ".1ns", ".1ps/s",
-#     ".1ns", ".1ps/s", ".1ns", "", "", "", ""]
-
-
-# Sample data
-data = [[
+labels = [[
     "SAT", "CL", "MJD", "STTIME", "TRKL", "ELV", "AZTH", "REFSV", "SRSV", 
     "REFSYS", "SRSYS", "DSG", "IOE", "MDTR", "SMDT", "MDIO", "SMDI", 
     "MSIO", "SMSI", "ISG", "FR", "HC", "FRC", "CK"], [
     "", "", "", "hhmmss", "s", ".1dg", ".1dg", ".1ns", ".1ps/s",
     ".1ns", ".1ps/s", ".1ns","", ".1ns", ".1ps/s", ".1ns", ".1ps/s",
-    ".1ns", ".1ps/s", ".1ns", "", "", "", ""],
-    ["G05", "FF", "60309", "001400", "780", "593", "1222", "+1565533", "+42", "4212", "+28", "15", "66", "94", "+6", "190", "+1", "190", "1", "12", "0", "0", "L3P", "FF"],
-    ["G12", "FF", "60309", "001400", "780", "231", "100", "+4633502", "+20", "4193", "-18", "32", "46", "205", "+62", "476", "+139", "476", "139", "28", "0", "0", "L3P", "62"],
-    ["G13", "FF", "60309", "001400", "780", "127", "750", "-6106250", "-74", "4190", "-37", "58", "46", "364", "-106", "542", "-75", "542", "-75", "39", "0", "0", "L3P", "7C"],
-    ["G15", "FF", "60309", "001400", "780", "218", "401", "-1118748", "-65", "4226", "-26", "32", "20", "218", "-52", "474", "-90", "474", "-90", "22", "0", "0", "L3P", "58"],
-    ["G18", "FF", "60309", "001400", "780", "402", "2633", "+5204373", "+34", "4215", "-63", "17", "173", "126", "-12", "219", "+46", "219", "46", "11", "0", "0", "L3P", "61"],
-    ["G20", "FF", "60309", "001400", "780", "219", "1366", "-3935536", "-33", "4199", "-52", "55", "67", "216", "+60", "335", "+92", "335", "92", "41", "0", "0", "L3P", "70"],
-    ["G23", "FF", "60309", "001400", "780", "197", "3322", "-1255607", "-53", "4237", "+19", "47", "217", "241", "-84", "483", "-145", "483", "-145", "40", "0", "0", "L3P", "AE"],
-    ["G25", "FF", "60309", "001400", "780", "476", "3361", "-4830824", "+46", "4233", "+60", "12", "91", "110", "+13", "243", "-17", "243", "-17", "9", "0", "0", "L3P", "4C"],
-    ["G26", "FF", "60309", "001400", "780", "123", "2224", "-2042952", "-160", "4245", "-193", "52", "46", "375", "-140", "333", "+135", "333", "135", "37", "0", "0", "L3P", "AD"],
-    ["G29", "FF", "60309", "001400", "780", "679", "1831", "+6096992", "-13", "4197", "-8", "15", "7", "88", "-3", "182", "+10", "182", "10", "13", "0", "0", "L3P", "29"],
-    ["G05", "FF", "60309", "003000", "780", "533", "1300", "+1565562", "+67", "4227", "+52", "13", "66", "101", "+9", "184", "-27", "184", "-27", "10", "0", "0", "L3P", "49"],
-    ["G12", "FF", "60309", "003000", "780", "160", "104", "+4633528", "+58", "4181", "+20", "39", "46", "291", "+124", "615", "+163", "615", "163", "29", "0", "0", "L3P", "78"],
-    ["G13", "FF", "60309", "003000", "780", "162", "814", "-6106279", "-115", "4198", "-78", "48", "46", "288", "-59", "462", "-1", "462", "-1", "33", "0", "0", "L3P", "5F"],
-    ["G15", "FF", "60309", "003000", "780", "271", "455", "-1118802", "-58", "4208", "-19", "27", "20", "178", "-33", "408", "-30", "408", "-30", "21", "0", "0", "L3P", "4E"],
-    ["G18", "FF", "60309", "003000", "780", "443", "2545", "+5204469", "+116", "4218", "+20", "30", "173", "116", "-9", "205", "-12", "205", "-12", "25", "0", "0", "L3P", "63"],
-    ["G20", "FF", "60309", "003000", "780", "157", "1367", "-3935499", "-145", "4217", "-164", "58", "67", "296", "+114", "357", "+174", "357", "174", "49", "0", "0", "L3P", "E4"],
-    ["G23", "FF", "60309", "003000", "780", "267", "3297", "-1255675", "-64", "4237", "+8", "22", "217", "181", "-46", "366", "-101", "366", "-101", "16", "0", "0", "L3P", "97"],
-    ["G25", "FF", "60309", "003000", "780", "403", "3407", "-4830838", "-54", "4232", "-40", "19", "91", "125", "+20", "282", "+98", "282", "98", "15", "0", "0", "L3P", "67"],
-    ["G26", "FF", "60309", "003000", "780", "167", "2267", "-2042906", "-8", "4258", "-41", "58", "46", "280", "-68", "296", "+7", "296", "7", "50", "0", "0", "L3P", "47"],
-    ["G29", "FF", "60309", "003000", "780", "727", "1652", "+6096999", "+13", "4208", "+17", "18", "7", "85", "-2", "170", "-7", "170", "-7", "16", "0", "0", "L3P", "25"]
-    # ... (add the rest of the rows in a similar format)
-]
+    ".1ns", ".1ps/s", ".1ns", "", "", "", ""]]
+
+raw_data = """
+G02 FF 60312 000200  780 811 2954    +5065571    -65         -17     -9    3 061   82   -2   50   -1   26  +10   5  0  0 L1C AA
+G02 FF 60312 000200  780 811 2954    +5065559    -69         -29    -13    2 061   82   -2   50   -1   26  +10   5  0  0 L1P CE
+G02 FF 60312 000200  780 811 2954    +5065543    -62         -45     -6    3 061   82   -2   83   -1   43  +16   8  0  0 L2P C0
+G03 FF 60312 000200  780 374 2333     -994025   -281         -64    -16    4 095  133  -22   77  -10   67   -1   9  0  0 L1C F3
+G03 FF 60312 000200  780 374 2333     -994002   -279         -41    -14    3 095  133  -22   77  -10   67   -1   9  0  0 L1P FA
+G03 FF 60312 000200  780 374 2333     -993751   -272        +210     -7    6 095  133  -22  126  -17  110   -1  15  0  0 L2C 16
+G03 FF 60312 000200  780 374 2333     -994008   -273         -47     -8    5 095  133  -22  126  -17  110   -1  15  0  0 L2P 1A
+G03 FF 60312 000200  780 374 2333     -993822   -280        +138    -16    5 095  133  -22  138  -18  120   -1  16  0  0 L5C 35
+G08 FF 60312 000200  780 410 1811    +1601523     +5         -36    -14    5 014  123  +19   72  +10   61   +9  19  0  0 L1C CC
+G08 FF 60312 000200  780 410 1811    +1601524     +6         -36    -14    7 014  123  +19   72  +10   61   +9  19  0  0 L1P DD
+G08 FF 60312 000200  780 410 1811    +1601779     +6        +219    -13    9 014  123  +19  119  +16  100  +14  30  0  0 L2C 16
+G08 FF 60312 000200  780 410 1811    +1601516     +6         -43    -14   10 014  123  +19  119  +16  100  +14  30  0  0 L2P 0E
+G08 FF 60312 000200  780 410 1811    +1601720     -1        +160    -21    9 014  123  +19  129  +17  109  +15  33  0  0 L5C 11
+G10 FF 60312 000200  780 191  589     +677818     +7        -188     -8    8 036  246  +82  111  +16   52  -33  19  0  0 L1C 02
+G10 FF 60312 000200  780 191  589     +677826    +13        -181     -2   11 036  246  +82  111  +16   52  -33  19  0  0 L1P 18
+G10 FF 60312 000200  780 191  589     +678024    -20         +17    -35   10 036  246  +82  183  +26   86  -54  31  0  0 L2C 12
+G10 FF 60312 000200  780 191  589     +677788    -19        -219    -34    7 036  246  +82  183  +26   86  -54  31  0  0 L2P 42
+G10 FF 60312 000200  780 191  589     +677894    -24        -112    -39    6 036  246  +82  199  +29   93  -59  34  0  0 L5C 3E
+G14 FF 60312 000200  780 211 2864    -2881624    -79         -76    +25    9 160  223  +23  106   +5   42  +28  30  0  0 L1C 0E
+G14 FF 60312 000200  780 211 2864    -2881616    -94         -68     +9   13 160  223  +23  106   +5   42  +28  30  0  0 L1P 17
+G14 FF 60312 000200  780 211 2864    -2881400    -99        +148     +5    7 160  223  +23  175   +9   69  +46  50  0  0 L2C 18
+G14 FF 60312 000200  780 211 2864    -2881657    -79        -109    +25   14 160  223  +23  175   +9   69  +46  50  0  0 L2P 50
+G14 FF 60312 000200  780 211 2864    -2881504    -83         +44    +20    7 160  223  +23  191   +9   75  +50  54  0  0 L5C 0B
+G17 FF 60312 000200  780 192 3153    -7207717     +9        -103     +1    8 046  243  -75  111  -15   28   -8  28  0  0 L1C 00
+G17 FF 60312 000200  780 192 3153    -7207710    +12         -95     +4   16 046  243  -75  111  -15   28   -8  28  0  0 L1P 1C
+G17 FF 60312 000200  780 192 3153    -7207507    +28        +108    +20   14 046  243  -75  182  -25   47  -12  47  0  0 L2C 46
+G17 FF 60312 000200  780 192 3153    -7207763    +17        -149     +9   15 046  243  -75  182  -25   47  -12  47  0  0 L2P 54
+G21 FF 60312 000200  780 831 1062    -1396356     +7         -14     -5    4 047   81   +1   50   +0   14  +26   7  0  0 L1C 8F
+G21 FF 60312 000200  780 831 1062    -1396370     +1         -28    -11    4 047   81   +1   50   +0   14  +26   7  0  0 L1P A4
+G21 FF 60312 000200  780 831 1062    -1396393    +18         -51     +6    3 047   81   +1   83   +1   24  +43  11  0  0 L2P C1
+G22 FF 60312 000200  780 206 3084     -549647    +78         -81    +12    9 040  228   -4  108   -1    6  +39  43  0  0 L1C DE
+G22 FF 60312 000200  780 206 3084     -549660    +59         -94     -7   15 040  228   -4  108   -1    6  +39  43  0  0 L1P EC
+G22 FF 60312 000200  780 206 3084     -549726    +83        -160    +17   24 040  228   -4  177   -1    9  +64  72  0  0 L2P 0F
+G32 FF 60312 000200  780 421  728    +6019645    +28         -81     -3    5 055  120   +4   71   +2   44  -24   8  0  0 L1C AB
+G32 FF 60312 000200  780 421  728    +6019659    +28         -68     -4    3 055  120   +4   71   +2   44  -24   8  0  0 L1P C1
+G32 FF 60312 000200  780 421  728    +6019901    +14        +175    -18    6 055  120   +4  117   +3   72  -39  12  0  0 L2C EF
+G32 FF 60312 000200  780 421  728    +6019641    +12         -85    -20    4 055  120   +4  117   +3   72  -39  12  0  0 L2P E4
+G32 FF 60312 000200  780 421  728    +6019749    +15         +22    -17    4 055  120   +4  127   +3   79  -42  13  0  0 L5C E4
+G02 FF 60312 001800  780 883 2851    +5065514    -60         -21     -4    3 061   81   +0   50   +0   24  -12   4  0  0 L1C 9D
+G02 FF 60312 001800  780 883 2851    +5065501    -58         -34     -2    2 061   81   +0   50   +0   24  -12   4  0  0 L1P AE
+G02 FF 60312 001800  780 883 2851    +5065484    -65         -51     -9    2 061   81   +0   82   +0   40  -19   7  0  0 L2P CA
+G03 FF 60312 001800  780 446 2373     -994281   -259         -66     +6    5 095  115  -15   68   -8   62   +1   8  0  0 L1C E8
+G03 FF 60312 001800  780 446 2373     -994262   -261         -47     +4    3 095  115  -15   68   -8   62   +1   8  0  0 L1P E8
+G03 FF 60312 001800  780 446 2373     -994010   -253        +205    +12    5 095  115  -15  112  -13  102   +1  13  0  0 L2C 18
+G03 FF 60312 001800  780 446 2373     -994266   -255         -51    +10    4 095  115  -15  112  -13  102   +1  13  0  0 L2P 22
+G03 FF 60312 001800  780 446 2373     -994084   -263        +131     +2    3 095  115  -15  122  -14  111   +1  14  0  0 L5C 15
+G08 FF 60312 001800  780 335 1800    +1601526     +3         -52    -17    7 014  146  +30   83  +12   81  +25  11  0  0 L1C E5
+G08 FF 60312 001800  780 335 1800    +1601530     +2         -49    -17    7 014  146  +30   83  +12   81  +25  11  0  0 L1P F2
+G08 FF 60312 001800  780 335 1800    +1601791    +12        +212     -7    5 014  146  +30  136  +20  133  +41  18  0  0 L2C 14
+G08 FF 60312 001800  780 335 1800    +1601529    +10         -50     -9    4 014  146  +30  136  +20  133  +41  18  0  0 L2P 11
+G08 FF 60312 001800  780 335 1800    +1601726    +38        +147    +19    4 014  146  +30  148  +22  145  +44  20  0  0 L5C 38
+G14 FF 60312 001800  780 184 2796    -2881731   -108         -83     -5   10 160  255  +43  113   +8   73   +5  31  0  0 L1C 18
+G14 FF 60312 001800  780 184 2796    -2881727    -97         -80     +6   16 160  255  +43  113   +8   73   +5  31  0  0 L1P 23
+G14 FF 60312 001800  780 184 2796    -2881497   -115        +150    -12    9 160  255  +43  186  +13  121   +9  51  0  0 L2C 55
+G14 FF 60312 001800  780 184 2796    -2881752   -100        -104     +4   14 160  255  +43  186  +13  121   +9  51  0  0 L2P 52
+G14 FF 60312 001800  780 184 2796    -2881607   -130         +41    -26    7 160  255  +43  202  +14  131  +10  55  0  0 L5C 43
+G17 FF 60312 001800  780 252 3134    -7207690    +23         -83    +15    7 046  189  -42   98  -12   47   +6  19  0  0 L1C 15
+G17 FF 60312 001800  780 252 3134    -7207685    +14         -79     +6   11 046  189  -42   98  -12   47   +6  19  0  0 L1P 26
+G17 FF 60312 001800  780 252 3134    -7207458    +35        +149    +27    7 046  189  -42  161  -20   77  +10  32  0  0 L2C 3E
+G17 FF 60312 001800  780 252 3134    -7207718    +25        -112    +17    7 046  189  -42  161  -20   77  +10  32  0  0 L2P 40
+G21 FF 60312 001800  780 761 1158    -1396348    +18         -17     +7    4 047   83   +3   51   +1   24  -13   8  0  0 L1C BA
+G21 FF 60312 001800  780 761 1158    -1396364    +14         -33     +3    3 047   83   +3   51   +1   24  -13   8  0  0 L1P BA
+G21 FF 60312 001800  780 761 1158    -1396382     +5         -50     -6    3 047   83   +3   84   +2   39  -21  13  0  0 L2P C7
+G22 FF 60312 001800  780 203 3016     -549584    +52         -81    -14   10 040  231   +9  108   +2   40  +17  31  0  0 L1C E4
+G22 FF 60312 001800  780 203 3016     -549597    +65         -94     -1   17 040  231   +9  108   +2   40  +17  31  0  0 L1P F0
+G22 FF 60312 001800  780 203 3016     -549642    +75        -139     +9   16 040  231   +9  178   +3   65  +27  52  0  0 L2P 11
+G32 FF 60312 001800  780 397  641    +6019669    +23         -88     -9    5 055  126   +8   74   +4   29  +22   9  0  0 L1C D5
+G32 FF 60312 001800  780 397  641    +6019683    +19         -74    -13    4 055  126   +8   74   +4   29  +22   9  0  0 L1P E8
+G32 FF 60312 001800  780 397  641    +6019913    +31        +156     +0    5 055  126   +8  121   +7   47  +36  14  0  0 L2C E9
+G32 FF 60312 001800  780 397  641    +6019654    +30        -103     -1    4 055  126   +8  121   +7   47  +36  14  0  0 L2P F3
+G32 FF 60312 001800  780 397  641    +6019778    +28         +21     -4    3 055  126   +8  132   +7   51  +39  16  0  0 L5C E8
+G02 FF 60312 003400  780 842 1311    +5065466    -45         -16    +11    4 061   81   +1   50   +0   16  +11   4  0  0 L1C A5
+G02 FF 60312 003400  780 842 1311    +5065453    -44         -29    +12    3 061   81   +1   50   +0   16  +11   4  0  0 L1P B1
+G02 FF 60312 003400  780 842 1311    +5065430    -37         -51    +19    2 061   81   +1   83   +1   27  +18   7  0  0 L2P C3
+G03 FF 60312 003400  780 519 2418     -994536   -273         -66     -8    4 095  103  -11   61   -6   58   -1   5  0  0 L1C DD
+G03 FF 60312 003400  780 519 2418     -994514   -270         -44     -5    3 095  103  -11   61   -6   58   -1   5  0  0 L1P DB
+G03 FF 60312 003400  780 519 2418     -994260   -269        +209     -4    5 095  103  -11  101  -10   96   -2   8  0  0 L2C 03
+G03 FF 60312 003400  780 519 2418     -994516   -266         -46     -1    3 095  103  -11  101  -10   96   -2   8  0  0 L2P FD
+G03 FF 60312 003400  780 519 2418     -994327   -265        +142     +0    4 095  103  -11  110  -11  105   -2   9  0  0 L5C 04
+G08 FF 60312 003400  780 262 1793    +1601546     +5         -51    -14    8 014  183  +48   96  +15   73  +29  13  0  0 L1C 06
+G08 FF 60312 003400  780 262 1793    +1601549     +4         -48    -15    7 014  183  +48   96  +15   73  +29  13  0  0 L1P 1B
+G08 FF 60312 003400  780 262 1793    +1601795     +6        +198    -13    8 014  183  +48  157  +24  121  +47  22  0  0 L2C 3F
+G08 FF 60312 003400  780 262 1793    +1601535    +14         -62     -5    5 014  183  +48  157  +24  121  +47  22  0  0 L2P 29
+G08 FF 60312 003400  780 262 1793    +1601737    +14        +140     -5    4 014  183  +48  171  +27  132  +52  24  0  0 L5C 2C
+G14 FF 60312 003400  780 148 2734    -2881834   -111         -87     -7   12 160  312  +81  122  +11   53  -21  27  0  0 L1C 2D
+G14 FF 60312 003400  780 148 2734    -2881823    -88         -76    +16   12 160  312  +81  122  +11   53  -21  27  0  0 L1P 41
+G14 FF 60312 003400  780 148 2734    -2881611   -102        +136     +1   11 160  312  +81  201  +18   88  -34  44  0  0 L2C 37
+G14 FF 60312 003400  780 148 2734    -2881867   -107        -120     -3   16 160  312  +81  201  +18   88  -34  44  0  0 L2P 5A
+G14 FF 60312 003400  780 148 2734    -2881722   -146         +24    -43   11 160  312  +81  219  +19   95  -37  48  0  0 L5C 58
+G17 FF 60312 003400  780 308 3102    -7207664     +5         -65     -2    5 046  157  -26   87  -10   38  +11  15  0  0 L1C EE
+G17 FF 60312 003400  780 308 3102    -7207659     +5         -60     -3    6 046  157  -26   87  -10   38  +11  15  0  0 L1P FC
+G17 FF 60312 003400  780 308 3102    -7207431    +24        +168    +16    8 046  157  -26  143  -16   63  +17  25  0  0 L2C 34
+G17 FF 60312 003400  780 308 3102    -7207691    +17         -91     +9    8 046  157  -26  143  -16   63  +17  25  0  0 L2P 2A
+G21 FF 60312 003400  780 690 1214    -1396333    +15         -12     +4    4 047   87   +4   53   +2   29   -1   8  0  0 L1C 9B
+G21 FF 60312 003400  780 690 1214    -1396349    +22         -29    +11    3 047   87   +4   53   +2   29   -1   8  0  0 L1P C2
+G21 FF 60312 003400  780 690 1214    -1396365    +20         -44     +9    4 047   87   +4   87   +3   48   -1  13  0  0 L2P C9
+G22 FF 60312 003400  780 190 2948     -549522    +70         -82     +4    9 040  246  +24  111   +5   36   +4  32  0  0 L1C D4
+G22 FF 60312 003400  780 190 2948     -549527    +56         -87     -9   13 040  246  +24  111   +5   36   +4  32  0  0 L1P 01
+G22 FF 60312 003400  780 190 2948     -549576    +61        -136     -5   18 040  246  +24  183   +8   59   +7  52  0  0 L2P 24
+G32 FF 60312 003400  780 361  570    +6019690    +24         -97     -7    6 055  137  +14   79   +6   40  -15   8  0  0 L1C D7
+G32 FF 60312 003400  780 361  570    +6019704    +25         -84     -7    4 055  137  +14   79   +6   40  -15   8  0  0 L1P DB
+G32 FF 60312 003400  780 361  570    +6019938    +10        +151    -22    6 055  137  +14  130  +11   66  -25  14  0  0 L2C 10
+G32 FF 60312 003400  780 361  570    +6019679    +11        -109    -21    4 055  137  +14  130  +11   66  -25  14  0  0 L2P 22
+G32 FF 60312 003400  780 361  570    +6019790    +18          +2    -13    4 055  137  +14  141  +12   72  -27  15  0  0 L5C F3
+"""
+
+
+# Split the string into lines and then each line into columns
+data_lines = raw_data.strip().split('\n')
+formatted_data = [line.split() for line in data_lines]
+# Prepend labels to the formatted data
+data = labels + formatted_data
+
+
 
 
 # Tool tip text for the Data 
@@ -697,7 +774,6 @@ tooltip_texts = [
 
 ]
 
-# Empty line to indicate the end of header 
 Empty_line_tooltip = '''
 <span class="tooltiptext">
     <ul>
@@ -710,7 +786,6 @@ Empty_line_tooltip = '''
 </span>
 '''
 
-
 # HTML for the empty line with tooltip
 empty_line_html = '''
 <div class="tooltip" style="background-color: #DCDCDC; height: 20px;">
@@ -718,9 +793,7 @@ empty_line_html = '''
 </div>
 '''.format(tooltip_content=Empty_line_tooltip)
 
-
-
-
+            
 # Define custom CSS for colored columns with 24 different colors
 custom_css = '''
     <style> 
@@ -809,16 +882,16 @@ custom_css = '''
             /*gap:0px;*/
             /*display: flex;*/
         }
+
         .st-emotion-cache-1347cmu {
             position: relative;
             margin: 0px 0px 0.5rem;
         }
-
+        
         .st-emotion-cache-5rimss {
             # font-family: "Source Sans Pro", sans-serif;
             margin-bottom: -1.5rem;
         }
-        
         .data-table {
             display: table;
             width: 100%;
@@ -840,6 +913,11 @@ custom_css = '''
             border: 1px solid #000000; /* Optional: show border on hover */
         }
 
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
         .tooltip .tooltiptext {
             visibility: hidden;
             width: 800px;
@@ -850,9 +928,9 @@ custom_css = '''
             # padding: 5px;
             position: absolute;
             z-index: 1000;
-            top: 1%;
+            bottom: 5%;
             left: 15%;
-            transform: translateY(20%);
+            transform: translateY(25%);
             opacity: 0;
             transition: opacity 0.3s;
             display: inline-block;
@@ -938,10 +1016,12 @@ custom_css = '''
         #     opacity: 1;
         # }
 
+
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
         }
+
          /* Show tooltips on hover */
         .data-cell:hover .tooltip-text-right,
         .data-cell:hover .tooltip-text-left {
@@ -1078,6 +1158,7 @@ custom_css = '''
     </style>
 '''
 
+
 # # Insert label rows 
 # data.insert(0, unit_labels)  # Insert the units as the first row
 
@@ -1111,7 +1192,7 @@ width_classes = [
 
 # # Create the formatted data display
 # formatted_data = ""
-# rightmost_column_start = 13
+# rightmost_column_start = 12
 # # Generate HTML table with tooltips
 # html = "<div class='data-table'>"
 # for row_index, row in enumerate(data):
@@ -1142,14 +1223,22 @@ def CGGTTS_data_format():
 
     st.subheader("File content")
 
-    header_html = '<div class="header-bg">' + '<br>'.join(header_lines) + '</div>'
+    header_html = '<div class="header-bg">' + '<br>'.join(header_lines) + '</div>' 
     st.markdown(custom_css + header_html, unsafe_allow_html=True)
+    
+    # #Insert an empty line with background color
+    # empty_line_html = '''
+    # <div style="background-color: #DCDCDC; height: 20px;">
+    # <span class= "tooltiptext"> Empty line indicates the end of the header </span>
+    # </div>'''  # Adjust the color and height as needed
+
     st.markdown(custom_css + empty_line_html, unsafe_allow_html=True)
+
     transposed_data = list(zip(*data))
 
     # Create the formatted data display
     formatted_data = ""
-    rightmost_column_start = 12
+    rightmost_column_start = 13
     # Generate HTML table with tooltips
     html = "<div class='data-table'>"
     for row_index, row in enumerate(data):
@@ -1165,3 +1254,5 @@ def CGGTTS_data_format():
     html += "</div>"
 
     st.markdown(custom_css + html, unsafe_allow_html=True)
+
+# CGGTTS_data_format()
