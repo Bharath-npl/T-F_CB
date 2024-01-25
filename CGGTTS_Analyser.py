@@ -107,7 +107,7 @@ def display_pdf_from_gdrive(gdrive_link):
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 # Define the options for the dropdown, including a default 'None' option
-options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Demonstration', 'References']
+options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Video Demo', 'References']
 
 # reduce_gap_css = '''
 # <style>
@@ -132,8 +132,8 @@ elif selected_option == 'CGGTTS data format':
 elif selected_option == 'User manual':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
 
-elif selected_option == 'Demonstration':
-    st.write('Demonstration')
+elif selected_option == 'Video Demo':
+    st.write('Video Demonstration will be available shortly')
 
 elif selected_option == 'References':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
