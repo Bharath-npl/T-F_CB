@@ -515,7 +515,7 @@ def plot_data1(frequency1):
         fig.update_layout(
             title=f"{st.session_state['REF01']} - {st.session_state['GNSS1']}(time) at Lab: {st.session_state['LAB1']} through {st.session_state.selected_frequency1}. (Each point correponds to Sum of all satellite weighted refsys per epoch)",
             xaxis_title="MJD",
-            yaxis_title="REFSYS (ns)",
+            yaxis_title="Weighted REFSYS (ns)",
             yaxis=dict(tickmode='auto', nticks =10),
             xaxis =dict(tickformat=".2f",  # Set the tick values as original MJD values
                     # ticktext=formatted_mjd,  # Set the formatted MJD values as tick labels,
@@ -885,7 +885,7 @@ def plot_data2(frequency2):
         fig.update_layout(
             title=f"{st.session_state['REF02']} - {st.session_state['GNSS2']}(time) at Lab: {st.session_state['LAB2']} through {st.session_state.selected_frequency2} . (Each point correponds to Sum of all satellite weighted refsys per epoch)",
             xaxis_title="MJD",
-            yaxis_title="REFSYS (ns)",
+            yaxis_title="Weighted REFSYS(ns)",
             yaxis=dict(tickmode='auto', nticks =10),
             xaxis =dict(tickformat=".2f", tickfont= dict(size=14, color ="black"), exponentformat ='none')
         )
