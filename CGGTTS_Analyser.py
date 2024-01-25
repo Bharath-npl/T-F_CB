@@ -62,7 +62,7 @@ st.sidebar.header("Time & Frequency Capacity Building")
 
 st.markdown('----')  # Add a horizontal line for separation
 
-st.sidebar.header("User Information")
+st.sidebar.header("Information for users")
 
 
 
