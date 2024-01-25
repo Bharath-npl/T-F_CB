@@ -25,6 +25,7 @@ file_name_text = '''
                 <li>"E" for Galileo (Europe)</li>
                 <li>"C" for BeiDou (China)</li>
                 <li>"J" for QZSS (Japan)</li>
+                <li>"I" for IRNSS (India)</li>
             </ul>
         </li>
         <li><strong>F</strong> is the code character indicating the frequencies and channels:
