@@ -753,6 +753,7 @@ custom_css = '''
             z-index: 1;
             top: 100%;
             left: 10%;
+            font-family: "Source Sans Pro", sans-serif;
             /*transform: translateX(-50%);*/
             margin-left: 0px;
             opacity: 0;
