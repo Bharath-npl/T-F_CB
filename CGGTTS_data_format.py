@@ -792,6 +792,7 @@ custom_css = '''
             padding: 5px;
             position: absolute;
             z-index: 1;
+            font-family: "Source Sans Pro", sans-serif;
             top: 100%; /* Position the tooltip below the text */
             left: 10%; /* Align the tooltip with the start of the text */
             opacity: 0;
