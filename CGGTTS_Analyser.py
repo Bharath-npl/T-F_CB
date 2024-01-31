@@ -130,7 +130,7 @@ elif selected_option == 'CGGTTS data format':
     CGGTTS_data_format()
 
 elif selected_option == 'User manual':
-    display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
+    display_pdf_from_gdrive('https://drive.google.com/file/d/1oDPzQImUXMAPIeU8cLnLiXCHmv59rEbT/view?usp=sharing')
 
 elif selected_option == 'Video Demo':
     st.video('https://www.youtube.com/watch?v=GhmDnyNJrO4')
