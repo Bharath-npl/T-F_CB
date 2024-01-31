@@ -133,7 +133,7 @@ elif selected_option == 'User manual':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1FUePXWYbnlBjuvQ-c2S8_p216AjGhkb2/view?usp=sharing')
 
 elif selected_option == 'Video Demo':
-    st.write('Video Demonstration will be available shortly')
+    st.video('https://www.youtube.com/watch?v=GhmDnyNJrO4')
 
 elif selected_option == 'References':
     display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
