@@ -1422,7 +1422,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # if  not st.session_state.plot_data.empty:
                     # Plotting 
                 else:
-                    st.error("Common view cannot be processed: The two data sets are of different GNSS constellation ")
+                    st.error("**Common view cannot be processed**: The two data sets are of different GNSS constellation ")
 
                 if st.session_state.CV_SV_data is not None and not st.session_state.CV_SV_data.empty and not CV_result_df.empty:
                     # Use the correct dataframe
