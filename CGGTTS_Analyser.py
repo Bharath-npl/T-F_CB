@@ -1755,7 +1755,9 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 # contact information at the bottom of the sidebar
 st.sidebar.markdown('---')  # Add a horizontal line for separation
 st.sidebar.markdown('**Contact:   tf.cbkt@bipm.org**')
-st.sidebar.markdown('**For more Info:** https://e-learning.bipm.org/)
+st.sidebar.markdown('**For more Information visit **)
+
+st.write("[link](https://e-learning.bipm.org/)")
 # st.sidebar.text('Mr/Ms XYZ')
 # st.sidebar.text('Email: tf.cbkt@bipm.org')
    
