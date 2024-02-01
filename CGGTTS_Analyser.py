@@ -107,7 +107,7 @@ def display_pdf_from_gdrive(gdrive_link):
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 # Define the options for the dropdown, including a default 'None' option
-options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Video Demo', 'References']
+# options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Video Demo', 'References']
 
 # reduce_gap_css = '''
 # <style>
@@ -120,23 +120,23 @@ options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User man
 # st.sidebar.markdown(reduce_gap_css, unsafe_allow_html=True)
 
 # Create the select box with the options
-selected_option = st.sidebar.selectbox("Choose an option", options, index=0)
+# selected_option = st.sidebar.selectbox("Choose an option", options, index=0)
 
 # Check which option was selected and take action accordingly
-if selected_option == 'Time Transfer through GNSS':
-    display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
+# if selected_option == 'Time Transfer through GNSS':
+#     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
 
-elif selected_option == 'CGGTTS data format':
-    CGGTTS_data_format()
+# elif selected_option == 'CGGTTS data format':
+#     CGGTTS_data_format()
 
-elif selected_option == 'User manual':
-    display_pdf_from_gdrive('https://drive.google.com/file/d/1oDPzQImUXMAPIeU8cLnLiXCHmv59rEbT/view?usp=sharing')
+# elif selected_option == 'User manual':
+#     display_pdf_from_gdrive('https://drive.google.com/file/d/1oDPzQImUXMAPIeU8cLnLiXCHmv59rEbT/view?usp=sharing')
 
-elif selected_option == 'Video Demo':
-    st.video('https://www.youtube.com/watch?v=GhmDnyNJrO4')
+# elif selected_option == 'Video Demo':
+#     st.video('https://www.youtube.com/watch?v=GhmDnyNJrO4')
 
-elif selected_option == 'References':
-    display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
+# elif selected_option == 'References':
+#     display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
 
 # # If the default option is selected, do nothing
 # elif selected_option == 'Select an option':
