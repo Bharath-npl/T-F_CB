@@ -62,7 +62,7 @@ st.sidebar.header("Time & Frequency Capacity Building")
 
 st.markdown('----')  # Add a horizontal line for separation
 
-st.sidebar.header("Information for users")
+
 
 
 
@@ -105,6 +105,8 @@ def display_pdf_from_gdrive(gdrive_link):
     
     # Display the PDF in Streamlit
     st.markdown(pdf_display, unsafe_allow_html=True)
+    
+# st.sidebar.header("Information for users")
 
 # Define the options for the dropdown, including a default 'None' option
 # options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Video Demo', 'References']
