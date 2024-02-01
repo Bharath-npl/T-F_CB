@@ -1757,7 +1757,7 @@ st.sidebar.markdown('---')  # Add a horizontal line for separation
 st.sidebar.markdown('**Contact:   tf.cbkt@bipm.org**')
 st.sidebar.markdown('**For more Information visit:**')
 
-st.sidebar.markdown("[BIPM e Learing](https://e-learning.bipm.org/)")
+st.sidebar.markdown("[**BIPM e-Learning Platform**](https://e-learning.bipm.org/)")
 # st.sidebar.text('Mr/Ms XYZ')
 # st.sidebar.text('Email: tf.cbkt@bipm.org')
    
