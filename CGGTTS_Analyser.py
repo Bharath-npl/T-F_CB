@@ -1,12 +1,12 @@
 # ********************************* CGGTTS data analyser ***********************
 
+# To run the code in your local system use the following command 
+# streamlit run .\CV_difference_V1.py --server.port 8888
+
+
 import streamlit as st
 import pandas as pd
-import os
-import csv
 import warnings
-# import cv2
-# import io 
 from io import StringIO
 import math
 import matplotlib.pyplot as plt
@@ -15,13 +15,9 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import math
-import base64
-import requests
-from CGGTTS_data_format import CGGTTS_data_format
+
 warnings.filterwarnings('ignore')
 
-
-# streamlit run .\CV_difference_V1.py --server.port 8888
 
 st.set_page_config(page_title="BIPM Time Analyser", page_icon=":chart_with_upwards_trend:", layout="wide")
 st.title(":chart_with_upwards_trend: CGGTTS data analyser v1.0")
@@ -31,25 +27,8 @@ col1, col2 = st.columns(2)
 # Display the Start MJD and End MJD input fields
 col3, col4 = st.columns(2)
 
-# Initialize df to an empty DataFrame
-df = pd.DataFrame()
-df1 = pd.DataFrame()
-df2 = pd.DataFrame()
 
-
-def find_header_end(lines):
-    for idx, line in enumerate(lines):
-        if "hhmmss  s  .1dg .1dg    .1ns" in line:
-            return idx + 2
-    return None
-
-
-df1_mjd=pd.DataFrame()
-Avg_refsys_CV = pd.DataFrame()
-Avg_refsys_Rx1 = pd.DataFrame()
-Avg_refsys_Rx2 = pd.DataFrame()
-
-
+# BIPM logo 
 st.sidebar.image("https://www.bipm.org/documents/20126/27072194/Logo+BIPM+blue.png/797bb4e6-8cfb-5d78-b480-e460ad5eeec2?t=1583920059345", width=200)
 #One line of gap 
 st.sidebar.write("")
@@ -58,93 +37,31 @@ st.sidebar.image("https://www.fusfoundation.org/images/IEEE-UFFC.jpg", width=200
 
 st.sidebar.header("Time & Frequency Capacity Building")
 
-
-
 st.markdown('----')  # Add a horizontal line for separation
 
 
-
-
-
-def display_pdf_from_url(url):
-    # Send a GET request to the URL
-    response = requests.get(url)
-    
-    # Check if the request was successful 
-    if response.status_code == 200:
-        # Encode the PDF content in base64
-        base64_pdf = base64.b64encode(response.content).decode('utf-8')
-        
-        # Embedding PDF in HTML using iframe
-        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="1400" height="1000" type="application/pdf"></iframe>'
-        
-        # Display the PDF in Streamlit
-        st.markdown(pdf_display, unsafe_allow_html=True)
-    else:
-        st.error("Failed to load PDF")
-
-# if st.sidebar.checkbox('Time transfer through GNSS'):
-    # st.markdown("[View Expert Presentation](https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf)", unsafe_allow_html=True)
-# if st.sidebar.checkbox('Time transfer through GNSS'):
-    # st.markdown('<a href="https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf" target="_blank">View Expert Presentation</a>', unsafe_allow_html=True)
-# if st.sidebar.checkbox('Time transfer through GNSS'):
-    # display_pdf_from_url('https://github.com/Bharath-npl/T-F_CB/blob/main/Expert_presentation.pdf')
-    # display_pdf_from_url('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view?usp=sharing')
-    # display_pdf_from_url('https://raw.githubusercontent.com/Bharath-npl/T-F_CB/main/Expert_presentation.pdf')
-# else:
-#     st.write("PDF is hidden. Check the box to view it.")
-def display_pdf_from_gdrive(gdrive_link):
-    # Extract the file ID from the Google Drive link
-    file_id = gdrive_link.split("/")[5]
-    
-    # Create the embed link
-    embed_link = f"https://drive.google.com/file/d/{file_id}/preview"
-    
-    # Embedding PDF in HTML using iframe
-    pdf_display = f'<iframe src="{embed_link}" width="1300" height="1000" type="application/pdf"></iframe>'
-    
-    # Display the PDF in Streamlit
-    st.markdown(pdf_display, unsafe_allow_html=True)
-    
-# st.sidebar.header("Information for users")
-
-# Define the options for the dropdown, including a default 'None' option
-# options = ['None', 'Time Transfer through GNSS', 'CGGTTS data format', 'User manual', 'Video Demo', 'References']
-
-# reduce_gap_css = '''
-# <style>
-#     .sidebar .sidebar-content { padding-top: -2rem; }
-#     .sidebar .st-bx { margin-bottom: -150px; }
-#     .sidebar .st-b7 { margin-bottom: -150px; }
-# </style>
-# '''
-# # Inject custom CSS with markdown
-# st.sidebar.markdown(reduce_gap_css, unsafe_allow_html=True)
-
-# Create the select box with the options
-# selected_option = st.sidebar.selectbox("Choose an option", options, index=0)
-
-# Check which option was selected and take action accordingly
-# if selected_option == 'Time Transfer through GNSS':
-#     display_pdf_from_gdrive('https://drive.google.com/file/d/10g7wfPB4kPgiEHAKJ0MhbPQcypcLYTL0/view')
-
-# elif selected_option == 'CGGTTS data format':
-#     CGGTTS_data_format()
-
-# elif selected_option == 'User manual':
-#     display_pdf_from_gdrive('https://drive.google.com/file/d/1oDPzQImUXMAPIeU8cLnLiXCHmv59rEbT/view?usp=sharing')
-
-# elif selected_option == 'Video Demo':
-#     st.video('https://www.youtube.com/watch?v=GhmDnyNJrO4')
-
-# elif selected_option == 'References':
-#     display_pdf_from_gdrive('https://drive.google.com/file/d/1dTSFKm4s5LpT6VJrAwcJicO2pP5k1Ys3/view?usp=sharing')
-
-# # If the default option is selected, do nothing
-# elif selected_option == 'Select an option':
-#     st.write("Please select an option to display information.")
-
+# Initialize df to an empty DataFrame
+df = pd.DataFrame()
+df1 = pd.DataFrame()
+df2 = pd.DataFrame()
+df1_mjd=pd.DataFrame()
+Avg_refsys_CV = pd.DataFrame()
+Avg_refsys_Rx1 = pd.DataFrame()
+Avg_refsys_Rx2 = pd.DataFrame()
 combined_Colm_data_01 = pd.DataFrame()
+CV_result_df = pd.DataFrame()
+AV_result_df = pd.DataFrame()
+
+# Initialize the variable outside of the conditional blocks
+Required_Colm_data_01 = []
+Required_Colm_data_02 = []
+unique_mjd_int_values = []
+unique_mjd_int_values2 = []
+CV_data =[]
+unique_SVIDs = []
+processed_data1= None
+processed_data2= None
+
 
 # File uploader and data processing
 with st.form("my-form1", clear_on_submit=True):
@@ -155,12 +72,20 @@ with st.form("my-form1", clear_on_submit=True):
 # Initialize selected_df_01 in session state if not present
 if 'sel_MJD_df_01' not in st.session_state:
     st.session_state['sel_MJD_df_01'] = pd.DataFrame()
+if 'sel_MJD_df_02' not in st.session_state:
+    st.session_state['sel_MJD_df_02'] = pd.DataFrame()
 
-Required_Colm_data_01 = []
+
+def find_header_end(lines):
+    for idx, line in enumerate(lines):
+        if "hhmmss  s  .1dg .1dg    .1ns" in line:
+            return idx + 2
+    return None
 
 
-def process_data1(files_01):
-    if files_01:
+# Function to process the CGGTTS data from the uploaded files  
+def process_data(files, Receiver):
+    if files:
         col1.empty()
         col2.empty()
         unique_mjd_values = set()  # To store unique MJD values
@@ -173,11 +98,13 @@ def process_data1(files_01):
         gnss_type = None
 
         # Initialize 'GNSS1' in session state if it doesn't exist
-        if 'GNSS1' not in st.session_state:
+        if 'GNSS1' not in st.session_state and Receiver == 1:
             st.session_state['GNSS1'] = None
+        
+        if 'GNSS2' not in st.session_state and Receiver == 2:
+            st.session_state['GNSS2'] = None
 
-
-        for each_file in files_01:
+        for each_file in files:
             all_dataframes = []
             filename = each_file.name
 
@@ -190,7 +117,10 @@ def process_data1(files_01):
                 if gnss_type is None:
                     # Set the GNSS type if not already set
                     gnss_type = current_gnss
-                    st.session_state["GNSS1"] = gnss_type
+                    if Receiver ==1: 
+                        st.session_state["GNSS1"] = gnss_type
+                    else: 
+                        st.session_state["GNSS2"] = gnss_type
                 elif gnss_type != current_gnss:
                     # Notify the user if there's a mismatch in GNSS type
                     st.error("Please upload files of one GNSS type. Found multiple types.")
@@ -231,14 +161,14 @@ def process_data1(files_01):
                 if line.startswith("CGGTTS")or line.startswith("GGTTS"):
                     inside_header = True
                     if "=" in line:
-                        Rx1_version = line.split('=')[1].strip()
-                        # Do something with Rx1_version
+                        Rx_version = line.split('=')[1].strip()
+                        # Do something with Rx_version
                     else:
                         st.error("Problem in reading CGGTTS version in the header, please add '=' before version number as per standard format")
                 
                 if line.startswith("REF=") or line.startswith("REF ="):
-                    Receiever1 = line.split('=')[1].strip()
-                
+                    RX = line.split('=')[1].strip()
+               
                 if line.startswith("LAB=") or line.startswith("LAB ="):
                     LAB = line.split('=')[1].strip()
 
@@ -269,8 +199,8 @@ def process_data1(files_01):
                         'REFSV': line[34:45].strip(),
                         'SRSV': line[46:52].strip(),
                         'REFSYS': line[53:64].strip(),
-                        'REF': Receiever1,
-                        'Version':Rx1_version,
+                        'REF': RX,
+                        'Version':Rx_version,
                         'LAB': LAB                                                
                     }
 
@@ -293,17 +223,8 @@ def process_data1(files_01):
                 continue  # Skip further processing for this file
 
             df_split = df_split[df_split['SAT'].notna()] # Skip the lines where SAT column is missing 
-            # print(f"File read is :\n {df_split}")
-            # print(f"Sv ids in the Data: \n {df_split['SAT']}")
-            # Convert to appropriate datatypes
-            # df_01['SAT'] = df_split['SAT'].astype(int)
             df_01['SAT'] = df_split['SAT']
-            # df_01['MJD'] = df_split['MJD'].astype(float)
-            # unique_mjd_values = set(df_split['MJD'])  # Unique MJD values in the list 
             df_split['STTIME'] = df_split['STTIME']  # Keep as string for hhmmss processing
-
-            # Combine hhmmss into MJD
-            # df_01['MJD'] += df_split['STTIME'].apply(lambda x: (int(x[0:2]) * 3600 + int(x[2:4]) * 60 + int(x[4:6]) * 1) * 0.00001)
 
             df_split['MJD'] = df_split['MJD'].astype(str).str.replace('"', '').astype(float)
 
@@ -362,8 +283,9 @@ def process_data1(files_01):
         return pd.DataFrame()
 
 
+# Function to assign the required variables from the processed data
 if files_01:
-    processed_data1, unique_mjd_values1, unique_FRC1, file01_empty = process_data1(files_01)
+    processed_data1, unique_mjd_values1, unique_FRC1, file01_empty = process_data(files_01, 1)
     if file01_empty == False:
         # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
         # st.write("All MJD values from files:", unique_mjd_values1)
@@ -376,73 +298,61 @@ if files_01:
         st.session_state['REF01'] = ', '.join(map(str, processed_data1['REF'].dropna().unique()))
         st.session_state['LAB1'] = ' '.join(map(str, processed_data1['LAB'].dropna().unique()))
 
-    
-def process_4_plot1(given_data1, start_mjd, end_mjd):
+
+# Function to filter the Data as per the user selected MJD range of receiver 
+def MJD_Filter(given_data2, start_mjd, end_mjd):
     # Ensure MJD values are of the correct type for comparison
-    given_data1["MJD"] = pd.to_numeric(given_data1["MJD"], errors='coerce')
+    given_data2["MJD"] = pd.to_numeric(given_data2["MJD"], errors='coerce')
     
         # Check if start and end MJD are the same (data for a single day)
     if start_mjd == end_mjd:
         # Filter data for that specific day
-        filtered_df = given_data1[(given_data1["MJD"] < float(start_mjd)+1) & (given_data1["MJD"] > float(start_mjd)-1)]
+        filtered_df = given_data2[(given_data2["MJD"] < float(start_mjd)+1) & (given_data2["MJD"] > float(start_mjd)-1)]
     else:
         # Filter the data based on the MJD range
-        filtered_df = given_data1[
-            (given_data1["MJD"].notnull()) &
-            (given_data1["MJD"] >= float(start_mjd)) &
-            (given_data1["MJD"] <= float(end_mjd+1))
+        filtered_df = given_data2[
+            (given_data2["MJD"].notnull()) &
+            (given_data2["MJD"] >= float(start_mjd)) &
+            (given_data2["MJD"] <= float(end_mjd+1))
         ]
-    
-    # st.write("Selected Start MJD:", start_mjd)
-    # st.write("Selected End MJD:", end_mjd)
-    
+        
     return filtered_df
 
 
-def create_csv_data_Rx1(starting_mjd, ending_mjd, selected_data, frequency1):
+# Function to write the required information into the header of the output files of receiver 1 
+def create_csv_data_Rx(starting_mjd, ending_mjd, selected_data, frequency, rx_info):
     # Creating DataFrame for data section
     # Format the 'MJD' column to have only 5 digits after the decimal
     selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
     
-    data_Rx1_df = pd.DataFrame({
+    data_Rx_df = pd.DataFrame({
         'MJD': selected_data["MJD"],
         'Weighted Refsys (ns)': selected_data['REFSYS']
     })
 
     # Creating header information
-    header_Rx1_info = (
-        f"# {st.session_state['REF01']} REFSYS data: Each point corresponds to sum of all visible satellite weighted REFSYS values at each epoch  \n"
-        f"# Start MJD: {starting_mjd}\n"
-        f"# End MJD: {ending_mjd}\n"
-        f"# Frequency: {frequency1}\n"
-        f"# Lab:{st.session_state['LAB1']}\n"
-        f"# GNSS reference time: {st.session_state['GNSS1']}\n")
-                
+    if rx_info ==1: 
 
-    return header_Rx1_info, data_Rx1_df
+        header_Rx_info = (
+            f"# {st.session_state['REF01']} REFSYS data: Each point corresponds to sum of all visible satellite weighted REFSYS values at each epoch  \n"
+            f"# Start MJD: {starting_mjd}\n"
+            f"# End MJD: {ending_mjd}\n"
+            f"# Frequency: {frequency}\n"
+            f"# Lab:{st.session_state['LAB1']}\n"
+            f"# GNSS reference time: {st.session_state['GNSS1']}\n")
+        
+    elif rx_info == 2:
 
+        header_Rx_info = (
+            f"# {st.session_state['REF02']} REFSYS data: Each point corresponds to sum of all visible satellite weighted REFSYS values at each epoch  \n"
+            f"# Start MJD: {starting_mjd}\n"
+            f"# End MJD: {ending_mjd}\n"
+            f"# Frequency: {frequency}\n"
+            f"# Lab:{st.session_state['LAB2']}\n"
+            f"# GNSS reference time: {st.session_state['GNSS2']}\n")
 
-def create_csv_data_Rx2(starting_mjd, ending_mjd, selected_data, frequency2):
-    # Creating DataFrame for data section
-    # Format the 'MJD' column to have only 5 digits after the decimal
-    selected_data["MJD"] = selected_data["MJD"].apply(lambda x: f"{x:.5f}")
-    
-    data_Rx2_df = pd.DataFrame({
-        'MJD': selected_data["MJD"],
-        'Weighted Refsys (ns)': selected_data['REFSYS']
-    })
+    return header_Rx_info, data_Rx_df
 
-    # Creating header information
-    header_Rx2_info = (
-        f"# {st.session_state['REF02']} REFSYS data: Each point corresponds to sum of all visible satellite weighted REFSYS values at each epoch  \n"
-        f"# Start MJD: {starting_mjd}\n"
-        f"# End MJD: {ending_mjd}\n"
-        f"# Frequency: {frequency2}\n"
-        f"# Lab:{st.session_state['LAB2']}\n"
-        f"# GNSS reference time: {st.session_state['GNSS2']}\n")
-
-    return header_Rx2_info, data_Rx2_df
-    
 
 # Function to convert header and DataFrame to CSV for download
 def convert_to_csv(header, df):
@@ -451,12 +361,11 @@ def convert_to_csv(header, df):
     df.to_csv(output,sep='\t', index=False, header=True)
     return output.getvalue()
 
-
-
-def plot_data1(frequency1):
+# Function to caluclate the weighted REFSYS and plot the data of receiver 1 
+def Weight_refsys_plot1(frequency1):
     # Filter the MJD-filtered data based on the frequency
     df1_data_filtered = st.session_state['sel_MJD_df_01'][st.session_state['sel_MJD_df_01']['FRC'] == frequency1]
-    # st.write(f"Filtered data: \n {df1_data_filtered}")
+   
     st.session_state["sel_MJD_FRC_01"] = df1_data_filtered
     
     # Calculate sine square of ELV
@@ -467,24 +376,6 @@ def plot_data1(frequency1):
 
     # Calculate weighted REFSYS value
     df1_data_filtered['weighted_REFSYS'] = df1_data_filtered['REFSYS'] * df1_data_filtered['sin2']*0.1
-
-
-    #df1_data_filtered['normalized_REFSYS'] = df1_data_filtered.groupby('MJD')['weighted_REFSYS'].transform(lambda x: x / x.sum())
-
-    # the following IF block is only to Print the first epoch info to validate the code logic 
-    # if not df1_data_filtered.empty:
-    #     first_mjd = df1_data_filtered['MJD'].iloc[0] # First epoch data 
-
-    #     # Filter the DataFrame to only include rows with the first MJD value
-    #     first_mjd_df = df1_data_filtered[df1_data_filtered['MJD'] == first_mjd]   
-
-    #     # Select only the relevant columns including initial REFSYS
-    #     table_data = first_mjd_df[['MJD','ELV','SAT','REFSYS', 'weighted_REFSYS']]
-        
-    #     # Display the table
-    #     st.table(table_data)
-        
-
 
     if not df1_data_filtered.empty:
         Avg_refsys_Rx1 = (df1_data_filtered.groupby("MJD")["weighted_REFSYS"].sum().reset_index())
@@ -528,14 +419,14 @@ def plot_data1(frequency1):
         st.plotly_chart(fig, use_container_width=True)
 
         # Create the CSV header and data
-        headerRx1, data_dfRx1 = create_csv_data_Rx1(min_Rx1, max_Rx1, Avg_refsys_Rx1,
-                                        st.session_state.selected_frequency1)
+        headerRx1, data_dfRx1 = create_csv_data_Rx(min_Rx1, max_Rx1, Avg_refsys_Rx1,
+                                        st.session_state.selected_frequency1, 1)
  
         
         csv_Rx1 = convert_to_csv(headerRx1, data_dfRx1)
                 
         # Create a download button
-        # csv = convert_Rx1_to_csv(Avg_refsys_Rx1)
+        
         st.download_button(
             label="Download REFSYS data",
             data=csv_Rx1,
@@ -548,7 +439,7 @@ def plot_data1(frequency1):
         st.error("Selected frequency data is not available in the selected MJD range ")
 
 
-# MJD Selection
+# Read the processed data and provide the user options for selecting the MJD range 
 if 'df1_total' in st.session_state and unique_mjd_int_values1:
     cols = st.columns(2)  # Creates two columns
 
@@ -556,16 +447,16 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
     with cols[0]:
         start_mjd_input1 = st.selectbox("**Start MJD**", options=unique_mjd_int_values1, key='start_mjd01')
 
-    # st.session_state['start_mjd_input1'] = start_mjd_input1
+  
     # "End MJD" in the second column
     with cols[1]:
-        # Update the end_values1 list based on the selected start_mjd_input
+        # Update the end_values1 list based on the selected start mjd value
         end_values1 = [mjd for mjd in unique_mjd_int_values1 if mjd >= start_mjd_input1]
-        # end_values1 = [mjd for mjd in all_mjd_float_values if mjd >= start_mjd_input1]
+        
         end_mjd_input1 = st.selectbox("**End MJD**", options=end_values1, index=len(end_values1)-1  if end_values1 else 0, key='end_mjd01')
-        # end_mjd_input1 = st.selectbox("End MJD", options=end_values1, index=0 if end_values1 else -1, key='end_mjd01')
+        
 
-    st.session_state['sel_MJD_df_01'] = process_4_plot1(st.session_state['df1_total'], start_mjd_input1, end_mjd_input1)
+    st.session_state['sel_MJD_df_01'] = MJD_Filter(st.session_state['df1_total'], start_mjd_input1, end_mjd_input1)
     
     # If unique frequencies are available, update the plot
     if 'unique_FRC1' in st.session_state and 'sel_MJD_df_01' in st.session_state:
@@ -574,225 +465,22 @@ if 'df1_total' in st.session_state and unique_mjd_int_values1:
             # Re-select the frequency after MJD filtering
             selected_frequency1 = st.radio("**Select Frequency**", filtered_unique_frequencies, index=0, key='Frequency1', horizontal=True)
             st.session_state.selected_frequency1= selected_frequency1
-            plot_data1(selected_frequency1)
+            Weight_refsys_plot1(selected_frequency1)
         else:
             st.error("No valid frequencies available to process the data")
 
 
-# Initialize the variable outside of the conditional blocks
-unique_mjd_int_values2 = []
-processed_data1= None
-selected_df_01 = None
-# processed_data = Selected_MJD_data1(uploaded_files)
-# Initialize variables
-unique_mjd_int_values = []
-
-if 'show_plot2' not in st.session_state:
-    st.session_state['show_plot2'] = False
+# if 'show_plot2' not in st.session_state:
+#     st.session_state['show_plot2'] = False
 
 # File uploader and data processing
 with st.form("my-form2", clear_on_submit=True):
     files_02 = st.file_uploader(":file_folder: **Upload the CGGTTS files of receiver 2**", accept_multiple_files=True)
     submitted2 = st.form_submit_button("**Submit2**")
 
-Required_Colm_data_02 = []
-
-
-def process_data2(files_02):
-    if files_02:
-        col3.empty()
-        col4.empty()
-        unique_mjd_values = set()  # To store unique MJD values
-        unique_sv_id = set()  # To store the Unique SV ID values
-        unique_FRC =set()
-        df_02 =pd.DataFrame()
-        combined_Colm_data_02 = pd.DataFrame()
-        # A list to store cleaned data across multiple files
-        valid_filenames02 = []
-        gnss_type2 = None
-        # Initialize 'GNSS2' in session state if it doesn't exist
-        if 'GNSS2' not in st.session_state:
-            st.session_state['GNSS2'] = None
-
-        for each_file in files_02:
-            all_dataframes = []
-            filename = each_file.name
-            # Check if the file name follows the XFLLmodd.ddd format
-            if len(filename) >= 1 and filename[0].upper() in ['G', 'R', 'E', 'C', 'J', 'I']:
-                # Determine the GNSS type based on the first character
-                current_gnss2 = {'G': 'GPS', 'R': 'GLONASS', 'E': 'Galileo', 
-                                'C': 'BeiDou', 'J': 'QZSS', 'I': 'IRNSS'}[filename[0].upper()]
-                
-                if gnss_type2 is None:
-                    # Set the GNSS type if not already set
-                    gnss_type2 = current_gnss2
-                    st.session_state['GNSS2'] = gnss_type2
-                elif gnss_type2 != current_gnss2:
-                    # Notify the user if there's a mismatch in GNSS type
-                    st.error("Please upload files of only one GNSS type. Found multiple types.")
-                    break
-
-            else:
-                st.error(f"Invalid file name format for GNSS detection: {filename}")
-            # Read uploaded file contents directly into memory
-            file_content = each_file.read().decode()
-
-            # Split the file into lines
-            lines = file_content.split('\n')
-
-            # Check if the first line starts with CGGTTS or GGTTS
-            if not (lines[0].startswith("CGGTTS") or lines[0].startswith("GGTTS")):
-                st.error(f"File format not supported for file: {filename}")
-                continue  # Skip to the next file
-            
-            # st.write(f"File: {filename}")
-            valid_filenames02.append(filename)
-
-
-            data_after_head = []
-            # Flag to indicate if we are currently inside a header block
-            inside_header = False
-            prev_line = None
-            frc_is_at =None
-
-            for line in lines:
-                               
-                # Start of the header
-                if line.startswith("CGGTTS")or line.startswith("GGTTS"):
-                    inside_header = True
-                    if "=" in line:
-                        Rx2_version = line.split('=')[1].strip()
-                        
-                    else:
-                        st.error("Problem in reading CGGTTS version in the header, please add '=' before version number as per standard format")
-                    
-                # Find the position of the FRC in the line 
-                if "hhmmss  s  .1dg .1dg    .1ns" in line and prev_line:
-                    frc_position = prev_line.find('FRC')
-                    if frc_position != -1:
-                        frc_is_at = frc_position
-
-                if line.startswith("REF=") or line.startswith("REF ="):
-                    Receiever2 = line.split('=')[1].strip()
-
-                if line.startswith("LAB=") or line.startswith("LAB ="):
-                    LAB = line.split('=')[1].strip()
-
-                # If we're not inside a header, process the line as data
-                elif not inside_header:
-                    data_after_head.append(line)
-
-                # End of the header
-                if "hhmmss  s  .1dg .1dg    .1ns" in line:
-                    inside_header = False
-                prev_line = line  # Update the prev_line with the current line
-
-            # Create DataFrame from the data list
-            data_rows = []
-            file02_empty = False
-            for line in data_after_head:
-                if line.strip():  # Skip empty lines
-                    # Extract the columns based on their fixed positions
-                    data_row = {
-                        'SAT': line[0:3].strip(),
-                        'CL': line[4:6].strip(),
-                        'MJD': line[7:12].strip(),
-                        'STTIME': line[13:19].strip(),
-                        'TRKL': line[20:24].strip(),
-                        'ELV': line[25:28].strip(),
-                        'AZTH': line[29:33].strip(),
-                        'REFSV': line[34:45].strip(),
-                        'SRSV': line[46:52].strip(),
-                        'REFSYS': line[53:64].strip(),
-                        'REF': Receiever2,
-                        'Version':Rx2_version, 
-                        'LAB': LAB}
-                    
-                    # Use the 'FRC' position if found
-                    if frc_is_at is not None and len(line) > frc_is_at + 2:
-                        data_row['FRC'] = line[frc_is_at:frc_is_at + 3].strip()
-                    else:
-                        data_row['FRC'] = "L1C"
-
-                    data_rows.append(data_row)
-
-            # Create DataFrame from the data list
-            df_split = pd.DataFrame(data_rows)
-
-            # Check if the DataFrame is empty or the 'SAT' column has only null/empty values
-            if df_split.empty or df_split['SAT'].isnull().all():
-                st.error(f"It seems {each_file.name} file is empty")
-                file02_empty = True
-                continue  # Skip further processing for this file
-            
-            df_split = df_split[df_split['SAT'].notna()] # Skip the lines where SAT column is missing 
-            # print(f"File read is :\n {df_split}")
-            # print(f"Sv ids in the Data: \n {df_split['SAT']}")
-            # Convert to appropriate datatypes
-            # df_02['SAT'] = df_split['SAT'].astype(int)
-            df_02['SAT'] = df_split['SAT']
-            # df_01['MJD'] = df_split['MJD'].astype(float)
-            # unique_mjd_values = set(df_split['MJD'])  # Unique MJD values in the list 
-            df_split['STTIME'] = df_split['STTIME']  # Keep as string for hhmmss processing
-
-            # Combine hhmmss into MJD
-            # df_01['MJD'] += df_split['STTIME'].apply(lambda x: (int(x[0:2]) * 3600 + int(x[2:4]) * 60 + int(x[4:6]) * 1) * 0.00001)
-
-            df_split['MJD'] = df_split['MJD'].astype(str).str.replace('"', '').astype(float)
-
-            # Process STTIME and combine it with MJD
-            def convert_sttime_to_seconds(sttime_str):
-                # Extract hours, minutes, seconds and convert to total seconds
-                hours, minutes, seconds = map(int, [sttime_str[:2], sttime_str[2:4], sttime_str[4:6]])
-                return (hours * 3600 + minutes * 60 + seconds)/86400
-
-            # Apply the conversion to STTIME and add it to MJD
-            df_split['MJD'] += df_split['STTIME'].apply(lambda x: convert_sttime_to_seconds(x) )
-            df_02['MJD'] = df_split['MJD']
-
-            try: 
-                # Convert other relevant columns to desired datatypes
-                df_02['ELV'] = df_split['ELV'].astype(float)
-                df_02['REFSV'] = df_split['REFSV'].astype(float)
-                df_02['SRSV'] = df_split['SRSV'].astype(float)
-                df_02['REFSYS'] = df_split['REFSYS'].astype(float)
-                df_02['FRC'] = df_split['FRC'].astype(str)
-                df_02['Version'] = df_split['Version'].astype(str)
-                df_02['LAB'] = df_split['LAB'].astype(str)
-                df_02['REF'] = df_split['REF'].astype(str)
-
-                # unique_frc_values = df_split['FRC'].unique()
-                # df_split['FRC'] = list(unique_frc_values)
-
-                Required_Colm_data_02.append(df_02)
-                unique_FRC.update(df_02['FRC'].unique())
-                unique_mjd_values.update(df_02['MJD'].unique())
-                unique_sv_id.update(df_02['SAT'].unique())
-            
-                combined_Colm_data_02 = pd.concat([combined_Colm_data_02, df_02])
-
-            except Exception as e:      
-                st.error(f"Data is not in proper format. Please check the file: {filename}") 
-                file02_empty = True
-                # Update the "Start MJD" and "End MJD" select boxes
-        unique_mjd_values = sorted(unique_mjd_values)
-        unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
-
-        # Write the list of valid filenames in a row
-        if valid_filenames02:
-            st.write(f"Files uploaded: {', '.join(valid_filenames02)}")
-        else:
-            st.write("No valid files found.")
-
-       
-        return combined_Colm_data_02,unique_mjd_int_values2, unique_FRC, file02_empty
-
-    else:
-        return pd.DataFrame()
-
 
 if files_02:
-    processed_data2, unique_mjd_values, unique_FRC2, file02_empty = process_data2(files_02)
+    processed_data2, unique_mjd_values, unique_FRC2, file02_empty = process_data(files_02, 2)
     if file02_empty == False: 
         # unique_mjd_int_values1 = sorted(set(int(mjd) for mjd in unique_mjd_values))
         unique_mjd_int_values2 = sorted(set(int(mjd) for mjd in unique_mjd_values if not pd.isna(mjd)))
@@ -805,29 +493,8 @@ if files_02:
         st.session_state['LAB2'] = ' '.join(map(str, processed_data2['LAB'].dropna().unique()))
 
 
-def process_4_plot2(given_data2, start_mjd, end_mjd):
-    # Ensure MJD values are of the correct type for comparison
-    given_data2["MJD"] = pd.to_numeric(given_data2["MJD"], errors='coerce')
-    
-        # Check if start and end MJD are the same (data for a single day)
-    if start_mjd == end_mjd:
-        # Filter data for that specific day
-        filtered_df = given_data2[(given_data2["MJD"] < float(start_mjd)+1) & (given_data2["MJD"] > float(start_mjd)-1)]
-    else:
-        # Filter the data based on the MJD range
-        filtered_df = given_data2[
-            (given_data2["MJD"].notnull()) &
-            (given_data2["MJD"] >= float(start_mjd)) &
-            (given_data2["MJD"] <= float(end_mjd+1))
-        ]
-    
-    # st.write("Selected Start MJD:", start_mjd)
-    # st.write("Selected End MJD:", end_mjd)
-    
-    return filtered_df
-
-
-def plot_data2(frequency2):
+# Function to caluclate the weighted REFSYS and plot the data of receiver 2
+def Weight_refsys_plot2(frequency2):
     # Filter the MJD-filtered data based on the frequency
     df2_data_filtered = st.session_state['sel_MJD_df_02'][st.session_state['sel_MJD_df_02']['FRC'] == frequency2]
     st.session_state["sel_MJD_FRC_02"] = df2_data_filtered
@@ -841,28 +508,12 @@ def plot_data2(frequency2):
 
      # Calculate weighted REFSYS value
     df2_data_filtered['weighted_REFSYS'] = df2_data_filtered['REFSYS'] * df2_data_filtered['sin2']*0.1
-
-    # The following IF block is only to Print the first epoch info to validate the code logic 
-    # if not df2_data_filtered.empty:
-    #     first_mjd = df2_data_filtered['MJD'].iloc[0] # First epoch data 
-
-    #     # Filter the DataFrame to only include rows with the first MJD value
-    #     first_mjd_df = df2_data_filtered[df2_data_filtered['MJD'] == first_mjd]   
-
-    #     # Select only the relevant columns including initial REFSYS
-    #     table_data = first_mjd_df[['MJD', 'ELV', 'SAT','REFSYS', 'weighted_REFSYS']]
-        
-    #     # Display the table
-    #     st.table(table_data)
-        
-
-       
+     
     if not df2_data_filtered.empty:
         Avg_refsys_Rx2 = (df2_data_filtered.groupby("MJD")["weighted_REFSYS"].sum().reset_index())
         Avg_refsys_Rx2["REFSYS"] = (Avg_refsys_Rx2["weighted_REFSYS"]).round(2)
         Data02_stdev = Avg_refsys_Rx2["REFSYS"].std()
-
-        # st.markdown(f"## Receiver 2 Average REFSYS: {frequency2}")
+        
         # Select the start and end MJD from the user selection 
         min_Rx2 = math.floor(min(Avg_refsys_Rx2["MJD"]))
         max_Rx2 = math.ceil(max(Avg_refsys_Rx2["MJD"]))
@@ -896,14 +547,14 @@ def plot_data2(frequency2):
         st.plotly_chart(fig, use_container_width=True)
 
         # Create the CSV header and data
-        headerRx2, data_dfRx2 = create_csv_data_Rx2(min_Rx2, max_Rx2, Avg_refsys_Rx2,
-                                        st.session_state.selected_frequency2)
+        headerRx2, data_dfRx2 = create_csv_data_Rx(min_Rx2, max_Rx2, Avg_refsys_Rx2,
+                                        st.session_state.selected_frequency2, 2)
  
         
         csv_Rx2 = convert_to_csv(headerRx2, data_dfRx2)
                 
         # Create a download button
-        # csv = convert_Rx1_to_csv(Avg_refsys_Rx1)
+       
         st.download_button(
             label="Download REFSYS data",
             data=csv_Rx2,
@@ -915,7 +566,7 @@ def plot_data2(frequency2):
         st.error("No valid frequencies available to process the data")
 
 
-# MJD Selection
+# Read the processed data and provide the user options for selecting the MJD range
 if 'df2_total' in st.session_state and unique_mjd_int_values2:
     cols = st.columns(2)  # Creates two columns
 
@@ -931,7 +582,7 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
     
     # Filter the DataFrame based on the MJD selection
 
-    st.session_state['sel_MJD_df_02'] = process_4_plot2(st.session_state['df2_total'], start_mjd_input2, end_mjd_input2)
+    st.session_state['sel_MJD_df_02'] = MJD_Filter(st.session_state['df2_total'], start_mjd_input2, end_mjd_input2)
     
         # st.session_state['sel_MJD_df_01'] = process_4_plot1(st.session_state['df1_total'], start_mjd_input1, end_mjd_input1)
     
@@ -942,7 +593,7 @@ if 'df2_total' in st.session_state and unique_mjd_int_values2:
             # Re-select the frequency after MJD filtering
             selected_frequency2 = st.radio("**Select Frequency**", filtered_unique_frequencies, index=0, key='Frequency2', horizontal=True)
             st.session_state.selected_frequency2= selected_frequency2
-            plot_data2(selected_frequency2)
+            Weight_refsys_plot2(selected_frequency2)
         else:
             st.error("No valid frequencies available for selection.")
     
@@ -1044,10 +695,7 @@ def create_csv_data_AV(starting_mjd, ending_mjd, SVids, frequency1, frequency2, 
     return header_AV_info, data_AV_df
     
 
-data1_avail =0
-data2_avail =0
-# BIPM Logo
-
+# Initialize session variables 
 
 if 'plot_CV_clicked' not in st.session_state:
     st.session_state.plot_CV_clicked = False
@@ -1055,6 +703,7 @@ if 'plot_CV_clicked' not in st.session_state:
 if 'plot_AV_clicked' not in st.session_state:
     st.session_state.plot_AV_clicked = False
 
+# Sidebar buttons for Common View 
 st.sidebar.header("Common-View Analysis")
 plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
 
@@ -1062,12 +711,8 @@ if plot_CV:
     st.session_state.plot_CV_clicked = True
 
 
-# st.sidebar.header("Common-View Analysis")
-# plot_CV = st.sidebar.button("Plot Common-View", key= 'Common_view')
-
-# # CV_PRNS = st.sidebar.button("Plot Common PRNs", key= 'Common_PRNs')
-
-
+# Sidebar buttons for All-in-view 
+    
 st.sidebar.header("All-in-View Analysis")
 plot_AV = st.sidebar.button("Plot All-in-View", key= 'All_in_view')
 
@@ -1075,15 +720,8 @@ if plot_AV:
     st.session_state.plot_AV_clicked = True
 
 
-# Check conditions only when plot buttons are clicked
-# if (st.session_state.plot_CV_clicked or st.session_state.plot_AV_clicked):
-#     if not submitted1 or not submitted2:
-#         st.error("One of the receiver data is not uploaded yet. Don't forget to press the Submit button after uploading the files.")
-
-
-
 df3 = pd.DataFrame(columns=['MJD_time', 'CV_diff'])
-CV_data =[]
+
 
 # Initialize session variables 
 
@@ -1096,8 +734,8 @@ if 'df2_mjd' not in st.session_state:
 if 'selected_svids' not in st.session_state:
     st.session_state.selected_svids = ['ALL']
 
-unique_SVIDs = []
 
+# Function to perform the Common view based on the filters applied on data 
 def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, Elv_Mask, outlier):
     
     # Filter based on ELV values
@@ -1143,9 +781,9 @@ def process_plot_CV(df1, df2, unique_MJD_times, selected_svids, unique_SVIDs, El
 
     return result, missing_session, CV_SV
 
-    
+ 
 
-
+# Function to perform the All-in-view based on the filters applied on data 
 def process_plot_AV(df1, df2, selected_svids, unique_SVIDs, unique_MJD_times, Elv_Mask, outlier):
     global print_once
      # Filter based on ELV values
@@ -1265,9 +903,7 @@ def map_svids(svids, gnss_const):
     return svids
 
 
-CV_result_df = pd.DataFrame()
-AV_result_df = pd.DataFrame()
-
+# Main function which performs the CV and AV data processing and update data as per the user selected filters and provides the option for downloading
 
 if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state:
     
@@ -1442,9 +1078,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         # Iterate over each satellite and its corresponding difference
                         for sat, diff in zip(common_sats, sat_diffs):
                             long_form.append({'MJD': mjd, 'SAT': sat, 'CV_diff': diff})
-
-
-                    
+   
                     long_df = pd.DataFrame(long_form)
                     
                     # if not CV_result_df.empty:
@@ -1531,17 +1165,10 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     df3_filtered = df3
                     std_dev = df3_filtered["CV_diff"].std()
 
-
-                    # # Set x-axis range and filter rows of the dataframe
-                    # min_mjd_time = df3["MJD"].dropna().min()
-                    # max_mjd_time = df3["MJD"].dropna().max()
-
-
                     # Set x-axis range and filter rows of the dataframe
                     min_mjd_time = float(df3["MJD"].dropna().min())
                     max_mjd_time = float(df3["MJD"].dropna().max())
 
-                    
                     # Now apply math.floor() and math.ceil()
                     min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
                     max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
@@ -1570,7 +1197,6 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
                         # Set plot titles and labels with increased font size and black color
                         fig.update_layout(
-                            # title=f"Common - View link between [{st.session_state['REF01']} - {st.session_state['REF02']}] during (MJD: {min_x} - {max_x-1})",
                             title=f" {st.session_state['GNSS2']} Common-View link between {st.session_state['LAB1']} ({st.session_state.selected_frequency1}) and {st.session_state['LAB2']}({st.session_state.selected_frequency2}) <br> (Each point is average of differences between refsys values of all common satellites at each epoch)",
                             title_font=dict(size=20, color="black"),
                             xaxis_title="MJD",
@@ -1579,8 +1205,6 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                             yaxis_title_font=dict(size=16, color="black"),
                             xaxis=dict(tickformat=".2f",
                                 tickmode='array',
-                                # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
-                                # tickformat="05d",
                                 tickfont=dict(size=14, color="black"),
                                 exponentformat='none' 
                             ),
@@ -1597,10 +1221,7 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         # Display the plot
                         st.plotly_chart(fig, use_container_width=True)
                     
-                    # Data file processing 
-                                    
-                    # if st.sidebar.button('Get CV file of this data'): 
-                        # Create the CSV data
+                        # Data file processing 
                         # Create the CSV header and data
                         header, data_df = create_csv_data_CV(min_x, max_x-1, 
                                                         st.session_state.selected_svids, st.session_state.selected_frequency1,
@@ -1665,16 +1286,6 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                     # df4_filtered = df4[(df4["AV_diff"] >= user_start_y) & (df4["AV_diff"] <= user_end_y)]
                     df4_filtered = df4
                     std_dev = df4_filtered["AV_diff"].std()
-                    
-
-                    # # Set x-axis range and filter rows of the dataframe
-                    # min_mjd_time = float(df3["MJD_time"].dropna().min())
-                    # max_mjd_time = float(df3["MJD_time"].dropna().max())
-
-                    # # Now apply math.floor() and math.ceil()
-                    # min_x = math.floor(min_mjd_time) if pd.notna(min_mjd_time) else None
-                    # max_x = math.ceil(max_mjd_time) if pd.notna(max_mjd_time) else None
-
 
                     # Set x-axis range
                     min_x = math.floor(float(min(df4["MJD_time"])))
@@ -1708,8 +1319,6 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                             yaxis_title_font=dict(size=16, color="black"),
                             xaxis=dict(tickformat=".2f",
                                 tickmode='array',
-                                # tickvals=[i for i in range(int(min_x), int(max_x) + 1) if i % 1 == 0],
-                                # tickformat="05d",
                                 tickfont=dict(size=14, color="black"), 
                                 exponentformat='none'
                             ),
@@ -1724,10 +1333,8 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
                         
                         # Display the plot
                         st.plotly_chart(fig, use_container_width=True)
-                                    
-                        # if st.sidebar.button('Get AV file of this data') : 
-                            # Create the CSV data
-                            # Create the CSV header and data
+
+                        # Create the CSV header and data
                         header, data_df = create_csv_data_AV(min_x, max_x-1, 
                                                         st.session_state.selected_svids, st.session_state.selected_frequency1,
                                                         st.session_state.selected_frequency2, st.session_state.elevation_mask , df4_filtered)
@@ -1745,19 +1352,12 @@ if 'sel_MJD_FRC_01' in st.session_state and 'sel_MJD_FRC_02' in st.session_state
 
     else:
         st.error("One of the session data is not available. Either frequency or MJD is not selected properly")
-# else: 
-#     st.error("Only one data set is available, cannot process either CV or AV analysis")
-# Add a spacer to push the contact info to the bottom
-# st.sidebar.write("")  # This line adds some space
-# st.sidebar.write("")  # Add as many as needed to push the content down
-# st.sidebar.write("")   
+
 
 # contact information at the bottom of the sidebar
 st.sidebar.markdown('---')  # Add a horizontal line for separation
 st.sidebar.markdown('**Contact:   tf.cbkt@bipm.org**')
 st.sidebar.markdown('**For more Information visit:**')
-
 st.sidebar.markdown("[**BIPM e-Learning Platform**](https://e-learning.bipm.org/)")
-# st.sidebar.text('Mr/Ms XYZ')
-# st.sidebar.text('Email: tf.cbkt@bipm.org')
+
    
